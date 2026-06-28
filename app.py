@@ -60,25 +60,74 @@ hr {
 conn = sqlite3.connect("swim_app.db", check_same_thread=False)
 c = conn.cursor()
 
+# Tabella stagioni
+c.execute("""
+CREATE TABLE IF NOT EXISTS stagioni (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT UNIQUE
+)
+""")
+
+# Tabella atleti
 c.execute("""
 CREATE TABLE IF NOT EXISTS atleti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT,
-    categoria TEXT
+    categoria TEXT,
+    stagione TEXT
 )
 """)
 
+# Tabella presenze
 c.execute("""
 CREATE TABLE IF NOT EXISTS presenze (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     atleta_id INTEGER,
     data TEXT,
+    stagione TEXT,
     presenza INTEGER,
     voto REAL,
     commento TEXT,
-    UNIQUE(atleta_id, data)
+    UNIQUE(atleta_id, data, stagione)
 )
 """)
+
+conn.commit()
+
+
+# ============================================================
+# MIGRAZIONE DATABASE VECCHIO
+# Serve se avevi già un database senza colonna stagione
+# ============================================================
+
+def colonna_esiste(tabella, colonna):
+    info = c.execute(f"PRAGMA table_info({tabella})").fetchall()
+    colonne = [x[1] for x in info]
+    return colonna in colonne
+
+
+if not colonna_esiste("atleti", "stagione"):
+    c.execute("ALTER TABLE atleti ADD COLUMN stagione TEXT")
+
+if not colonna_esiste("presenze", "stagione"):
+    c.execute("ALTER TABLE presenze ADD COLUMN stagione TEXT")
+
+# assegna gli atleti e le presenze già esistenti alla stagione attuale
+c.execute("""
+UPDATE atleti
+SET stagione = '2025/2026'
+WHERE stagione IS NULL OR stagione = ''
+""")
+
+c.execute("""
+UPDATE presenze
+SET stagione = '2025/2026'
+WHERE stagione IS NULL OR stagione = ''
+""")
+
+# stagioni di default
+c.execute("INSERT OR IGNORE INTO stagioni (nome) VALUES (?)", ("2025/2026",))
+c.execute("INSERT OR IGNORE INTO stagioni (nome) VALUES (?)", ("2026/2027",))
 
 conn.commit()
 
@@ -87,27 +136,58 @@ conn.commit()
 # FUNZIONI
 # ============================================================
 
-def get_atleti():
+def get_stagioni():
+    df = pd.read_sql("""
+        SELECT nome
+        FROM stagioni
+        ORDER BY nome
+    """, conn)
+
+    if df.empty:
+        return ["2025/2026"]
+
+    return df["nome"].tolist()
+
+
+def aggiungi_stagione(nome_stagione):
+    c.execute("""
+        INSERT OR IGNORE INTO stagioni (nome)
+        VALUES (?)
+    """, (nome_stagione,))
+    conn.commit()
+
+
+def get_atleti(stagione):
     return pd.read_sql("""
         SELECT *
         FROM atleti
+        WHERE stagione = ?
         ORDER BY categoria, nome
+    """, conn, params=(stagione,))
+
+
+def get_tutti_atleti():
+    return pd.read_sql("""
+        SELECT *
+        FROM atleti
+        ORDER BY stagione, categoria, nome
     """, conn)
 
 
-def get_presenze_data(data_allenamento):
+def get_presenze_data(data_allenamento, stagione):
     return pd.read_sql("""
-        SELECT atleta_id, data, presenza, voto, commento
+        SELECT atleta_id, data, stagione, presenza, voto, commento
         FROM presenze
         WHERE data = ?
-    """, conn, params=(str(data_allenamento),))
+        AND stagione = ?
+    """, conn, params=(str(data_allenamento), stagione))
 
 
-def salva_presenza(atleta_id, data_allenamento, presenza, voto, commento):
+def salva_presenza(atleta_id, data_allenamento, stagione, presenza, voto, commento):
     c.execute("""
-        INSERT INTO presenze (atleta_id, data, presenza, voto, commento)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(atleta_id, data)
+        INSERT INTO presenze (atleta_id, data, stagione, presenza, voto, commento)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(atleta_id, data, stagione)
         DO UPDATE SET
             presenza = excluded.presenza,
             voto = excluded.voto,
@@ -115,6 +195,7 @@ def salva_presenza(atleta_id, data_allenamento, presenza, voto, commento):
     """, (
         atleta_id,
         str(data_allenamento),
+        stagione,
         int(presenza),
         float(voto) if voto is not None else None,
         commento
@@ -122,20 +203,28 @@ def salva_presenza(atleta_id, data_allenamento, presenza, voto, commento):
     conn.commit()
 
 
-def get_storico():
+def get_storico(stagione):
     return pd.read_sql("""
         SELECT 
             a.id AS atleta_id,
             a.nome,
             a.categoria,
+            a.stagione,
             p.data,
             p.presenza,
             p.voto,
             p.commento
         FROM presenze p
         JOIN atleti a ON a.id = p.atleta_id
+        WHERE p.stagione = ?
         ORDER BY p.data DESC, a.categoria, a.nome
-    """, conn)
+    """, conn, params=(stagione,))
+
+
+def elimina_atleta(atleta_id):
+    c.execute("DELETE FROM presenze WHERE atleta_id = ?", (atleta_id,))
+    c.execute("DELETE FROM atleti WHERE id = ?", (atleta_id,))
+    conn.commit()
 
 
 def pulisci_categoria(categoria):
@@ -170,6 +259,9 @@ if "registro" not in st.session_state:
 if "data_corrente" not in st.session_state:
     st.session_state.data_corrente = str(date.today())
 
+if "stagione_corrente" not in st.session_state:
+    st.session_state.stagione_corrente = "2025/2026"
+
 
 # ============================================================
 # INTERFACCIA PRINCIPALE
@@ -177,11 +269,30 @@ if "data_corrente" not in st.session_state:
 
 st.title("🏊 Gestionale Nuoto")
 
-tab1, tab2, tab3, tab4 = st.tabs([
+stagioni = get_stagioni()
+
+if "2025/2026" in stagioni:
+    index_default = stagioni.index("2025/2026")
+else:
+    index_default = 0
+
+stagione_selezionata = st.selectbox(
+    "Stagione sportiva",
+    stagioni,
+    index=index_default
+)
+
+# Se cambio stagione, resetto il registro visivo
+if st.session_state.stagione_corrente != stagione_selezionata:
+    st.session_state.registro = {}
+    st.session_state.stagione_corrente = stagione_selezionata
+
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📋 Registro",
     "👥 Atleti",
     "📊 Statistiche",
-    "🗂️ Storico"
+    "🗂️ Storico",
+    "⚙️ Stagioni"
 ])
 
 
@@ -193,15 +304,17 @@ with tab1:
 
     st.header("📋 Registro allenamento")
 
+    st.info(f"Stagione selezionata: {stagione_selezionata}")
+
     data_allenamento = st.date_input(
         "Data allenamento",
         value=date.today()
     )
 
-    df_atleti = get_atleti()
+    df_atleti = get_atleti(stagione_selezionata)
 
     if df_atleti.empty:
-        st.warning("Inserisci prima gli atleti nella sezione 👥 Atleti.")
+        st.warning("Non ci sono atleti in questa stagione. Inseriscili nella sezione 👥 Atleti.")
     else:
 
         df_atleti["categoria_pulita"] = df_atleti["categoria"].apply(pulisci_categoria)
@@ -220,13 +333,13 @@ with tab1:
                 df_atleti["categoria_pulita"] == filtro_categoria
             ].copy()
 
-        # Reset se cambia data
+        # reset se cambia data
         if st.session_state.data_corrente != str(data_allenamento):
             st.session_state.registro = {}
             st.session_state.data_corrente = str(data_allenamento)
 
-        # Carica dati già salvati per quella data
-        presenze_salvate = get_presenze_data(data_allenamento)
+        # carica dati già salvati per data + stagione
+        presenze_salvate = get_presenze_data(data_allenamento, stagione_selezionata)
 
         saved_dict = {}
 
@@ -240,8 +353,7 @@ with tab1:
                     "commento": r["commento"] if pd.notna(r["commento"]) else ""
                 }
 
-        # Inizializzazione:
-        # tutti assenti di default
+        # inizializzazione: tutti assenti di default
         for _, row in df_atleti.iterrows():
             atleta_id = int(row["id"])
 
@@ -351,7 +463,7 @@ with tab1:
         st.markdown("---")
 
         # ========================================================
-        # LISTA ATLETI SEMPLICE
+        # LISTA ATLETI
         # ========================================================
 
         st.subheader("🏊 Atleti")
@@ -364,7 +476,6 @@ with tab1:
 
             presenza_attuale = bool(st.session_state.registro[atleta_id]["presenza"])
 
-            # Nome e categoria semplici, senza sfondi
             st.markdown(f"### {nome}")
             st.write(f"Categoria: {categoria}")
 
@@ -425,6 +536,7 @@ with tab1:
                 salva_presenza(
                     atleta_id=atleta_id,
                     data_allenamento=data_allenamento,
+                    stagione=stagione_selezionata,
                     presenza=dati["presenza"],
                     voto=voto_salvato,
                     commento=dati["commento"]
@@ -443,6 +555,8 @@ with tab2:
 
     st.header("👥 Gestione atleti")
 
+    st.info(f"Stai lavorando sulla stagione: {stagione_selezionata}")
+
     with st.form("form_atleta", clear_on_submit=True):
 
         nome = st.text_input("Nome atleta")
@@ -452,56 +566,90 @@ with tab2:
             placeholder="es. Esordienti, Ragazzi, Junior, Assoluti"
         )
 
-        submit = st.form_submit_button("➕ Aggiungi atleta")
+        submit = st.form_submit_button("➕ Aggiungi atleta alla stagione selezionata")
 
         if submit:
             if nome.strip() == "":
                 st.error("Inserisci il nome dell'atleta.")
             else:
                 c.execute("""
-                    INSERT INTO atleti (nome, categoria)
-                    VALUES (?, ?)
+                    INSERT INTO atleti (nome, categoria, stagione)
+                    VALUES (?, ?, ?)
                 """, (
                     nome.strip(),
-                    categoria.strip()
+                    categoria.strip(),
+                    stagione_selezionata
                 ))
 
                 conn.commit()
-                st.success(f"Atleta {nome} aggiunto.")
+                st.success(f"Atleta {nome} aggiunto alla stagione {stagione_selezionata}.")
+                st.rerun()
 
     st.markdown("---")
 
-    df_atleti = get_atleti()
+    df_atleti = get_atleti(stagione_selezionata)
 
     if df_atleti.empty:
-        st.info("Nessun atleta inserito.")
+        st.info("Nessun atleta inserito in questa stagione.")
     else:
 
+        st.subheader("Lista atleti stagione selezionata")
+
         st.dataframe(
-            df_atleti,
+            df_atleti[["id", "nome", "categoria", "stagione"]],
             use_container_width=True,
             hide_index=True
         )
 
-        st.subheader("🗑️ Elimina atleta")
+        st.markdown("---")
 
-        atleta_da_eliminare = st.selectbox(
-            "Seleziona atleta",
-            df_atleti["nome"].tolist()
+        st.subheader("🗑️ Elimina atleta da PC")
+
+        st.warning(
+            "Questa operazione elimina l'atleta dalla stagione selezionata e cancella anche le sue presenze associate."
         )
 
-        if st.button("Elimina atleta selezionato"):
+        opzioni_eliminazione = {
+            f"{row['nome']} | {pulizia if (pulizia := pulisci_categoria(row['categoria'])) else 'Senza categoria'} | id={row['id']}": int(row["id"])
+            for _, row in df_atleti.iterrows()
+        }
 
-            atleta_id = int(
-                df_atleti[df_atleti["nome"] == atleta_da_eliminare]["id"].iloc[0]
-            )
+        scelta = st.selectbox(
+            "Seleziona atleta da eliminare",
+            list(opzioni_eliminazione.keys())
+        )
 
-            c.execute("DELETE FROM presenze WHERE atleta_id = ?", (atleta_id,))
-            c.execute("DELETE FROM atleti WHERE id = ?", (atleta_id,))
-            conn.commit()
+        conferma = st.checkbox("Confermo di voler eliminare questo atleta")
 
-            st.success(f"Atleta {atleta_da_eliminare} eliminato.")
-            st.rerun()
+        if st.button("🗑️ Elimina atleta selezionato"):
+
+            if not conferma:
+                st.error("Prima devi spuntare la conferma.")
+            else:
+                atleta_id = opzioni_eliminazione[scelta]
+                elimina_atleta(atleta_id)
+
+                # pulisco il registro in memoria per evitare riferimenti a id cancellati
+                if atleta_id in st.session_state.registro:
+                    del st.session_state.registro[atleta_id]
+
+                st.success(f"Atleta eliminato: {scelta}")
+                st.rerun()
+
+    st.markdown("---")
+
+    st.subheader("📋 Tutti gli atleti nel database")
+
+    tutti = get_tutti_atleti()
+
+    if tutti.empty:
+        st.info("Nessun atleta nel database.")
+    else:
+        st.dataframe(
+            tutti[["id", "nome", "categoria", "stagione"]],
+            use_container_width=True,
+            hide_index=True
+        )
 
 
 # ============================================================
@@ -512,10 +660,12 @@ with tab3:
 
     st.header("📊 Statistiche automatiche")
 
-    storico = get_storico()
+    st.info(f"Statistiche stagione: {stagione_selezionata}")
+
+    storico = get_storico(stagione_selezionata)
 
     if storico.empty:
-        st.info("Non ci sono ancora allenamenti salvati.")
+        st.info("Non ci sono ancora allenamenti salvati per questa stagione.")
     else:
 
         totale_registrazioni = len(storico)
@@ -547,7 +697,7 @@ with tab3:
         st.markdown("---")
 
         stats = storico.groupby(
-            ["atleta_id", "nome", "categoria"],
+            ["atleta_id", "nome", "categoria", "stagione"],
             dropna=False
         ).agg(
             allenamenti_registrati=("presenza", "count"),
@@ -570,6 +720,7 @@ with tab3:
             stats[[
                 "nome",
                 "categoria",
+                "stagione",
                 "allenamenti_registrati",
                 "presenze",
                 "assenze",
@@ -585,7 +736,7 @@ with tab3:
         st.download_button(
             "Scarica statistiche CSV",
             data=csv,
-            file_name="statistiche_nuoto.csv",
+            file_name=f"statistiche_nuoto_{stagione_selezionata.replace('/', '-')}.csv",
             mime="text/csv"
         )
 
@@ -598,10 +749,12 @@ with tab4:
 
     st.header("🗂️ Storico allenamenti")
 
-    storico = get_storico()
+    st.info(f"Storico stagione: {stagione_selezionata}")
+
+    storico = get_storico(stagione_selezionata)
 
     if storico.empty:
-        st.info("Nessuno storico disponibile.")
+        st.info("Nessuno storico disponibile per questa stagione.")
     else:
 
         storico["presenza_testo"] = storico["presenza"].map({
@@ -618,6 +771,7 @@ with tab4:
                 "data",
                 "nome",
                 "categoria",
+                "stagione",
                 "presenza_testo",
                 "stelle",
                 "commento"
@@ -631,6 +785,57 @@ with tab4:
         st.download_button(
             "Scarica storico CSV",
             data=csv_storico,
-            file_name="storico_allenamenti_nuoto.csv",
+            file_name=f"storico_allenamenti_nuoto_{stagione_selezionata.replace('/', '-')}.csv",
             mime="text/csv"
         )
+
+
+# ============================================================
+# TAB 5 - STAGIONI
+# ============================================================
+
+with tab5:
+
+    st.header("⚙️ Gestione stagioni")
+
+    st.write("Qui puoi creare nuove stagioni sportive.")
+
+    with st.form("form_stagione", clear_on_submit=True):
+
+        nuova_stagione = st.text_input(
+            "Nuova stagione",
+            placeholder="es. 2027/2028"
+        )
+
+        crea = st.form_submit_button("➕ Crea stagione")
+
+        if crea:
+            if nuova_stagione.strip() == "":
+                st.error("Inserisci il nome della stagione.")
+            else:
+                aggiungi_stagione(nuova_stagione.strip())
+                st.success(f"Stagione {nuova_stagione} creata.")
+                st.rerun()
+
+    st.markdown("---")
+
+    st.subheader("Stagioni disponibili")
+
+    df_stagioni = pd.read_sql("""
+        SELECT nome
+        FROM stagioni
+        ORDER BY nome
+    """, conn)
+
+    st.dataframe(
+        df_stagioni,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.markdown("---")
+
+    st.info(
+        "Gli atleti sono separati per stagione. "
+        "Un atleta inserito nel 2025/2026 non viene trasferito automaticamente nel 2026/2027."
+    )
