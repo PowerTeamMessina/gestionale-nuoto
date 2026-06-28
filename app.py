@@ -2,6 +2,8 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 from datetime import date
+from io import BytesIO
+import json
 
 # ============================================================
 # CONFIGURAZIONE PAGINA
@@ -89,7 +91,6 @@ def colonna_esiste(tabella, colonna):
     return colonna in colonne
 
 
-# Se non esiste ancora la tabella presenze, la creo direttamente con tipo_evento
 c.execute("""
 CREATE TABLE IF NOT EXISTS presenze (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,7 +108,6 @@ CREATE TABLE IF NOT EXISTS presenze (
 conn.commit()
 
 
-# Migrazione vecchio DB: aggiungo stagione ad atleti se mancava
 if not colonna_esiste("atleti", "stagione"):
     c.execute("ALTER TABLE atleti ADD COLUMN stagione TEXT")
 
@@ -120,8 +120,6 @@ WHERE stagione IS NULL OR stagione = ''
 conn.commit()
 
 
-# Migrazione vecchia tabella presenze:
-# se manca tipo_evento, ricreo la tabella con schema nuovo
 if not colonna_esiste("presenze", "tipo_evento"):
 
     c.execute("""
@@ -148,9 +146,9 @@ if not colonna_esiste("presenze", "tipo_evento"):
         c.execute("""
         INSERT OR IGNORE INTO presenze
         (atleta_id, data, stagione, tipo_evento, presenza, voto, commento)
-        SELECT atleta_id, data, 
+        SELECT atleta_id, data,
                COALESCE(NULLIF(stagione, ''), '2025/2026'),
-               'Allenamento',
+               'Allenamento in vasca',
                presenza, voto, commento
         FROM presenze_old
         """)
@@ -160,7 +158,7 @@ if not colonna_esiste("presenze", "tipo_evento"):
         (atleta_id, data, stagione, tipo_evento, presenza, voto, commento)
         SELECT atleta_id, data,
                '2025/2026',
-               'Allenamento',
+               'Allenamento in vasca',
                presenza, voto, commento
         FROM presenze_old
         """)
@@ -169,7 +167,18 @@ if not colonna_esiste("presenze", "tipo_evento"):
     conn.commit()
 
 
-# Inserisco stagioni base
+c.execute("""
+UPDATE presenze
+SET tipo_evento = 'Allenamento in vasca'
+WHERE tipo_evento = 'Allenamento'
+""")
+
+c.execute("""
+UPDATE presenze
+SET stagione = '2025/2026'
+WHERE stagione IS NULL OR stagione = ''
+""")
+
 c.execute("INSERT OR IGNORE INTO stagioni (nome) VALUES (?)", ("2025/2026",))
 c.execute("INSERT OR IGNORE INTO stagioni (nome) VALUES (?)", ("2026/2027",))
 
@@ -323,6 +332,208 @@ def stelle_to_voto(stelle):
 
 
 # ============================================================
+# FUNZIONI BACKUP / EXPORT / IMPORT
+# ============================================================
+
+def export_db_json():
+    dati = {}
+
+    dati["stagioni"] = pd.read_sql("SELECT * FROM stagioni", conn).to_dict(orient="records")
+    dati["atleti"] = pd.read_sql("SELECT * FROM atleti", conn).to_dict(orient="records")
+    dati["presenze"] = pd.read_sql("SELECT * FROM presenze", conn).to_dict(orient="records")
+
+    return json.dumps(dati, ensure_ascii=False, indent=2)
+
+
+def import_db_json(uploaded_file):
+    data = json.loads(uploaded_file.getvalue().decode("utf-8"))
+
+    c.execute("DELETE FROM presenze")
+    c.execute("DELETE FROM atleti")
+    c.execute("DELETE FROM stagioni")
+
+    for row in data.get("stagioni", []):
+        c.execute("""
+            INSERT OR REPLACE INTO stagioni (id, nome)
+            VALUES (?, ?)
+        """, (
+            row.get("id"),
+            row.get("nome")
+        ))
+
+    for row in data.get("atleti", []):
+        c.execute("""
+            INSERT OR REPLACE INTO atleti (id, nome, categoria, stagione)
+            VALUES (?, ?, ?, ?)
+        """, (
+            row.get("id"),
+            row.get("nome"),
+            row.get("categoria"),
+            row.get("stagione", "2025/2026")
+        ))
+
+    for row in data.get("presenze", []):
+        c.execute("""
+            INSERT OR REPLACE INTO presenze
+            (id, atleta_id, data, stagione, tipo_evento, presenza, voto, commento)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            row.get("id"),
+            row.get("atleta_id"),
+            row.get("data"),
+            row.get("stagione", "2025/2026"),
+            row.get("tipo_evento", "Allenamento in vasca"),
+            row.get("presenza"),
+            row.get("voto"),
+            row.get("commento")
+        ))
+
+    conn.commit()
+
+
+def crea_statistiche_da_storico(storico):
+    if storico.empty:
+        return pd.DataFrame(columns=[
+            "nome",
+            "categoria",
+            "stagione",
+            "tipo_evento",
+            "registrazioni",
+            "presenze",
+            "assenze",
+            "percentuale_presenze",
+            "media_stelle"
+        ])
+
+    stats = storico.groupby(
+        ["atleta_id", "nome", "categoria", "stagione", "tipo_evento"],
+        dropna=False
+    ).agg(
+        registrazioni=("presenza", "count"),
+        presenze=("presenza", "sum"),
+        media_stelle=("voto", "mean")
+    ).reset_index()
+
+    stats["assenze"] = stats["registrazioni"] - stats["presenze"]
+
+    stats["percentuale_presenze"] = (
+        stats["presenze"] / stats["registrazioni"] * 100
+    )
+
+    stats["media_stelle"] = stats["media_stelle"].round(2)
+    stats["percentuale_presenze"] = stats["percentuale_presenze"].round(1)
+
+    return stats
+
+
+def crea_excel_stagione(stagione):
+    output = BytesIO()
+
+    df_stagioni = pd.read_sql("""
+        SELECT *
+        FROM stagioni
+        ORDER BY nome
+    """, conn)
+
+    df_atleti_stagione = get_atleti(stagione)
+
+    df_tutti_atleti = get_tutti_atleti()
+
+    storico = get_storico(stagione, "Tutti")
+
+    if not storico.empty:
+        storico["presenza_testo"] = storico["presenza"].map({
+            1: "Presente",
+            0: "Assente"
+        })
+
+        storico["stelle"] = storico["voto"].apply(
+            lambda x: voto_to_stelle(x) if pd.notna(x) else ""
+        )
+
+    statistiche = crea_statistiche_da_storico(storico)
+
+    storico_vasca = get_storico(stagione, "Allenamento in vasca")
+    storico_secco = get_storico(stagione, "Allenamento a secco")
+    storico_gare = get_storico(stagione, "Gara")
+
+    statistiche_vasca = crea_statistiche_da_storico(storico_vasca)
+    statistiche_secco = crea_statistiche_da_storico(storico_secco)
+    statistiche_gare = crea_statistiche_da_storico(storico_gare)
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+
+        df_stagioni.to_excel(
+            writer,
+            sheet_name="Stagioni",
+            index=False
+        )
+
+        df_atleti_stagione.to_excel(
+            writer,
+            sheet_name="Atleti stagione",
+            index=False
+        )
+
+        df_tutti_atleti.to_excel(
+            writer,
+            sheet_name="Tutti atleti",
+            index=False
+        )
+
+        storico.to_excel(
+            writer,
+            sheet_name="Storico completo",
+            index=False
+        )
+
+        statistiche.to_excel(
+            writer,
+            sheet_name="Statistiche complete",
+            index=False
+        )
+
+        storico_vasca.to_excel(
+            writer,
+            sheet_name="Storico vasca",
+            index=False
+        )
+
+        statistiche_vasca.to_excel(
+            writer,
+            sheet_name="Statistiche vasca",
+            index=False
+        )
+
+        storico_secco.to_excel(
+            writer,
+            sheet_name="Storico secco",
+            index=False
+        )
+
+        statistiche_secco.to_excel(
+            writer,
+            sheet_name="Statistiche secco",
+            index=False
+        )
+
+        storico_gare.to_excel(
+            writer,
+            sheet_name="Storico gare",
+            index=False
+        )
+
+        statistiche_gare.to_excel(
+            writer,
+            sheet_name="Statistiche gare",
+            index=False
+        )
+
+    output.seek(0)
+    return output.getvalue()
+
+
+# ============================================================
 # SESSION STATE
 # ============================================================
 
@@ -336,26 +547,35 @@ if "stagione_corrente" not in st.session_state:
     st.session_state.stagione_corrente = "2025/2026"
 
 if "tipo_evento_corrente" not in st.session_state:
-    st.session_state.tipo_evento_corrente = "Allenamento"
+    st.session_state.tipo_evento_corrente = "Allenamento in vasca"
 
 
 # ============================================================
 # FUNZIONE REGISTRO GENERICA
-# Allenamento e Gara usano la stessa logica, ma dati separati
 # ============================================================
 
 def mostra_registro(tipo_evento, stagione_selezionata):
 
-    if tipo_evento == "Allenamento":
-        titolo = "📋 Registro Allenamento"
-        label_data = "Data allenamento"
-        label_salva = "💾 SALVA ALLENAMENTO"
+    if tipo_evento == "Allenamento in vasca":
+        titolo = "📋 Registro Allenamento in vasca"
+        label_data = "Data allenamento in vasca"
+        label_salva = "💾 SALVA ALLENAMENTO IN VASCA"
         nota_placeholder = "Nota opzionale"
+        label_nota = "Nota"
+
+    elif tipo_evento == "Allenamento a secco":
+        titolo = "🏋️ Registro Allenamento a secco"
+        label_data = "Data allenamento a secco"
+        label_salva = "💾 SALVA ALLENAMENTO A SECCO"
+        nota_placeholder = "Nota opzionale"
+        label_nota = "Nota"
+
     else:
         titolo = "🏁 Registro Gare"
         label_data = "Data gara"
         label_salva = "💾 SALVA GARA"
         nota_placeholder = "Nota/Risultato opzionale"
+        label_nota = "Nota/Risultato"
 
     st.header(titolo)
 
@@ -415,7 +635,6 @@ def mostra_registro(tipo_evento, stagione_selezionata):
                 "commento": r["commento"] if pd.notna(r["commento"]) else ""
             }
 
-    # Tutti assenti di default
     for _, row in df_atleti.iterrows():
         atleta_id = int(row["id"])
 
@@ -431,10 +650,6 @@ def mostra_registro(tipo_evento, stagione_selezionata):
                 }
 
     st.markdown("---")
-
-    # ========================================================
-    # MODIFICA RAPIDA
-    # ========================================================
 
     st.subheader("⚡ Modifica rapida")
 
@@ -480,10 +695,6 @@ def mostra_registro(tipo_evento, stagione_selezionata):
 
     st.markdown("---")
 
-    # ========================================================
-    # RIEPILOGO LIVE
-    # ========================================================
-
     ids_visibili = [int(x) for x in df_visibili["id"].tolist()]
 
     presenti_live = sum(
@@ -524,10 +735,6 @@ def mostra_registro(tipo_evento, stagione_selezionata):
     st.caption(f"Percentuale presenti: {percentuale_presenti}%")
 
     st.markdown("---")
-
-    # ========================================================
-    # LISTA ATLETI
-    # ========================================================
 
     st.subheader("🏊 Atleti")
 
@@ -571,7 +778,7 @@ def mostra_registro(tipo_evento, stagione_selezionata):
             st.write("Assente: nessun voto")
 
         commento = st.text_input(
-            "Nota" if tipo_evento == "Allenamento" else "Nota/Risultato",
+            label_nota,
             value=st.session_state.registro[atleta_id]["commento"],
             key=f"commento_{tipo_evento}_{atleta_id}",
             placeholder=nota_placeholder
@@ -582,10 +789,6 @@ def mostra_registro(tipo_evento, stagione_selezionata):
         st.session_state.registro[atleta_id]["commento"] = commento
 
         st.markdown("---")
-
-    # ========================================================
-    # SALVATAGGIO
-    # ========================================================
 
     if st.button(label_salva, type="primary", key=f"salva_{tipo_evento}"):
 
@@ -640,37 +843,47 @@ if st.session_state.stagione_corrente != stagione_selezionata:
     st.session_state.registro = {}
     st.session_state.stagione_corrente = stagione_selezionata
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "📋 Registro Allenamento",
-    "🏁 Registro Gare",
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+    "📋 Allenamento in vasca",
+    "🏋️ Allenamento a secco",
+    "🏁 Gare",
     "👥 Atleti",
     "📊 Statistiche",
     "🗂️ Storico",
-    "⚙️ Stagioni"
+    "⚙️ Stagioni",
+    "💾 Backup / Export"
 ])
 
 
 # ============================================================
-# TAB 1 - REGISTRO ALLENAMENTO
+# TAB 1 - ALLENAMENTO IN VASCA
 # ============================================================
 
 with tab1:
-    mostra_registro("Allenamento", stagione_selezionata)
+    mostra_registro("Allenamento in vasca", stagione_selezionata)
 
 
 # ============================================================
-# TAB 2 - REGISTRO GARE
+# TAB 2 - ALLENAMENTO A SECCO
 # ============================================================
 
 with tab2:
+    mostra_registro("Allenamento a secco", stagione_selezionata)
+
+
+# ============================================================
+# TAB 3 - GARE
+# ============================================================
+
+with tab3:
     mostra_registro("Gara", stagione_selezionata)
 
 
 # ============================================================
-# TAB 3 - ATLETI
+# TAB 4 - ATLETI
 # ============================================================
 
-with tab3:
+with tab4:
 
     st.header("👥 Gestione atleti")
 
@@ -726,7 +939,7 @@ with tab3:
 
         st.warning(
             "Questa operazione elimina l'atleta dalla stagione selezionata "
-            "e cancella anche allenamenti, gare, voti e commenti associati."
+            "e cancella anche allenamenti in vasca, allenamenti a secco, gare, voti e commenti associati."
         )
 
         opzioni_eliminazione = {}
@@ -777,10 +990,10 @@ with tab3:
 
 
 # ============================================================
-# TAB 4 - STATISTICHE
+# TAB 5 - STATISTICHE
 # ============================================================
 
-with tab4:
+with tab5:
 
     st.header("📊 Statistiche automatiche")
 
@@ -788,7 +1001,7 @@ with tab4:
 
     tipo_statistiche = st.selectbox(
         "Tipo dati",
-        ["Allenamento", "Gara", "Tutti"],
+        ["Allenamento in vasca", "Allenamento a secco", "Gara", "Tutti"],
         index=0
     )
 
@@ -826,23 +1039,7 @@ with tab4:
 
         st.markdown("---")
 
-        stats = storico.groupby(
-            ["atleta_id", "nome", "categoria", "stagione", "tipo_evento"],
-            dropna=False
-        ).agg(
-            registrazioni=("presenza", "count"),
-            presenze=("presenza", "sum"),
-            media_stelle=("voto", "mean")
-        ).reset_index()
-
-        stats["assenze"] = stats["registrazioni"] - stats["presenze"]
-
-        stats["percentuale_presenze"] = (
-            stats["presenze"] / stats["registrazioni"] * 100
-        )
-
-        stats["media_stelle"] = stats["media_stelle"].round(2)
-        stats["percentuale_presenze"] = stats["percentuale_presenze"].round(1)
+        stats = crea_statistiche_da_storico(storico)
 
         st.subheader("Statistiche per atleta")
 
@@ -865,7 +1062,7 @@ with tab4:
         nome_file = (
             f"statistiche_nuoto_"
             f"{stagione_selezionata.replace('/', '-')}_"
-            f"{tipo_statistiche}.csv"
+            f"{tipo_statistiche.replace(' ', '_')}.csv"
         )
 
         csv = stats.to_csv(index=False).encode("utf-8")
@@ -879,10 +1076,10 @@ with tab4:
 
 
 # ============================================================
-# TAB 5 - STORICO
+# TAB 6 - STORICO
 # ============================================================
 
-with tab5:
+with tab6:
 
     st.header("🗂️ Storico")
 
@@ -890,7 +1087,7 @@ with tab5:
 
     tipo_storico = st.selectbox(
         "Tipo storico",
-        ["Allenamento", "Gara", "Tutti"],
+        ["Allenamento in vasca", "Allenamento a secco", "Gara", "Tutti"],
         index=0
     )
 
@@ -927,7 +1124,7 @@ with tab5:
         nome_file_storico = (
             f"storico_nuoto_"
             f"{stagione_selezionata.replace('/', '-')}_"
-            f"{tipo_storico}.csv"
+            f"{tipo_storico.replace(' ', '_')}.csv"
         )
 
         csv_storico = storico.to_csv(index=False).encode("utf-8")
@@ -941,10 +1138,10 @@ with tab5:
 
 
 # ============================================================
-# TAB 6 - STAGIONI
+# TAB 7 - STAGIONI
 # ============================================================
 
-with tab6:
+with tab7:
 
     st.header("⚙️ Gestione stagioni")
 
@@ -994,7 +1191,7 @@ with tab6:
 
     st.warning(
         "Attenzione: eliminando una stagione verranno cancellati anche tutti gli atleti, "
-        "gli allenamenti, le gare, le presenze, i voti e i commenti associati a quella stagione."
+        "gli allenamenti in vasca, gli allenamenti a secco, le gare, le presenze, i voti e i commenti associati."
     )
 
     stagioni_disponibili = get_stagioni()
@@ -1036,6 +1233,98 @@ with tab6:
     st.markdown("---")
 
     st.info(
-        "Allenamenti e gare sono separati nel database. "
-        "Le statistiche e lo storico possono essere filtrati per Allenamento, Gara oppure Tutti."
+        "Allenamento in vasca, allenamento a secco e gare sono separati nel database. "
+        "Le statistiche e lo storico possono essere filtrati separatamente oppure visualizzati insieme con l'opzione Tutti."
     )
+
+
+# ============================================================
+# TAB 8 - BACKUP / EXPORT
+# ============================================================
+
+with tab8:
+
+    st.header("💾 Backup / Export dati")
+
+    st.info(
+        "Da qui puoi esportare tutti i dati in JSON oppure scaricare un file Excel completo per una stagione."
+    )
+
+    # ------------------------------------------------------------
+    # EXPORT EXCEL PER STAGIONE
+    # ------------------------------------------------------------
+
+    st.subheader("📊 Export Excel per stagione")
+
+    stagione_export_excel = st.selectbox(
+        "Seleziona stagione da esportare in Excel",
+        get_stagioni(),
+        key="stagione_export_excel"
+    )
+
+    excel_data = crea_excel_stagione(stagione_export_excel)
+
+    nome_excel = f"export_nuoto_{stagione_export_excel.replace('/', '-')}.xlsx"
+
+    st.download_button(
+        label="📥 Scarica Excel stagione",
+        data=excel_data,
+        file_name=nome_excel,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    st.caption(
+        "Il file Excel contiene atleti, storico completo, statistiche complete, e dati separati per vasca, secco e gare."
+    )
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------
+    # EXPORT JSON COMPLETO
+    # ------------------------------------------------------------
+
+    st.subheader("📥 Export completo JSON")
+
+    export_data = export_db_json()
+
+    st.download_button(
+        "Scarica backup completo JSON",
+        data=export_data,
+        file_name="backup_nuoto_completo.json",
+        mime="application/json"
+    )
+
+    st.caption(
+        "Il JSON serve per ripristinare l'intero database, inclusi atleti, stagioni, allenamenti, gare e storico."
+    )
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------
+    # IMPORT JSON COMPLETO
+    # ------------------------------------------------------------
+
+    st.subheader("📤 Import completo JSON")
+
+    st.warning(
+        "ATTENZIONE: questa operazione sovrascrive completamente i dati attuali."
+    )
+
+    uploaded_file = st.file_uploader(
+        "Carica file JSON di backup",
+        type="json"
+    )
+
+    conferma_import = st.checkbox(
+        "Confermo di voler sovrascrivere il database attuale"
+    )
+
+    if uploaded_file is not None and st.button("📤 Importa dati da JSON"):
+
+        if not conferma_import:
+            st.error("Devi confermare prima di importare.")
+        else:
+            import_db_json(uploaded_file)
+            st.session_state.registro = {}
+            st.success("Dati importati correttamente ✅")
+            st.rerun()
