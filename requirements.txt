@@ -1,6 +1,3 @@
-Database
-Funzioni
-Registri
-Statistiche
-Backup
-UI
+streamlit
+pandas
+openpyxl
