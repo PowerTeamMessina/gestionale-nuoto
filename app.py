@@ -839,6 +839,8 @@ else:
 
         if registro_esistente:
 
+    if registro_esistente:
+
     st.success(
         f"✅ Registro {tipo_evento} aggiornato correttamente."
     )
