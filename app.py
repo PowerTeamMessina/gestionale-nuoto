@@ -818,7 +818,7 @@ else:
 
         st.markdown("---")
 
-    if st.button(label_salva, type="primary", key=f"salva_{tipo_evento}"):
+if st.button(label_salva, type="primary", key=f"salva_{tipo_evento}"):
 
     for _, row in df_visibili.iterrows():
 
@@ -849,7 +849,6 @@ else:
 st.caption(
     "Se salvi più volte la stessa data e lo stesso tipo di registro, i dati vengono aggiornati."
 )
-
 
 # ============================================================
 # INTERFACCIA PRINCIPALE
