@@ -299,7 +299,7 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "🏠 Dashboard",
     "📋 Allenamento vasca",
     "🏋️ Allenamento secco",
@@ -309,7 +309,8 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "🗂️ Storico",
     "⚙️ Stagioni",
     "💾 Backup",
-    "📅 Calendario"
+    "📅 Calendario",
+    "📋 Registro settimanale"
 ])
 
 # ============================================================
@@ -1853,6 +1854,159 @@ with tab9:
 
             st.info(
                 "Vai nella scheda corrispondente."
+            )
+
+# ============================================================
+# TAB 10 - REGISTRO SETTIMANALE
+# ============================================================
+
+with tab10:
+
+    st.header("📋 Registro Settimanale")
+
+    data_riferimento = st.date_input(
+        "Seleziona una data della settimana"
+    )
+
+    inizio_settimana = (
+        pd.Timestamp(data_riferimento)
+        - pd.Timedelta(days=data_riferimento.weekday())
+    )
+
+    fine_settimana = (
+        inizio_settimana
+        + pd.Timedelta(days=6)
+    )
+
+    st.info(
+        f"Settimana dal "
+        f"{inizio_settimana.date()} "
+        f"al "
+        f"{fine_settimana.date()}"
+    )
+
+    storico = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            p.data,
+            p.presenza
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE
+            p.stagione = ?
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if storico.empty:
+
+        st.info(
+            "Nessuna registrazione disponibile."
+        )
+
+    else:
+
+        storico["data"] = pd.to_datetime(
+            storico["data"]
+        )
+
+        storico = storico[
+            (
+                storico["data"]
+                >= inizio_settimana
+            )
+            &
+            (
+                storico["data"]
+                <= fine_settimana
+            )
+        ]
+
+        if storico.empty:
+
+            st.info(
+                "Nessuna attività nella settimana selezionata."
+            )
+
+        else:
+
+            giorni = [
+                inizio_settimana + pd.Timedelta(days=i)
+                for i in range(7)
+            ]
+
+            risultati = []
+
+            for atleta in sorted(
+                storico["nome"].unique()
+            ):
+
+                riga = {
+                    "Atleta": atleta
+                }
+
+                presenti = 0
+                totale = 0
+
+                dati_atleta = storico[
+                    storico["nome"] == atleta
+                ]
+
+                for giorno in giorni:
+
+                    giorno_str = giorno.strftime(
+                        "%d/%m"
+                    )
+
+                    giorno_dati = dati_atleta[
+                        dati_atleta["data"].dt.date
+                        == giorno.date()
+                    ]
+
+                    if giorno_dati.empty:
+
+                        riga[giorno_str] = "-"
+
+                    else:
+
+                        presenza = int(
+                            giorno_dati[
+                                "presenza"
+                            ].max()
+                        )
+
+                        if presenza == 1:
+
+                            riga[giorno_str] = "✅"
+                            presenti += 1
+
+                        else:
+
+                            riga[giorno_str] = "❌"
+
+                        totale += 1
+
+                riga["Totale"] = (
+                    f"{presenti}/{totale}"
+                    if totale > 0
+                    else "-"
+                )
+
+                risultati.append(
+                    riga
+                )
+
+            df_settimana = pd.DataFrame(
+                risultati
+            )
+
+            st.dataframe(
+                df_settimana,
+                use_container_width=True,
+                hide_index=True
             )
             
 # ============================================================
