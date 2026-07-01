@@ -1663,9 +1663,9 @@ with tab7:
 
 with tab8:
 
-    st.markdown("---")
-
     st.header("💾 Backup & Export")
+
+    st.markdown("---")
 
     if st.button(
         "📥 Scarica e ripristina backup GitHub"
@@ -1681,6 +1681,7 @@ with tab8:
 
             st.rerun()
 
+    st.markdown("---")
     # =====================================================
     # EXPORT JSON COMPLETO
     # =====================================================
