@@ -299,7 +299,7 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
     "🏠 Dashboard",
     "📋 Allenamento vasca",
     "🏋️ Allenamento secco",
@@ -310,7 +310,8 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "⚙️ Stagioni",
     "💾 Backup",
     "📅 Calendario",
-    "📋 Registro settimanale"
+    "📋 Registro settimanale",
+    "🏁 Archivio Gare"
 ])
 
 # ============================================================
@@ -2076,6 +2077,126 @@ with tab10:
                 use_container_width=True,
                 hide_index=True
             )
+            # ============================================================
+# TAB 11 - ARCHIVIO GARE
+# ============================================================
+
+with tab11:
+
+    st.header("🏁 Archivio Gare")
+
+    archivio = pd.read_sql(
+        """
+        SELECT
+            p.data,
+            a.nome,
+            a.categoria,
+            p.presenza,
+            p.voto,
+            p.commento
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE
+            p.stagione = ?
+            AND p.tipo_evento = 'Gara'
+        ORDER BY p.data DESC
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if archivio.empty:
+
+        st.info(
+            "Nessuna gara registrata."
+        )
+
+    else:
+
+        ricerca = st.text_input(
+            "🔎 Cerca atleta"
+        )
+
+        if ricerca:
+
+            archivio = archivio[
+                archivio["nome"]
+                .str.contains(
+                    ricerca,
+                    case=False,
+                    na=False
+                )
+            ]
+
+        archivio["presenza"] = (
+            archivio["presenza"]
+            .map({
+                1: "✅ Presente",
+                0: "❌ Assente"
+            })
+        )
+
+        archivio["stelle"] = (
+            archivio["voto"]
+            .fillna(0)
+            .astype(int)
+            .apply(
+                lambda x: "⭐" * x
+            )
+        )
+
+        totale_gare = (
+            archivio["data"]
+            .nunique()
+        )
+
+        totale_atleti = (
+            archivio["nome"]
+            .nunique()
+        )
+
+        c1, c2 = st.columns(2)
+
+        c1.metric(
+            "🏁 Gare registrate",
+            totale_gare
+        )
+
+        c2.metric(
+            "👥 Atleti coinvolti",
+            totale_atleti
+        )
+
+        st.markdown("---")
+
+        st.dataframe(
+            archivio[
+                [
+                    "data",
+                    "nome",
+                    "categoria",
+                    "presenza",
+                    "stelle",
+                    "commento"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+        csv = (
+            archivio
+            .to_csv(index=False)
+            .encode("utf-8")
+        )
+
+        st.download_button(
+            "📥 Scarica archivio gare CSV",
+            csv,
+            "archivio_gare.csv",
+            "text/csv"
+        )
             
 # ============================================================
 # REGISTRI
