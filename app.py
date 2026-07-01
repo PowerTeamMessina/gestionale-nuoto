@@ -293,7 +293,7 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "📋 Allenamento vasca",
     "🏋️ Allenamento secco",
     "🏁 Gare",
@@ -301,7 +301,8 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "📊 Statistiche",
     "🗂️ Storico",
     "⚙️ Stagioni",
-    "💾 Backup"
+    "💾 Backup",
+    "📅 Calendario"
 ])
 
 # ============================================================
@@ -1163,6 +1164,61 @@ with tab8:
                 "application/vnd.openxmlformats-"
                 "officedocument.spreadsheetml.sheet"
             )
+        )
+
+# ============================================================
+# TAB 9 - CALENDARIO REGISTRAZIONI
+# ============================================================
+
+with tab9:
+
+    st.header("📅 Calendario registrazioni")
+
+    calendario = pd.read_sql(
+        """
+        SELECT
+            data,
+            tipo_evento,
+            COUNT(*) AS registrazioni,
+            SUM(presenza) AS presenti
+        FROM presenze
+        WHERE stagione = ?
+        GROUP BY data, tipo_evento
+        ORDER BY data DESC
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if calendario.empty:
+
+        st.info(
+            "Nessuna registrazione presente."
+        )
+
+    else:
+
+        filtro = st.selectbox(
+            "Tipo evento",
+            [
+                "Tutti",
+                "Allenamento in vasca",
+                "Allenamento a secco",
+                "Gara"
+            ],
+            key="filtro_calendario"
+        )
+
+        if filtro != "Tutti":
+
+            calendario = calendario[
+                calendario["tipo_evento"] == filtro
+            ]
+
+        st.dataframe(
+            calendario,
+            use_container_width=True,
+            hide_index=True
         )
 # ============================================================
 # REGISTRI
