@@ -837,8 +837,6 @@ else:
                 commento=dati["commento"]
             )
 
-        if registro_esistente:
-
     if registro_esistente:
 
     st.success(
