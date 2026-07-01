@@ -2831,27 +2831,27 @@ def mostra_registro(
 
         for _, row in df_atleti.iterrows():
 
-    atleta_id = int(
-        row["id"]
-    )
+            atleta_id = int(
+                row["id"]
+            )
 
-    dati = st.session_state.registro[
-        atleta_id
-    ]
+            dati = st.session_state.registro[
+                atleta_id
+            ]
 
-    salva_presenza(
-        atleta_id,
-        data_evento,
-        stagione,
-        tipo_evento,
-        dati["presenza"],
-        dati["voto"]
-        if dati["presenza"]
-        else None,
-        dati["commento"]
-    )
+            salva_presenza(
+                atleta_id,
+                data_evento,
+                stagione,
+                tipo_evento,
+                dati["presenza"],
+                dati["voto"]
+                if dati["presenza"]
+                else None,
+                dati["commento"]
+            )
 
-crea_backup_automatico()
+        crea_backup_automatico()
 
         if registro_esistente:
 
@@ -2866,7 +2866,6 @@ crea_backup_automatico()
             )
 
         st.rerun()
-
 
 # ============================================================
 # TAB REGISTRI
