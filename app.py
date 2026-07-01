@@ -820,33 +820,35 @@ else:
 
     if st.button(label_salva, type="primary", key=f"salva_{tipo_evento}"):
 
-        for _, row in df_visibili.iterrows():
+    for _, row in df_visibili.iterrows():
 
-            atleta_id = int(row["id"])
-            dati = st.session_state.registro[atleta_id]
+        atleta_id = int(row["id"])
+        dati = st.session_state.registro[atleta_id]
 
-            voto_salvato = dati["voto"] if dati["presenza"] else None
+        voto_salvato = dati["voto"] if dati["presenza"] else None
 
-            salva_presenza(
-                atleta_id=atleta_id,
-                data_evento=data_evento,
-                stagione=stagione_selezionata,
-                tipo_evento=tipo_evento,
-                presenza=dati["presenza"],
-                voto=voto_salvato,
-                commento=dati["commento"]
-            )
+        salva_presenza(
+            atleta_id=atleta_id,
+            data_evento=data_evento,
+            stagione=stagione_selezionata,
+            tipo_evento=tipo_evento,
+            presenza=dati["presenza"],
+            voto=voto_salvato,
+            commento=dati["commento"]
+        )
 
-   if registro_esistente:
-    st.success(
-        f"✅ Registro {tipo_evento} aggiornato correttamente."
-    )
+    if registro_esistente:
+        st.success(
+            f"✅ Registro {tipo_evento} aggiornato correttamente."
+        )
     else:
-    st.success(
-        f"✅ Nuovo registro {tipo_evento} salvato correttamente."
-    )
+        st.success(
+            f"✅ Nuovo registro {tipo_evento} salvato correttamente."
+        )
 
-    st.caption("Se salvi più volte la stessa data e lo stesso tipo di registro, i dati vengono aggiornati.")
+st.caption(
+    "Se salvi più volte la stessa data e lo stesso tipo di registro, i dati vengono aggiornati."
+)
 
 
 # ============================================================
