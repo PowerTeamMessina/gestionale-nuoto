@@ -617,6 +617,74 @@ with tab0:
                 use_container_width=True,
                 hide_index=True
             )
+            
+    # --------------------------------------------------------
+    # GRAFICI
+    # --------------------------------------------------------
+
+    st.markdown("---")
+
+    st.subheader("📊 Analisi visiva")
+
+    grafico_presenze = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            SUM(p.presenza) AS presenze,
+            COUNT(*) AS registrazioni
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE p.stagione = ?
+        GROUP BY a.nome
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if not grafico_presenze.empty:
+
+        grafico_presenze["percentuale"] = (
+            grafico_presenze["presenze"]
+            /
+            grafico_presenze["registrazioni"]
+            * 100
+        ).round(1)
+
+        st.write("🏆 Percentuale presenze")
+
+        st.bar_chart(
+            grafico_presenze.set_index("nome")[
+                "percentuale"
+            ]
+        )
+
+    grafico_stelle = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            AVG(p.voto) AS media_stelle
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE
+            p.stagione = ?
+            AND p.voto IS NOT NULL
+        GROUP BY a.nome
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if not grafico_stelle.empty:
+
+        st.write("⭐ Media stelle")
+
+        st.bar_chart(
+            grafico_stelle.set_index("nome")[
+                "media_stelle"
+            ]
+        )
 
 # ============================================================
 # TAB 1
