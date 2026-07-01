@@ -1373,13 +1373,13 @@ def mostra_registro(
         st.session_state.data_aperta is not None
         and
         st.session_state.tipo_aperto == tipo_evento
-        ):
+    ):
 
-    try:
+        try:
 
-        data_default = pd.to_datetime(
-            st.session_state.data_aperta
-        ).date()
+            data_default = pd.to_datetime(
+                st.session_state.data_aperta
+            ).date()
 
         except:
             pass
@@ -1388,9 +1388,9 @@ def mostra_registro(
         "Data",
         value=data_default,
         key=f"data_{tipo_evento}"
-        )
+    )
 
-        df_atleti = get_atleti(stagione)
+    df_atleti = get_atleti(stagione)
 
     if df_atleti.empty:
 
@@ -1398,7 +1398,7 @@ def mostra_registro(
             "Nessun atleta presente nella stagione selezionata."
         )
 
-    return
+        return
 
     # -----------------------------------------
     # CARICAMENTO REGISTRO ESISTENTE
