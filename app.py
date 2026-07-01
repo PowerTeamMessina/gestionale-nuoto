@@ -264,6 +264,12 @@ if "stagione_corrente" not in st.session_state:
 if "registro" not in st.session_state:
     st.session_state.registro = {}
 
+if "data_aperta" not in st.session_state:
+    st.session_state.data_aperta = None
+
+if "tipo_aperto" not in st.session_state:
+    st.session_state.tipo_aperto = None
+
 # ============================================================
 # HEADER
 # ============================================================
@@ -1220,6 +1226,38 @@ with tab9:
             use_container_width=True,
             hide_index=True
         )
+
+        st.markdown("---")
+
+        st.subheader(
+            "🔄 Apri registrazione"
+        )
+
+        scelta = st.selectbox(
+            "Seleziona una registrazione",
+            [
+                f"{row['data']} | {row['tipo_evento']}"
+                for _, row in calendario.iterrows()
+            ]
+        )
+
+        if st.button(
+            "🔄 Apri registro"
+        ):
+
+            parti = scelta.split(" | ")
+
+            st.session_state.data_aperta = parti[0]
+            st.session_state.tipo_aperto = parti[1]
+
+            st.success(
+                "Registrazione selezionata."
+            )
+
+            st.info(
+                "Vai nella scheda corrispondente."
+            )
+            
 # ============================================================
 # REGISTRI
 # ============================================================
@@ -1329,11 +1367,28 @@ def mostra_registro(
 
     st.header(titolo)
 
-    data_evento = st.date_input(
-        "Data",
-        value=date.today(),
-        key=f"data_{tipo_evento}"
-    )
+    data_default = date.today()
+
+if (
+    st.session_state.data_aperta is not None
+    and
+    st.session_state.tipo_aperto == tipo_evento
+):
+
+    try:
+
+        data_default = pd.to_datetime(
+            st.session_state.data_aperta
+        ).date()
+
+    except:
+        pass
+
+data_evento = st.date_input(
+    "Data",
+    value=data_default,
+    key=f"data_{tipo_evento}"
+)
 
     df_atleti = get_atleti(stagione)
 
