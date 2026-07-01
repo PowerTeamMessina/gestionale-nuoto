@@ -698,6 +698,135 @@ with tab5:
             media_globale
         )
 
+        # =====================================================
+        # SCHEDA ATLETA
+        # =====================================================
+
+        st.markdown("---")
+
+        st.subheader("👤 Scheda atleta")
+
+        atleta_scheda = st.selectbox(
+            "Seleziona atleta",
+            sorted(stats["nome"].unique())
+        )
+
+        dati_atleta = stats[
+            stats["nome"] == atleta_scheda
+        ]
+
+        presenze_atleta = int(
+            dati_atleta["presenze"].sum()
+        )
+
+        assenze_atleta = int(
+            dati_atleta["assenze"].sum()
+        )
+
+        percentuale_atleta = round(
+            dati_atleta["percentuale"].mean(),
+            1
+        )
+
+        media_stelle_atleta = round(
+            dati_atleta["media_stelle"].mean(),
+            2
+        )
+
+        categoria_atleta = (
+            dati_atleta["categoria"]
+            .iloc[0]
+        )
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        c1.metric(
+            "✅ Presenze",
+            presenze_atleta
+        )
+
+        c2.metric(
+            "❌ Assenze",
+            assenze_atleta
+        )
+
+        c3.metric(
+            "%",
+            percentuale_atleta
+        )
+
+        c4.metric(
+            "⭐ Media",
+            media_stelle_atleta
+        )
+
+        st.write(
+            f"**Categoria:** {categoria_atleta}"
+        )
+
+        storico_atleta = pd.read_sql(
+            """
+            SELECT
+                p.data,
+                p.tipo_evento,
+                p.presenza,
+                p.voto,
+                p.commento
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE
+                a.nome = ?
+            AND
+                p.stagione = ?
+            ORDER BY p.data DESC
+            """,
+            conn,
+            params=(
+                atleta_scheda,
+                stagione_selezionata
+            )
+        )
+
+        if not storico_atleta.empty:
+
+            storico_atleta["presenza"] = (
+                storico_atleta["presenza"]
+                .map({
+                    1: "Presente",
+                    0: "Assente"
+                })
+            )
+
+            storico_atleta["stelle"] = (
+                storico_atleta["voto"]
+                .fillna(0)
+                .astype(int)
+                .apply(
+                    lambda x: "⭐" * x
+                )
+            )
+
+            st.markdown("---")
+
+            st.subheader(
+                "📜 Storico atleta"
+            )
+
+            st.dataframe(
+                storico_atleta[
+                    [
+                        "data",
+                        "tipo_evento",
+                        "presenza",
+                        "stelle",
+                        "commento"
+                    ]
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
         st.dataframe(
             stats,
             use_container_width=True,
