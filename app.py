@@ -793,26 +793,65 @@ with tab6:
         )
 
         st.dataframe(
-            storico[
-                [
-                    "data",
-                    "tipo_evento",
-                    "nome",
-                    "categoria",
-                    "presenza",
-                    "stelle",
-                    "commento"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
+    stats,
+    use_container_width=True,
+    hide_index=True
+)
 
-        csv = (
-            storico
-            .to_csv(index=False)
-            .encode("utf-8")
-        )
+# =====================================================
+# CLASSIFICA PRESENZE
+# =====================================================
+
+st.markdown("---")
+
+st.subheader("🏆 Classifica presenze")
+
+classifica = stats.copy()
+
+classifica = classifica.sort_values(
+    by="percentuale",
+    ascending=False
+).reset_index(drop=True)
+
+medaglie = []
+
+for i in range(len(classifica)):
+
+    if i == 0:
+        medaglie.append("🥇")
+    elif i == 1:
+        medaglie.append("🥈")
+    elif i == 2:
+        medaglie.append("🥉")
+    else:
+        medaglie.append(str(i + 1))
+
+classifica.insert(
+    0,
+    "Rank",
+    medaglie
+)
+
+st.dataframe(
+    classifica[
+        [
+            "Rank",
+            "nome",
+            "categoria",
+            "presenze",
+            "assenze",
+            "percentuale"
+        ]
+    ],
+    use_container_width=True,
+    hide_index=True
+)
+
+csv = (
+    stats
+    .to_csv(index=False)
+    .encode("utf-8")
+)
 
         st.download_button(
             "📥 Scarica storico CSV",
