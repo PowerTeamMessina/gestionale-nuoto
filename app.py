@@ -1,21 +1,4 @@
 import streamlit as st
-
-try:
-
-    st.write(
-        "✅ GitHub Secrets trovati"
-    )
-
-    st.write(
-        st.secrets["GITHUB_OWNER"]
-    )
-
-except Exception as e:
-
-    st.error(
-        f"Errore Secrets: {e}"
-    )
-
 import sqlite3
 import pandas as pd
 from datetime import date
@@ -2848,25 +2831,27 @@ def mostra_registro(
 
         for _, row in df_atleti.iterrows():
 
-            atleta_id = int(
-                row["id"]
-            )
+    atleta_id = int(
+        row["id"]
+    )
 
-            dati = st.session_state.registro[
-                atleta_id
-            ]
+    dati = st.session_state.registro[
+        atleta_id
+    ]
 
-            salva_presenza(
-                atleta_id,
-                data_evento,
-                stagione,
-                tipo_evento,
-                dati["presenza"],
-                dati["voto"]
-                if dati["presenza"]
-                else None,
-                dati["commento"]
-            )
+    salva_presenza(
+        atleta_id,
+        data_evento,
+        stagione,
+        tipo_evento,
+        dati["presenza"],
+        dati["voto"]
+        if dati["presenza"]
+        else None,
+        dati["commento"]
+    )
+
+crea_backup_automatico()
 
         if registro_esistente:
 
