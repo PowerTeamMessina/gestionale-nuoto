@@ -526,6 +526,86 @@ with tab0:
         miglior_rendimento,
         miglior_media
     )
+    
+    # --------------------------------------------------------
+    # ASSENTI CRONICI
+    # --------------------------------------------------------
+
+    st.markdown("---")
+
+    st.subheader("🚨 Assenti cronici")
+
+    assenti = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            a.categoria,
+            SUM(p.presenza) AS presenze,
+            COUNT(*) AS registrazioni
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE p.stagione = ?
+        GROUP BY a.nome, a.categoria
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if assenti.empty:
+
+        st.info(
+            "Nessun dato disponibile."
+        )
+
+    else:
+
+        assenti["percentuale"] = (
+            assenti["presenze"]
+            /
+            assenti["registrazioni"]
+            * 100
+        ).round(1)
+
+        assenti_critici = assenti[
+            assenti["percentuale"] < 60
+        ].sort_values(
+            by="percentuale"
+        )
+
+        if assenti_critici.empty:
+
+            st.success(
+                "✅ Nessun atleta sotto il 60% di presenza."
+            )
+
+        else:
+
+            st.warning(
+                f"⚠️ {len(assenti_critici)} atleta/i sotto il 60%."
+            )
+
+            for _, row in assenti_critici.iterrows():
+
+                st.markdown(
+                    f"🔴 **{row['nome']}** "
+                    f"({row['categoria']}) — "
+                    f"{row['percentuale']}%"
+                )
+
+            st.dataframe(
+                assenti_critici[
+                    [
+                        "nome",
+                        "categoria",
+                        "presenze",
+                        "registrazioni",
+                        "percentuale"
+                    ]
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
 
 # ============================================================
 # TAB 1
