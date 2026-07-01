@@ -299,9 +299,7 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-tab0, tab1, tab2, tab3, tab4, tab5,
-tab6, tab7, tab8, tab9, tab10, tab11,
-tab12 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 = st.tabs([
     "🏠 Dashboard",
     "📋 Allenamento vasca",
     "🏋️ Allenamento secco",
@@ -2276,6 +2274,207 @@ def salva_presenza(
     )
 
     conn.commit()
+    
+# ============================================================
+# TAB 12 - ANALISI STAGIONE
+# ============================================================
+
+with tab12:
+
+    st.header("📈 Analisi Stagione")
+
+    analisi = pd.read_sql(
+        """
+        SELECT
+            data,
+            tipo_evento,
+            presenza,
+            voto
+        FROM presenze
+        WHERE stagione = ?
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if analisi.empty:
+
+        st.info(
+            "Nessun dato disponibile."
+        )
+
+    else:
+
+        analisi["data"] = pd.to_datetime(
+            analisi["data"]
+        )
+
+        analisi["mese"] = (
+            analisi["data"]
+            .dt.strftime("%Y-%m")
+        )
+
+        # ----------------------------------------------------
+        # ANALISI MENSILE
+        # ----------------------------------------------------
+
+        mensile = analisi.groupby(
+            "mese"
+        ).agg(
+            registrazioni=(
+                "presenza",
+                "count"
+            ),
+            presenze=(
+                "presenza",
+                "sum"
+            ),
+            media_stelle=(
+                "voto",
+                "mean"
+            )
+        ).reset_index()
+
+        mensile["percentuale"] = (
+            mensile["presenze"]
+            /
+            mensile["registrazioni"]
+            * 100
+        ).round(1)
+
+        mensile["media_stelle"] = (
+            mensile["media_stelle"]
+            .fillna(0)
+            .round(2)
+        )
+
+        # ----------------------------------------------------
+        # BEST / WORST MONTH
+        # ----------------------------------------------------
+
+        best_month = mensile.sort_values(
+            "percentuale",
+            ascending=False
+        ).iloc[0]
+
+        worst_month = mensile.sort_values(
+            "percentuale",
+            ascending=True
+        ).iloc[0]
+
+        c1, c2 = st.columns(2)
+
+        c1.metric(
+            "🏆 Miglior mese",
+            best_month["mese"],
+            f"{best_month['percentuale']}%"
+        )
+
+        c2.metric(
+            "📉 Peggior mese",
+            worst_month["mese"],
+            f"{worst_month['percentuale']}%"
+        )
+
+        st.markdown("---")
+
+        # ----------------------------------------------------
+        # GRAFICO PRESENZE
+        # ----------------------------------------------------
+
+        st.subheader(
+            "📊 Percentuale presenze mensile"
+        )
+
+        st.line_chart(
+            mensile.set_index("mese")[
+                "percentuale"
+            ]
+        )
+
+        # ----------------------------------------------------
+        # GRAFICO STELLE
+        # ----------------------------------------------------
+
+        st.subheader(
+            "⭐ Media stelle mensile"
+        )
+
+        st.line_chart(
+            mensile.set_index("mese")[
+                "media_stelle"
+            ]
+        )
+
+        st.markdown("---")
+
+        # ----------------------------------------------------
+        # CONFRONTO EVENTI
+        # ----------------------------------------------------
+
+        st.subheader(
+            "🏊 Confronto attività"
+        )
+
+        confronto = analisi.groupby(
+            "tipo_evento"
+        ).agg(
+            registrazioni=(
+                "presenza",
+                "count"
+            ),
+            presenze=(
+                "presenza",
+                "sum"
+            ),
+            media_stelle=(
+                "voto",
+                "mean"
+            )
+        ).reset_index()
+
+        confronto["percentuale"] = (
+            confronto["presenze"]
+            /
+            confronto["registrazioni"]
+            * 100
+        ).round(1)
+
+        confronto["media_stelle"] = (
+            confronto["media_stelle"]
+            .fillna(0)
+            .round(2)
+        )
+
+        st.dataframe(
+            confronto,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.bar_chart(
+            confronto.set_index(
+                "tipo_evento"
+            )[
+                "percentuale"
+            ]
+        )
+
+        st.markdown("---")
+
+        # ----------------------------------------------------
+        # DATI MENSILI
+        # ----------------------------------------------------
+
+        st.subheader(
+            "📋 Dettaglio mensile"
+        )
+
+        st.dataframe(
+            mensile,
+            use_container_width=True,
+            hide_index=True
+        )
 
 
 # ============================================================
