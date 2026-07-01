@@ -1369,11 +1369,11 @@ def mostra_registro(
 
     data_default = date.today()
 
-if (
-    st.session_state.data_aperta is not None
-    and
-    st.session_state.tipo_aperto == tipo_evento
-):
+    if (
+        st.session_state.data_aperta is not None
+        and
+        st.session_state.tipo_aperto == tipo_evento
+        ):
 
     try:
 
@@ -1381,16 +1381,16 @@ if (
             st.session_state.data_aperta
         ).date()
 
-    except:
-        pass
+        except:
+            pass
 
-data_evento = st.date_input(
-    "Data",
-    value=data_default,
-    key=f"data_{tipo_evento}"
-)
+    data_evento = st.date_input(
+        "Data",
+        value=data_default,
+        key=f"data_{tipo_evento}"
+        )
 
-    df_atleti = get_atleti(stagione)
+        df_atleti = get_atleti(stagione)
 
     if df_atleti.empty:
 
@@ -1398,7 +1398,7 @@ data_evento = st.date_input(
             "Nessun atleta presente nella stagione selezionata."
         )
 
-        return
+    return
 
     # -----------------------------------------
     # CARICAMENTO REGISTRO ESISTENTE
