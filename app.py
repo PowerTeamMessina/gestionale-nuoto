@@ -766,6 +766,55 @@ with tab5:
             "text/csv"
         )
 
+# =====================================================
+        # CLASSIFICA RENDIMENTO
+        # =====================================================
+
+        st.markdown("---")
+
+        st.subheader("⭐ Classifica rendimento")
+
+        rendimento = stats.copy()
+
+        rendimento = rendimento.sort_values(
+            by="media_stelle",
+            ascending=False
+        ).reset_index(drop=True)
+
+        medaglie_rendimento = []
+
+        for i in range(len(rendimento)):
+
+            if i == 0:
+                medaglie_rendimento.append("🥇")
+            elif i == 1:
+                medaglie_rendimento.append("🥈")
+            elif i == 2:
+                medaglie_rendimento.append("🥉")
+            else:
+                medaglie_rendimento.append(str(i + 1))
+
+        rendimento.insert(
+            0,
+            "Rank",
+            medaglie_rendimento
+        )
+
+        st.dataframe(
+            rendimento[
+                [
+                    "Rank",
+                    "nome",
+                    "categoria",
+                    "media_stelle",
+                    "presenze",
+                    "percentuale"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
 
 # ============================================================
 # TAB 6
