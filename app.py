@@ -312,13 +312,25 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "📅 Calendario"
 ])
 
+# ============================================================
+# TAB 0 - DASHBOARD
+# ============================================================
+
 with tab0:
 
     st.header("🏠 Dashboard")
 
+    # --------------------------------------------------------
+    # ATLETI
+    # --------------------------------------------------------
+
     totale_atleti = len(
         get_atleti(stagione_selezionata)
     )
+
+    # --------------------------------------------------------
+    # REGISTRAZIONI
+    # --------------------------------------------------------
 
     totale_eventi = pd.read_sql(
         """
@@ -331,17 +343,31 @@ with tab0:
         params=(stagione_selezionata,)
     ).iloc[0]["totale"]
 
+    if pd.isna(totale_eventi):
+        totale_eventi = 0
+
+    # --------------------------------------------------------
+    # GARE
+    # --------------------------------------------------------
+
     totale_gare = pd.read_sql(
         """
         SELECT COUNT(DISTINCT data)
         AS totale
         FROM presenze
         WHERE stagione = ?
-        AND tipo_evento='Gara'
+        AND tipo_evento = 'Gara'
         """,
         conn,
         params=(stagione_selezionata,)
     ).iloc[0]["totale"]
+
+    if pd.isna(totale_gare):
+        totale_gare = 0
+
+    # --------------------------------------------------------
+    # MEDIA STELLE
+    # --------------------------------------------------------
 
     media_stelle = pd.read_sql(
         """
@@ -357,7 +383,11 @@ with tab0:
     if pd.isna(media_stelle):
         media_stelle = 0
 
-    ultima = pd.read_sql(
+    # --------------------------------------------------------
+    # ULTIMA ATTIVITA'
+    # --------------------------------------------------------
+
+    ultima_attivita = pd.read_sql(
         """
         SELECT MAX(data) AS data
         FROM presenze
@@ -366,6 +396,93 @@ with tab0:
         conn,
         params=(stagione_selezionata,)
     ).iloc[0]["data"]
+
+    if ultima_attivita is None:
+        ultima_attivita = "-"
+
+    # --------------------------------------------------------
+    # CLASSIFICA PRESENZE
+    # --------------------------------------------------------
+
+    query_dashboard = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            SUM(p.presenza) AS presenze,
+            COUNT(*) AS registrazioni
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE p.stagione = ?
+        GROUP BY a.nome
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    miglior_presenza = "-"
+    miglior_percentuale = 0
+
+    if not query_dashboard.empty:
+
+        query_dashboard["percentuale"] = (
+            query_dashboard["presenze"]
+            /
+            query_dashboard["registrazioni"]
+            * 100
+        )
+
+        best = query_dashboard.sort_values(
+            "percentuale",
+            ascending=False
+        ).iloc[0]
+
+        miglior_presenza = best["nome"]
+        miglior_percentuale = round(
+            best["percentuale"],
+            1
+        )
+
+    # --------------------------------------------------------
+    # CLASSIFICA STELLE
+    # --------------------------------------------------------
+
+    query_stelle = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            AVG(p.voto) AS media
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE
+            p.stagione = ?
+            AND p.voto IS NOT NULL
+        GROUP BY a.nome
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    miglior_rendimento = "-"
+    miglior_media = 0
+
+    if not query_stelle.empty:
+
+        best = query_stelle.sort_values(
+            "media",
+            ascending=False
+        ).iloc[0]
+
+        miglior_rendimento = best["nome"]
+        miglior_media = round(
+            best["media"],
+            2
+        )
+
+    # --------------------------------------------------------
+    # METRICHE
+    # --------------------------------------------------------
 
     c1, c2, c3, c4, c5 = st.columns(5)
 
@@ -391,7 +508,23 @@ with tab0:
 
     c5.metric(
         "📅 Ultima attività",
-        ultima if ultima else "-"
+        ultima_attivita
+    )
+
+    st.markdown("---")
+
+    c6, c7 = st.columns(2)
+
+    c6.metric(
+        "🏆 Miglior presenza",
+        miglior_presenza,
+        f"{miglior_percentuale}%"
+    )
+
+    c7.metric(
+        "⭐ Miglior rendimento",
+        miglior_rendimento,
+        miglior_media
     )
 
 # ============================================================
