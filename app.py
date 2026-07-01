@@ -490,18 +490,246 @@ with tab4:
 # ============================================================
 
 with tab5:
-    st.info(
-        "Parte 4: Statistiche"
+
+    st.header("📊 Statistiche")
+
+    storico = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            a.categoria,
+            p.tipo_evento,
+            p.presenza,
+            p.voto
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE p.stagione = ?
+        """,
+        conn,
+        params=(stagione_selezionata,)
     )
+
+    if storico.empty:
+
+        st.info(
+            "Nessun dato disponibile."
+        )
+
+    else:
+
+        filtro = st.selectbox(
+            "Tipo evento",
+            [
+                "Tutti",
+                "Allenamento in vasca",
+                "Allenamento a secco",
+                "Gara"
+            ]
+        )
+
+        if filtro != "Tutti":
+
+            storico = storico[
+                storico["tipo_evento"] == filtro
+            ]
+
+        stats = storico.groupby(
+            ["nome", "categoria"],
+            dropna=False
+        ).agg(
+            registrazioni=(
+                "presenza",
+                "count"
+            ),
+            presenze=(
+                "presenza",
+                "sum"
+            ),
+            media_stelle=(
+                "voto",
+                "mean"
+            )
+        ).reset_index()
+
+        stats["assenze"] = (
+            stats["registrazioni"]
+            -
+            stats["presenze"]
+        )
+
+        stats["percentuale"] = (
+            stats["presenze"]
+            /
+            stats["registrazioni"]
+            *
+            100
+        ).round(1)
+
+        stats["media_stelle"] = (
+            stats["media_stelle"]
+            .fillna(0)
+            .round(2)
+        )
+
+        totale_reg = int(
+            stats["registrazioni"].sum()
+        )
+
+        totale_pres = int(
+            stats["presenze"].sum()
+        )
+
+        totale_ass = int(
+            stats["assenze"].sum()
+        )
+
+        media_globale = round(
+            stats["media_stelle"].mean(),
+            2
+        )
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        c1.metric(
+            "Registrazioni",
+            totale_reg
+        )
+
+        c2.metric(
+            "Presenze",
+            totale_pres
+        )
+
+        c3.metric(
+            "Assenze",
+            totale_ass
+        )
+
+        c4.metric(
+            "Media stelle",
+            media_globale
+        )
+
+        st.dataframe(
+            stats,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        csv = (
+            stats
+            .to_csv(index=False)
+            .encode("utf-8")
+        )
+
+        st.download_button(
+            "📥 Scarica statistiche CSV",
+            csv,
+            "statistiche.csv",
+            "text/csv"
+        )
+
 
 # ============================================================
 # TAB 6
 # ============================================================
 
 with tab6:
-    st.info(
-        "Parte 4: Storico"
+
+    st.header("🗂️ Storico")
+
+    storico = pd.read_sql(
+        """
+        SELECT
+            p.data,
+            p.tipo_evento,
+            a.nome,
+            a.categoria,
+            p.presenza,
+            p.voto,
+            p.commento
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE p.stagione = ?
+        ORDER BY p.data DESC
+        """,
+        conn,
+        params=(stagione_selezionata,)
     )
+
+    if storico.empty:
+
+        st.info(
+            "Nessun storico disponibile."
+        )
+
+    else:
+
+        filtro = st.selectbox(
+            "Filtro evento",
+            [
+                "Tutti",
+                "Allenamento in vasca",
+                "Allenamento a secco",
+                "Gara"
+            ],
+            key="filtro_storico"
+        )
+
+        if filtro != "Tutti":
+
+            storico = storico[
+                storico["tipo_evento"] == filtro
+            ]
+
+        storico["presenza"] = (
+            storico["presenza"]
+            .map({
+                1: "Presente",
+                0: "Assente"
+            })
+        )
+
+        storico["stelle"] = (
+            storico["voto"]
+            .fillna(0)
+            .astype(int)
+            .apply(
+                lambda x:
+                "⭐" * x
+            )
+        )
+
+        st.dataframe(
+            storico[
+                [
+                    "data",
+                    "tipo_evento",
+                    "nome",
+                    "categoria",
+                    "presenza",
+                    "stelle",
+                    "commento"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+        csv = (
+            storico
+            .to_csv(index=False)
+            .encode("utf-8")
+        )
+
+        st.download_button(
+            "📥 Scarica storico CSV",
+            csv,
+            "storico.csv",
+            "text/csv"
+        )
 
 # ============================================================
 # TAB 7
@@ -697,9 +925,245 @@ with tab7:
 # ============================================================
 
 with tab8:
-    st.info(
-        "Parte 5: Backup / Export"
+
+    st.header("💾 Backup & Export")
+
+    # =====================================================
+    # EXPORT JSON COMPLETO
+    # =====================================================
+
+    st.subheader("📥 Backup JSON completo")
+
+    if st.button("📥 Genera backup JSON"):
+
+        dati = {}
+
+        dati["stagioni"] = pd.read_sql(
+            "SELECT * FROM stagioni",
+            conn
+        ).to_dict(orient="records")
+
+        dati["atleti"] = pd.read_sql(
+            "SELECT * FROM atleti",
+            conn
+        ).to_dict(orient="records")
+
+        dati["presenze"] = pd.read_sql(
+            "SELECT * FROM presenze",
+            conn
+        ).to_dict(orient="records")
+
+        json_data = json.dumps(
+            dati,
+            ensure_ascii=False,
+            indent=2
+        )
+
+        st.download_button(
+            "💾 Scarica backup JSON",
+            json_data,
+            file_name="backup_nuoto.json",
+            mime="application/json"
+        )
+
+    st.markdown("---")
+
+    # =====================================================
+    # IMPORT JSON
+    # =====================================================
+
+    st.subheader("📤 Ripristino da JSON")
+
+    uploaded_file = st.file_uploader(
+        "Carica backup JSON",
+        type="json"
     )
+
+    conferma_import = st.checkbox(
+        "Confermo il ripristino completo"
+    )
+
+    if (
+        uploaded_file is not None
+        and
+        st.button("📤 Importa backup")
+    ):
+
+        if not conferma_import:
+
+            st.error(
+                "Devi confermare il ripristino."
+            )
+
+        else:
+
+            dati = json.loads(
+                uploaded_file
+                .getvalue()
+                .decode("utf-8")
+            )
+
+            c.execute(
+                "DELETE FROM presenze"
+            )
+
+            c.execute(
+                "DELETE FROM atleti"
+            )
+
+            c.execute(
+                "DELETE FROM stagioni"
+            )
+
+            for row in dati.get(
+                "stagioni",
+                []
+            ):
+
+                c.execute(
+                    """
+                    INSERT INTO stagioni(
+                        id,
+                        nome
+                    )
+                    VALUES(?,?)
+                    """,
+                    (
+                        row["id"],
+                        row["nome"]
+                    )
+                )
+
+            for row in dati.get(
+                "atleti",
+                []
+            ):
+
+                c.execute(
+                    """
+                    INSERT INTO atleti(
+                        id,
+                        nome,
+                        categoria,
+                        stagione
+                    )
+                    VALUES(?,?,?,?)
+                    """,
+                    (
+                        row["id"],
+                        row["nome"],
+                        row["categoria"],
+                        row["stagione"]
+                    )
+                )
+
+            for row in dati.get(
+                "presenze",
+                []
+            ):
+
+                c.execute(
+                    """
+                    INSERT INTO presenze(
+                        id,
+                        atleta_id,
+                        data,
+                        stagione,
+                        tipo_evento,
+                        presenza,
+                        voto,
+                        commento
+                    )
+                    VALUES(?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        row["id"],
+                        row["atleta_id"],
+                        row["data"],
+                        row["stagione"],
+                        row["tipo_evento"],
+                        row["presenza"],
+                        row["voto"],
+                        row["commento"]
+                    )
+                )
+
+            conn.commit()
+
+            st.success(
+                "Backup importato correttamente."
+            )
+
+            st.rerun()
+
+    st.markdown("---")
+
+    # =====================================================
+    # EXPORT EXCEL
+    # =====================================================
+
+    st.subheader("📊 Export Excel")
+
+    if st.button(
+        "📊 Genera Excel stagione"
+    ):
+
+        output = BytesIO()
+
+        storico = pd.read_sql(
+            """
+            SELECT
+                p.data,
+                p.tipo_evento,
+                a.nome,
+                a.categoria,
+                p.presenza,
+                p.voto,
+                p.commento
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE p.stagione = ?
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        )
+
+        atleti = get_atleti(
+            stagione_selezionata
+        )
+
+        with pd.ExcelWriter(
+            output,
+            engine="openpyxl"
+        ) as writer:
+
+            atleti.to_excel(
+                writer,
+                sheet_name="Atleti",
+                index=False
+            )
+
+            storico.to_excel(
+                writer,
+                sheet_name="Storico",
+                index=False
+            )
+
+        output.seek(0)
+
+        st.download_button(
+            "📥 Scarica Excel",
+            output.getvalue(),
+            file_name=(
+                f"nuoto_"
+                f"{stagione_selezionata}.xlsx"
+            ),
+            mime=(
+                "application/vnd.openxmlformats-"
+                "officedocument.spreadsheetml.sheet"
+            )
+        )
 # ============================================================
 # REGISTRI
 # ============================================================
