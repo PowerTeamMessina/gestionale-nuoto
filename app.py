@@ -535,6 +535,14 @@ with tab0:
 
     st.subheader("🚨 Assenti cronici")
 
+    soglia = st.slider(
+        "Soglia minima di presenza (%)",
+        min_value=0,
+        max_value=100,
+        value=60,
+        step=5
+    )
+
     assenti = pd.read_sql(
         """
         SELECT
@@ -568,29 +576,32 @@ with tab0:
         ).round(1)
 
         assenti_critici = assenti[
-            assenti["percentuale"] < 60
+            assenti["percentuale"] < soglia
         ].sort_values(
-            by="percentuale"
+            by="percentuale",
+            ascending=True
         )
 
         if assenti_critici.empty:
 
             st.success(
-                "✅ Nessun atleta sotto il 60% di presenza."
+                f"✅ Nessun atleta sotto il {soglia}% di presenza."
             )
 
         else:
 
             st.warning(
-                f"⚠️ {len(assenti_critici)} atleta/i sotto il 60%."
+                f"⚠️ {len(assenti_critici)} atleta/i sotto il {soglia}%."
             )
 
             for _, row in assenti_critici.iterrows():
 
                 st.markdown(
-                    f"🔴 **{row['nome']}** "
-                    f"({row['categoria']}) — "
-                    f"{row['percentuale']}%"
+                    f"""
+                    🔴 **{row['nome']}**
+                    ({row['categoria']})
+                    — {row['percentuale']}%
+                    """
                 )
 
             st.dataframe(
