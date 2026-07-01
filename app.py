@@ -2497,6 +2497,41 @@ def voto_to_stelle(voto):
 def stelle_to_voto(stelle):
     return stelle.count("⭐")
 
+# ============================================================
+# BACKUP AUTOMATICO
+# ============================================================
+
+def crea_backup_automatico():
+
+    dati = {}
+
+    dati["stagioni"] = pd.read_sql(
+        "SELECT * FROM stagioni",
+        conn
+    ).to_dict(orient="records")
+
+    dati["atleti"] = pd.read_sql(
+        "SELECT * FROM atleti",
+        conn
+    ).to_dict(orient="records")
+
+    dati["presenze"] = pd.read_sql(
+        "SELECT * FROM presenze",
+        conn
+    ).to_dict(orient="records")
+
+    with open(
+        "backup_automatico.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            dati,
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
 
 # ============================================================
 # REGISTRO GENERICO
@@ -2619,6 +2654,20 @@ def mostra_registro(
                     "voto": 4,
                     "commento": ""
                 }
+                
+                crea_backup_automatico()
+                
+                if registro_esistente:
+
+                    st.success(
+                        "✅ Registro aggiornato correttamente."
+                    )
+
+                else:
+
+                    st.success(
+                        "✅ Nuovo registro salvato."
+                    )
 
     # -----------------------------------------
     # RIEPILOGO
