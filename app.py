@@ -308,6 +308,16 @@ def elimina_atleta(atleta_id):
     c.execute("DELETE FROM atleti WHERE id = ?", (atleta_id,))
     conn.commit()
 
+def aggiorna_categoria_atleta(atleta_id, nuova_categoria):
+    c.execute("""
+        UPDATE atleti
+        SET categoria = ?
+        WHERE id = ?
+    """, (
+        nuova_categoria,
+        atleta_id
+    ))
+    conn.commit()
 
 def pulisci_categoria(categoria):
     if categoria is None:
@@ -623,6 +633,24 @@ def mostra_registro(tipo_evento, stagione_selezionata):
 
     presenze_salvate = get_presenze_data(data_evento, stagione_selezionata, tipo_evento)
 
+    registro_esistente = not presenze_salvate.empty
+
+if registro_esistente:
+
+    st.success(
+        f"✅ Registro già esistente per "
+        f"{tipo_evento} del {data_evento}. "
+        f"I dati sono stati caricati e possono essere modificati."
+    )
+
+else:
+
+    st.info(
+        f"📝 Nessun registro trovato per "
+        f"{tipo_evento} del {data_evento}. "
+        f"Stai creando una nuova registrazione."
+    )
+
     saved_dict = {}
 
     if not presenze_salvate.empty:
@@ -670,14 +698,14 @@ def mostra_registro(tipo_evento, stagione_selezionata):
                 st.session_state.registro[atleta_id]["presenza"] = True
 
                 if st.session_state.registro[atleta_id]["voto"] is None:
-                    st.session_state.registro[atleta_id]["voto"] = 3
+                    st.session_state.registro[atleta_id]["voto"] = 4
 
             st.rerun()
 
     stelle_gruppo = st.radio(
         "Applica voto ai presenti",
         ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"],
-        index=2,
+        index=3,
         horizontal=True,
         key=f"stelle_gruppo_{tipo_evento}"
     )
@@ -758,7 +786,7 @@ def mostra_registro(tipo_evento, stagione_selezionata):
         if presenza:
 
             if st.session_state.registro[atleta_id]["voto"] is None:
-                st.session_state.registro[atleta_id]["voto"] = 3
+                st.session_state.registro[atleta_id]["voto"] = 4
 
             voto_corrente = int(st.session_state.registro[atleta_id]["voto"])
 
@@ -809,7 +837,17 @@ def mostra_registro(tipo_evento, stagione_selezionata):
                 commento=dati["commento"]
             )
 
-        st.success(f"{tipo_evento} salvato correttamente ✅")
+        if registro_esistente:
+
+    st.success(
+        f"✅ Registro {tipo_evento} aggiornato correttamente."
+    )
+
+else:
+
+    st.success(
+        f"✅ Nuovo registro {tipo_evento} salvato correttamente."
+    )
 
     st.caption("Se salvi più volte la stessa data e lo stesso tipo di registro, i dati vengono aggiornati.")
 
@@ -932,6 +970,48 @@ with tab4:
             use_container_width=True,
             hide_index=True
         )
+
+        st.markdown("---")
+
+st.subheader("✏️ Modifica categoria atleta")
+
+opzioni_modifica = {}
+
+for _, row in df_atleti.iterrows():
+
+    testo = (
+        f"{row['nome']} "
+        f"(Categoria attuale: {pulisci_categoria(row['categoria'])}) "
+        f"[id={row['id']}]"
+    )
+
+    opzioni_modifica[testo] = int(row["id"])
+
+scelta_modifica = st.selectbox(
+    "Seleziona atleta",
+    list(opzioni_modifica.keys()),
+    key="modifica_categoria"
+)
+
+nuova_categoria = st.text_input(
+    "Nuova categoria"
+)
+
+if st.button("💾 Aggiorna categoria"):
+
+    if nuova_categoria.strip() == "":
+        st.error("Inserisci una categoria.")
+    else:
+
+        atleta_id = opzioni_modifica[scelta_modifica]
+
+        aggiorna_categoria_atleta(
+            atleta_id,
+            nuova_categoria.strip()
+        )
+
+        st.success("Categoria aggiornata correttamente ✅")
+        st.rerun()
 
         st.markdown("---")
 
