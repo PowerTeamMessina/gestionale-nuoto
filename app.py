@@ -4,6 +4,8 @@ import pandas as pd
 from datetime import date
 from io import BytesIO
 import json
+import os
+from datetime import datetime
 
 # ============================================================
 # CONFIGURAZIONE
@@ -687,6 +689,64 @@ with tab0:
             grafico_stelle.set_index("nome")[
                 "media_stelle"
             ]
+        )
+    
+    # --------------------------------------------------------
+    # BACKUP AUTOMATICO
+    # --------------------------------------------------------
+
+    st.markdown("---")
+
+    st.subheader("💾 Stato backup")
+
+    if os.path.exists(
+        "backup_automatico.json"
+    ):
+
+        ultima_modifica = datetime.fromtimestamp(
+            os.path.getmtime(
+                "backup_automatico.json"
+            )
+        )
+
+        dimensione = round(
+            os.path.getsize(
+                "backup_automatico.json"
+            ) / 1024,
+            2
+        )
+
+        c1, c2 = st.columns(2)
+
+        c1.metric(
+            "📅 Ultimo backup",
+            ultima_modifica.strftime(
+                "%d/%m/%Y %H:%M"
+            )
+        )
+
+        c2.metric(
+            "📦 Dimensione",
+            f"{dimensione} KB"
+        )
+
+        with open(
+            "backup_automatico.json",
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            st.download_button(
+                "📥 Scarica backup automatico",
+                f.read(),
+                "backup_automatico.json",
+                "application/json"
+            )
+
+    else:
+
+        st.warning(
+            "Nessun backup automatico disponibile."
         )
 
 # ============================================================
