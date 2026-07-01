@@ -1663,6 +1663,18 @@ with tab7:
 
 with tab8:
 
+    st.markdown("---")
+
+    st.subheader(
+        "☁️ Backup GitHub"
+    )
+
+    if st.button(
+        "📥 Scarica backup da GitHub"
+    ):
+
+        scarica_backup_github()
+        
     st.header("💾 Backup & Export")
 
     # =====================================================
@@ -2663,6 +2675,56 @@ def upload_backup_github():
             f"❌ Errore GitHub: "
             f"{upload.status_code}"
         )
+
+def scarica_backup_github():
+
+    token = st.secrets["GITHUB_TOKEN"]
+    owner = st.secrets["GITHUB_OWNER"]
+    repo = st.secrets["GITHUB_REPO"]
+
+    url = (
+        f"https://api.github.com/repos/"
+        f"{owner}/{repo}/contents/"
+        f"backup_automatico.json"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    risposta = requests.get(
+        url,
+        headers=headers
+    )
+
+    if risposta.status_code != 200:
+
+        st.error(
+            "❌ Impossibile scaricare il backup."
+        )
+
+        return False
+
+    data = risposta.json()
+
+    contenuto = base64.b64decode(
+        data["content"]
+    ).decode("utf-8")
+
+    with open(
+        "backup_automatico.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        f.write(contenuto)
+
+    st.success(
+        "✅ Backup scaricato da GitHub"
+    )
+
+    return True
         
 # ============================================================
 # REGISTRO GENERICO
