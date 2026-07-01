@@ -1665,17 +1665,21 @@ with tab8:
 
     st.markdown("---")
 
-    st.subheader(
-        "☁️ Backup GitHub"
-    )
+    st.header("💾 Backup & Export")
 
     if st.button(
-        "📥 Scarica backup da GitHub"
+        "📥 Scarica e ripristina backup GitHub"
     ):
 
-        scarica_backup_github()
-        
-    st.header("💾 Backup & Export")
+        if scarica_backup_github():
+
+            ripristina_backup_locale()
+
+            st.success(
+                "✅ Backup ripristinato correttamente"
+            )
+
+            st.rerun()
 
     # =====================================================
     # EXPORT JSON COMPLETO
@@ -2723,6 +2727,105 @@ def scarica_backup_github():
     st.success(
         "✅ Backup scaricato da GitHub"
     )
+
+    return True
+
+def ripristina_backup_locale():
+
+    with open(
+        "backup_automatico.json",
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        dati = json.load(f)
+
+    c.execute(
+        "DELETE FROM presenze"
+    )
+
+    c.execute(
+        "DELETE FROM atleti"
+    )
+
+    c.execute(
+        "DELETE FROM stagioni"
+    )
+
+    for row in dati.get(
+        "stagioni",
+        []
+    ):
+
+        c.execute(
+            """
+            INSERT INTO stagioni(
+                id,
+                nome
+            )
+            VALUES(?,?)
+            """,
+            (
+                row["id"],
+                row["nome"]
+            )
+        )
+
+    for row in dati.get(
+        "atleti",
+        []
+    ):
+
+        c.execute(
+            """
+            INSERT INTO atleti(
+                id,
+                nome,
+                categoria,
+                stagione
+            )
+            VALUES(?,?,?,?)
+            """,
+            (
+                row["id"],
+                row["nome"],
+                row["categoria"],
+                row["stagione"]
+            )
+        )
+
+    for row in dati.get(
+        "presenze",
+        []
+    ):
+
+        c.execute(
+            """
+            INSERT INTO presenze(
+                id,
+                atleta_id,
+                data,
+                stagione,
+                tipo_evento,
+                presenza,
+                voto,
+                commento
+            )
+            VALUES(?,?,?,?,?,?,?,?)
+            """,
+            (
+                row["id"],
+                row["atleta_id"],
+                row["data"],
+                row["stagione"],
+                row["tipo_evento"],
+                row["presenza"],
+                row["voto"],
+                row["commento"]
+            )
+        )
+
+    conn.commit()
 
     return True
         
