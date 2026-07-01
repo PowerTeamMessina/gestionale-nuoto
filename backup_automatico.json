@@ -1,0 +1,28 @@
+{
+  "stagioni": [
+    {
+      "id": 1,
+      "nome": "2025/2026"
+    }
+  ],
+  "atleti": [
+    {
+      "id": 1,
+      "nome": "Gabriele Grifo",
+      "categoria": "Assoluto",
+      "stagione": "2025/2026"
+    }
+  ],
+  "presenze": [
+    {
+      "id": 1,
+      "atleta_id": 1,
+      "data": "2026-07-01",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 4.0,
+      "commento": ""
+    }
+  ]
+}
