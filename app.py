@@ -837,14 +837,11 @@ else:
                 commento=dati["commento"]
             )
 
-    if registro_esistente:
-
+   if registro_esistente:
     st.success(
         f"✅ Registro {tipo_evento} aggiornato correttamente."
     )
-
-else:
-
+    else:
     st.success(
         f"✅ Nuovo registro {tipo_evento} salvato correttamente."
     )
