@@ -6,6 +6,8 @@ from io import BytesIO
 import json
 import os
 from datetime import datetime
+import base64
+import requests
 
 # ============================================================
 # CONFIGURAZIONE
@@ -2593,6 +2595,75 @@ def crea_backup_automatico():
             indent=2
         )
 
+def upload_backup_github():
+
+    token = st.secrets["GITHUB_TOKEN"]
+    owner = st.secrets["GITHUB_OWNER"]
+    repo = st.secrets["GITHUB_REPO"]
+
+    path = "backup_automatico.json"
+
+    with open(
+        path,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        contenuto = f.read()
+
+    contenuto_b64 = base64.b64encode(
+        contenuto.encode("utf-8")
+    ).decode("utf-8")
+
+    url = (
+        f"https://api.github.com/repos/"
+        f"{owner}/{repo}/contents/{path}"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    sha = None
+
+    risposta = requests.get(
+        url,
+        headers=headers
+    )
+
+    if risposta.status_code == 200:
+
+        sha = risposta.json()["sha"]
+
+    payload = {
+        "message": "Aggiornamento backup automatico",
+        "content": contenuto_b64
+    }
+
+    if sha is not None:
+
+        payload["sha"] = sha
+
+    upload = requests.put(
+        url,
+        headers=headers,
+        json=payload
+    )
+
+    if upload.status_code in [200, 201]:
+
+        st.success(
+            "✅ Backup sincronizzato su GitHub"
+        )
+
+    else:
+
+        st.error(
+            f"❌ Errore GitHub: "
+            f"{upload.status_code}"
+        )
+        
 # ============================================================
 # REGISTRO GENERICO
 # ============================================================
@@ -2714,20 +2785,6 @@ def mostra_registro(
                     "voto": 4,
                     "commento": ""
                 }
-                
-                crea_backup_automatico()
-                
-                if registro_esistente:
-
-                    st.success(
-                        "✅ Registro aggiornato correttamente."
-                    )
-
-                else:
-
-                    st.success(
-                        "✅ Nuovo registro salvato."
-                    )
 
     # -----------------------------------------
     # RIEPILOGO
@@ -2852,6 +2909,8 @@ def mostra_registro(
             )
 
         crea_backup_automatico()
+
+        upload_backup_github()
 
         if registro_esistente:
 
