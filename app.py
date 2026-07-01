@@ -992,16 +992,17 @@ with tab5:
         )
 
         # =====================================================
-        # SCHEDA ATLETA
+        # SCHEDA ATLETA AVANZATA
         # =====================================================
 
         st.markdown("---")
 
-        st.subheader("👤 Scheda atleta")
+        st.subheader("👤 Scheda atleta avanzata")
 
         atleta_scheda = st.selectbox(
             "Seleziona atleta",
-            sorted(stats["nome"].unique())
+            sorted(stats["nome"].unique()),
+            key="scheda_atleta"
         )
 
         dati_atleta = stats[
@@ -1044,7 +1045,7 @@ with tab5:
         )
 
         c3.metric(
-            "%",
+            "% Presenze",
             percentuale_atleta
         )
 
@@ -1056,6 +1057,10 @@ with tab5:
         st.write(
             f"**Categoria:** {categoria_atleta}"
         )
+
+        # -----------------------------------------------------
+        # STORICO ATLETA
+        # -----------------------------------------------------
 
         storico_atleta = pd.read_sql(
             """
@@ -1070,8 +1075,7 @@ with tab5:
                 ON a.id = p.atleta_id
             WHERE
                 a.nome = ?
-            AND
-                p.stagione = ?
+                AND p.stagione = ?
             ORDER BY p.data DESC
             """,
             conn,
@@ -1083,11 +1087,80 @@ with tab5:
 
         if not storico_atleta.empty:
 
+            gare_disputate = len(
+                storico_atleta[
+                    storico_atleta["tipo_evento"]
+                    == "Gara"
+                ]
+            )
+
+            st.metric(
+                "🏁 Gare disputate",
+                gare_disputate
+            )
+
+            # -----------------------------------------
+            # GRAFICO PRESENZE
+            # -----------------------------------------
+
+            grafico_presenze = storico_atleta.copy()
+
+            grafico_presenze["data"] = pd.to_datetime(
+                grafico_presenze["data"]
+            )
+
+            grafico_presenze = (
+                grafico_presenze
+                .sort_values("data")
+            )
+
+            st.markdown("---")
+
+            st.subheader(
+                "📈 Andamento presenze"
+            )
+
+            st.line_chart(
+                grafico_presenze.set_index("data")[
+                    "presenza"
+                ]
+            )
+
+            # -----------------------------------------
+            # GRAFICO STELLE
+            # -----------------------------------------
+
+            grafico_stelle = (
+                grafico_presenze.copy()
+            )
+
+            grafico_stelle = grafico_stelle[
+                grafico_stelle["voto"].notna()
+            ]
+
+            if not grafico_stelle.empty:
+
+                st.subheader(
+                    "⭐ Andamento stelle"
+                )
+
+                st.line_chart(
+                    grafico_stelle.set_index(
+                        "data"
+                    )[
+                        "voto"
+                    ]
+                )
+
+            # -----------------------------------------
+            # ULTIME 10 ATTIVITA'
+            # -----------------------------------------
+
             storico_atleta["presenza"] = (
                 storico_atleta["presenza"]
                 .map({
-                    1: "Presente",
-                    0: "Assente"
+                    1: "✅",
+                    0: "❌"
                 })
             )
 
@@ -1103,7 +1176,7 @@ with tab5:
             st.markdown("---")
 
             st.subheader(
-                "📜 Storico atleta"
+                "📜 Ultime 10 attività"
             )
 
             st.dataframe(
@@ -1115,16 +1188,11 @@ with tab5:
                         "stelle",
                         "commento"
                     ]
-                ],
+                ]
+                .head(10),
                 use_container_width=True,
                 hide_index=True
             )
-
-        st.dataframe(
-            stats,
-            use_container_width=True,
-            hide_index=True
-        )
 
         # =====================================================
         # CLASSIFICA PRESENZE
