@@ -10,7 +10,7 @@ import json
 # ============================================================
 
 st.set_page_config(
-    page_title="Gestionale Nuoto V2",
+    page_title="Gestionale Nuoto",
     page_icon="🏊",
     layout="wide"
 )
