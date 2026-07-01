@@ -1,4 +1,21 @@
 import streamlit as st
+
+try:
+
+    st.write(
+        "✅ GitHub Secrets trovati"
+    )
+
+    st.write(
+        st.secrets["GITHUB_OWNER"]
+    )
+
+except Exception as e:
+
+    st.error(
+        f"Errore Secrets: {e}"
+    )
+
 import sqlite3
 import pandas as pd
 from datetime import date
