@@ -299,7 +299,8 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    "🏠 Dashboard",
     "📋 Allenamento vasca",
     "🏋️ Allenamento secco",
     "🏁 Gare",
@@ -310,6 +311,88 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "💾 Backup",
     "📅 Calendario"
 ])
+
+with tab0:
+
+    st.header("🏠 Dashboard")
+
+    totale_atleti = len(
+        get_atleti(stagione_selezionata)
+    )
+
+    totale_eventi = pd.read_sql(
+        """
+        SELECT COUNT(DISTINCT data || tipo_evento)
+        AS totale
+        FROM presenze
+        WHERE stagione = ?
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    ).iloc[0]["totale"]
+
+    totale_gare = pd.read_sql(
+        """
+        SELECT COUNT(DISTINCT data)
+        AS totale
+        FROM presenze
+        WHERE stagione = ?
+        AND tipo_evento='Gara'
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    ).iloc[0]["totale"]
+
+    media_stelle = pd.read_sql(
+        """
+        SELECT AVG(voto) AS media
+        FROM presenze
+        WHERE stagione = ?
+        AND voto IS NOT NULL
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    ).iloc[0]["media"]
+
+    if pd.isna(media_stelle):
+        media_stelle = 0
+
+    ultima = pd.read_sql(
+        """
+        SELECT MAX(data) AS data
+        FROM presenze
+        WHERE stagione = ?
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    ).iloc[0]["data"]
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    c1.metric(
+        "👥 Atleti",
+        totale_atleti
+    )
+
+    c2.metric(
+        "🏊 Registrazioni",
+        totale_eventi
+    )
+
+    c3.metric(
+        "🏁 Gare",
+        totale_gare
+    )
+
+    c4.metric(
+        "⭐ Media stelle",
+        round(media_stelle, 2)
+    )
+
+    c5.metric(
+        "📅 Ultima attività",
+        ultima if ultima else "-"
+    )
 
 # ============================================================
 # TAB 1
