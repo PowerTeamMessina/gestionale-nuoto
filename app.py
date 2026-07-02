@@ -9,44 +9,6 @@ import requests
 import os
 from datetime import datetime
 
-def check_admin():
-
-    if "admin" not in st.session_state:
-        st.session_state.admin = False
-
-    with st.sidebar:
-
-        st.markdown("---")
-        st.subheader("🔐 Area amministratore")
-
-        if not st.session_state.admin:
-
-            pwd = st.text_input(
-                "Password",
-                type="password",
-                key="admin_pwd"
-            )
-
-            if st.button("Accedi"):
-
-                if pwd == st.secrets["ADMIN_PASSWORD"]:
-
-                    st.session_state.admin = True
-                    st.rerun()
-
-                else:
-
-                    st.error("Password errata")
-
-        else:
-
-            st.success("✅ Modalità amministratore")
-
-            if st.button("🚪 Logout"):
-
-                st.session_state.admin = False
-                st.rerun()
-
 # ============================================================
 # CONFIGURAZIONE
 # ============================================================
@@ -127,6 +89,44 @@ conn.commit()
 # FUNZIONI STAGIONI
 # ============================================================
 
+def check_admin():
+
+    if "admin" not in st.session_state:
+        st.session_state.admin = False
+
+    with st.sidebar:
+
+        st.markdown("---")
+        st.subheader("🔐 Area amministratore")
+
+        if not st.session_state.admin:
+
+            pwd = st.text_input(
+                "Password",
+                type="password",
+                key="admin_pwd"
+            )
+
+            if st.button("Accedi"):
+
+                if pwd == st.secrets["ADMIN_PASSWORD"]:
+
+                    st.session_state.admin = True
+                    st.rerun()
+
+                else:
+
+                    st.error("Password errata")
+
+        else:
+
+            st.success("✅ Modalità amministratore")
+
+            if st.button("🚪 Logout"):
+
+                st.session_state.admin = False
+                st.rerun()
+                
 def get_stagioni():
 
     df = pd.read_sql(
