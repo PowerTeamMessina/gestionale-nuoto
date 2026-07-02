@@ -352,8 +352,6 @@ st.session_state.stagione_corrente = (
 # ============================================================
 # TAB PRINCIPALI
 # ============================================================
-if st.session_state.admin:
-
     (tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12) = st.tabs([
         "🏠 Dashboard",
         "📋 Allenamento vasca",
@@ -366,16 +364,6 @@ if st.session_state.admin:
         "💾 Backup",
         "📅 Calendario",
         "📋 Registro settimanale",
-        "🏁 Archivio Gare",
-        "📈 Analisi Stagione"
-    ])
-
-else:
-
-    (tab0, tab5, tab6, tab11, tab12) = st.tabs([
-        "🏠 Dashboard",
-        "📊 Statistiche",
-        "🗂️ Storico",
         "🏁 Archivio Gare",
         "📈 Analisi Stagione"
     ])
@@ -1072,6 +1060,15 @@ with tab0:
 # TAB 1
 # ============================================================
 
+
+if not st.session_state.admin:
+
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
+        )
+
+    else:
+
 with tab1:
     st.info(
         "Parte 2: Registro Allenamento in vasca"
@@ -1080,6 +1077,15 @@ with tab1:
 # ============================================================
 # TAB 2
 # ============================================================
+
+
+if not st.session_state.admin:
+
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
+        )
+
+    else:
 
 with tab2:
     st.info(
@@ -1090,6 +1096,14 @@ with tab2:
 # TAB 3
 # ============================================================
 
+if not st.session_state.admin:
+
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
+        )
+
+    else:
+
 with tab3:
     st.info(
         "Parte 2: Registro Gare"
@@ -1098,6 +1112,14 @@ with tab3:
 # ============================================================
 # TAB 4
 # ============================================================
+
+if not st.session_state.admin:
+
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
+        )
+
+    else:
 
 with tab4:
 
