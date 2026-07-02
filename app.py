@@ -1088,9 +1088,9 @@ if not st.session_state.admin:
 else:
 
     with tab2:
-    st.info(
-        "Parte 2: Registro Allenamento a secco"
-    )
+        st.info(
+            "Parte 2: Registro Allenamento a secco"
+        )
 
 # ============================================================
 # TAB 3
