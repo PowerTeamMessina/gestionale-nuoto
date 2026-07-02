@@ -1099,7 +1099,7 @@ with tab3:
 
 with tab4:
 
-    if st.session_state.admin:
+    if not st.session_state.admin:
 
         pass
 
