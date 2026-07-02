@@ -1065,19 +1065,19 @@ with tab0:
 # ============================================================
 
 
-with tab1:
+if st.session_state.admin:
 
-    if st.session_state.admin:
+    st.info(
+        "Parte 2: Registro Allenamento in vasca"
+    )
 
-        st.info(
-            "Parte 2: Registro Allenamento in vasca"
-        )
+else:
 
-    else:
-
-        st.warning(
-            "🔒 Registro Allenamento disponibile solo agli amministratori."
-        )
+    with tab1:
+            
+    st.warning(
+        "🔒 Registro Allenamento disponibile solo agli amministratori."
+    )
 
 # ============================================================
 # TAB 2
