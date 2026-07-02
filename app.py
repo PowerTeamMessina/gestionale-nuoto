@@ -1108,19 +1108,19 @@ with tab2:
 
 with tab3:
 
-        if not st.session_state.admin:
+    if not st.session_state.admin:
         
-            st.warning(
-                "🔒 Attività disponibile solo agli amministratori."
-            )
-            pass
+        st.warning(
+              "🔒 Attività disponibile solo agli amministratori."
+        )
+        pass
 
-        else:
+    else:
         
-            st.info(
-                "Parte 2: Registro gare"
-            )
-            st.rerun()
+        st.info(
+            "Parte 2: Registro gare"
+        )
+        st.rerun()
 
 # ============================================================
 # TAB 4
@@ -1837,188 +1837,198 @@ with tab6:
 
 with tab7:
 
-    st.header("⚙️ Gestione Stagioni")
+    with tab4:
 
-    # =====================================================
-    # NUOVA STAGIONE
-    # =====================================================
-
-    st.subheader("➕ Nuova stagione")
-
-    nuova_stagione = st.text_input(
-        "Nome stagione",
-        placeholder="es. 2026/2027"
-    )
-
-    if st.button(
-        "➕ Crea stagione"
-    ):
-
-        if nuova_stagione.strip() == "":
-
-            st.error(
-                "Inserisci il nome della stagione."
-            )
-
-        else:
-
-            aggiungi_stagione(
-                nuova_stagione.strip()
-            )
-
-            st.success(
-                "Stagione creata correttamente."
-            )
-
-            st.rerun()
-
-    st.markdown("---")
-
-    # =====================================================
-    # ELENCO STAGIONI
-    # =====================================================
-
-    st.subheader(
-        "📋 Stagioni presenti"
-    )
-
-    df_stagioni = pd.DataFrame(
-        {
-            "Stagione": get_stagioni()
-        }
-    )
-
-    st.dataframe(
-        df_stagioni,
-        use_container_width=True,
-        hide_index=True
-    )
-
-    st.markdown("---")
-
-    # =====================================================
-    # COPIA ATLETI
-    # =====================================================
-
-    st.subheader(
-        "📄 Copia atleti"
-    )
-
-    stagioni_disponibili = (
-        get_stagioni()
-    )
-
-    if len(stagioni_disponibili) > 1:
-
-        stagione_origine = st.selectbox(
-            "Stagione origine",
-            stagioni_disponibili,
-            key="stagione_origine"
+    if not st.session_state.admin:
+        
+        st.warning(
+            "🔒 Attività disponibile solo agli amministratori."
         )
+        pass
 
-        stagione_destinazione = st.selectbox(
-            "Stagione destinazione",
-            stagioni_disponibili,
-            key="stagione_destinazione"
+    else:
+        st.header("⚙️ Gestione Stagioni")
+
+        # =====================================================
+        # NUOVA STAGIONE
+        # =====================================================
+
+        st.subheader("➕ Nuova stagione")
+
+        nuova_stagione = st.text_input(
+            "Nome stagione",
+            placeholder="es. 2026/2027"
         )
 
         if st.button(
-            "📄 Copia atleti"
+            "➕ Crea stagione"
         ):
 
-            if (
-                stagione_origine
-                ==
-                stagione_destinazione
-            ):
+            if nuova_stagione.strip() == "":
 
                 st.error(
-                    "Le due stagioni devono essere diverse."
+                    "Inserisci il nome della stagione."
                 )
 
             else:
 
-                df_source = get_atleti(
-                    stagione_origine
+                aggiungi_stagione(
+                    nuova_stagione.strip()
                 )
 
-                count = 0
-
-                for _, row in df_source.iterrows():
-
-                    c.execute(
-                        """
-                        INSERT INTO atleti(
-                            nome,
-                            categoria,
-                            stagione
-                        )
-                        VALUES(?,?,?)
-                        """,
-                        (
-                            row["nome"],
-                            row["categoria"],
-                            stagione_destinazione
-                        )
-                    )
-
-                    count += 1
-
-                conn.commit()
-
                 st.success(
-                    f"{count} atleti copiati."
+                    "Stagione creata correttamente."
                 )
 
                 st.rerun()
 
-    else:
+        st.markdown("---")
 
-        st.info(
-            "Servono almeno due stagioni."
+        # =====================================================
+        # ELENCO STAGIONI
+        # =====================================================
+
+        st.subheader(
+            "📋 Stagioni presenti"
         )
 
-    st.markdown("---")
+        df_stagioni = pd.DataFrame(
+            {
+                "Stagione": get_stagioni()
+            }
+        )
 
-    # =====================================================
-    # ELIMINA STAGIONE
-    # =====================================================
+        st.dataframe(
+            df_stagioni,
+            use_container_width=True,
+            hide_index=True
+        )
 
-    st.subheader(
-        "🗑️ Elimina stagione"
-    )
+        st.markdown("---")
 
-    stagione_delete = st.selectbox(
-        "Seleziona stagione",
-        stagioni_disponibili,
-        key="delete_stagione"
-    )
+        # =====================================================
+        # COPIA ATLETI
+        # =====================================================
 
-    conferma = st.checkbox(
-        "Confermo eliminazione stagione"
-    )
+        st.subheader(
+            "📄 Copia atleti"
+        )
 
-    if st.button(
-        "🗑️ Elimina stagione"
-    ):
+        stagioni_disponibili = (
+            get_stagioni()
+        )
 
-        if not conferma:
+        if len(stagioni_disponibili) > 1:
 
-            st.error(
-                "Devi confermare."
+            stagione_origine = st.selectbox(
+                "Stagione origine",
+                stagioni_disponibili,
+                key="stagione_origine"
             )
+
+            stagione_destinazione = st.selectbox(
+                "Stagione destinazione",
+                stagioni_disponibili,
+                key="stagione_destinazione"
+            )
+
+            if st.button(
+                "📄 Copia atleti"
+            ):
+
+                if (
+                    stagione_origine
+                    ==
+                    stagione_destinazione
+                ):
+
+                    st.error(
+                        "Le due stagioni devono essere diverse."
+                    )
+
+                else:
+
+                    df_source = get_atleti(
+                        stagione_origine
+                    )
+
+                    count = 0
+
+                    for _, row in df_source.iterrows():
+
+                        c.execute(
+                            """
+                            INSERT INTO atleti(
+                                nome,
+                                categoria,
+                                stagione
+                            )
+                            VALUES(?,?,?)
+                            """,
+                            (
+                                row["nome"],
+                                row["categoria"],
+                                stagione_destinazione
+                            )
+                        )
+
+                        count += 1
+
+                    conn.commit()
+
+                    st.success(
+                        f"{count} atleti copiati."
+                    )
+
+                    st.rerun()
 
         else:
 
-            elimina_stagione(
-                stagione_delete
+            st.info(
+                "Servono almeno due stagioni."
             )
 
-            st.success(
-                "Stagione eliminata."
-            )
+        st.markdown("---")
 
-            st.rerun()
+        # =====================================================
+        # ELIMINA STAGIONE
+        # =====================================================
+
+        st.subheader(
+            "🗑️ Elimina stagione"
+        )
+
+        stagione_delete = st.selectbox(
+            "Seleziona stagione",
+            stagioni_disponibili,
+            key="delete_stagione"
+        )
+
+        conferma = st.checkbox(
+            "Confermo eliminazione stagione"
+        )
+
+        if st.button(
+            "🗑️ Elimina stagione"
+        ):
+
+            if not conferma:
+
+                st.error(
+                    "Devi confermare."
+                )
+
+            else:
+    
+                elimina_stagione(
+                    stagione_delete
+                )
+
+                st.success(
+                    "Stagione eliminata."
+                )
+
+                st.rerun()
 
 # ============================================================
 # TAB 8
