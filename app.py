@@ -1004,7 +1004,6 @@ with tab0:
         st.warning(
             "🔒 Backup disponibile solo agli amministratori."
         )
-        st.stop()
 
     else:
             st.markdown("---")
