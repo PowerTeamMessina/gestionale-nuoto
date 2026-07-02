@@ -1064,23 +1064,18 @@ with tab0:
 # TAB 1
 # ============================================================
 
+with tab1:
+    if st.session_state.admin:
+    
+        st.info(
+            "Parte 2: Registro Allenamento in vasca"
+        )
 
-if st.session_state.admin:
-    mostra_registro(
-        "📋 Allenamento in vasca",
-        "Allenamento in vasca",
-        stagione_selezionata
-    )
-        
-    st.info(
-        "Parte 2: Registro Allenamento in vasca"
-    )
-
-else:
+    else:
             
-    st.warning(
-        "🔒 Registro Allenamento disponibile solo agli amministratori."
-    )
+        st.warning(
+            "🔒 Registro Allenamento disponibile solo agli amministratori."
+        )
 
 # ============================================================
 # TAB 2
@@ -3214,6 +3209,14 @@ def mostra_registro(
 # ============================================================
 # TAB REGISTRI
 # ============================================================
+with tab1:
+    
+    mostra_registro(
+        "📋 Allenamento in vasca",
+        "Allenamento in vasca",
+        stagione_selezionata
+    )
+
 with tab2:
 
     mostra_registro(
