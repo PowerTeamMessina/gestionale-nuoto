@@ -1046,6 +1046,7 @@ with tab0:
                 "backup_automatico.json",
                 "r",
                 encoding="utf-8"
+                
             ) as f:
 
                 st.download_button(
@@ -1065,18 +1066,9 @@ with tab0:
 # TAB 1
 # ============================================================
 
-with tab1:
-    if st.session_state.admin:
-    
+with tab1:    
         st.info(
             "Parte 2: Registro Allenamento in vasca"
-        )
-
-    else:
-        
-            
-        st.warning(
-            "🔒 Registro Allenamento disponibile solo agli amministratori."
         )
 
 # ============================================================
@@ -1084,30 +1076,15 @@ with tab1:
 # ============================================================
 
 with tab2:
-    if not st.session_state.admin:
-
-        st.warning(
-            "🔒 Backup disponibile solo agli amministratori."
+        st.info(
+            "Parte 2: Registro Allenamento a secco"
         )
-
-    else:
-            st.info(
-                "Parte 2: Registro Allenamento a secco"
-            )
 
 # ============================================================
 # TAB 3
 # ============================================================
 
-if not st.session_state.admin:
-
-    st.warning(
-        "🔒 Backup disponibile solo agli amministratori."
-    )
-
-else:
-
-    with tab3:
+with tab3:
         st.info(
             "Parte 2: Registro Gare"
         )
