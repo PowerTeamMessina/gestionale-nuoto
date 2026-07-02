@@ -88,44 +88,6 @@ conn.commit()
 # ============================================================
 # FUNZIONI STAGIONI
 # ============================================================
-
-def check_admin():
-
-    if "admin" not in st.session_state:
-        st.session_state.admin = False
-
-    with st.sidebar:
-
-        st.markdown("---")
-        st.subheader("🔐 Area amministratore")
-
-        if not st.session_state.admin:
-
-            pwd = st.text_input(
-                "Password",
-                type="password",
-                key="admin_pwd"
-            )
-
-            if st.button("Accedi"):
-
-                if pwd == st.secrets["ADMIN_PASSWORD"]:
-
-                    st.session_state.admin = True
-                    st.rerun()
-
-                else:
-
-                    st.error("Password errata")
-
-        else:
-
-            st.success("✅ Modalità amministratore")
-
-            if st.button("🚪 Logout"):
-
-                st.session_state.admin = False
-                st.rerun()
                 
 def get_stagioni():
 
@@ -311,6 +273,52 @@ if "data_aperta" not in st.session_state:
 
 if "tipo_aperto" not in st.session_state:
     st.session_state.tipo_aperto = None
+
+def check_admin():
+
+    if "admin" not in st.session_state:
+        st.session_state.admin = False
+
+    with st.sidebar:
+
+        st.markdown("---")
+        st.subheader("🔐 Accesso amministratore")
+
+        if not st.session_state.admin:
+
+            password = st.text_input(
+                "Password amministratore",
+                type="password",
+                key="admin_password"
+            )
+
+            if st.button(
+                "Accedi come amministratore"
+            ):
+
+                if password == st.secrets["ADMIN_PASSWORD"]:
+
+                    st.session_state.admin = True
+                    st.rerun()
+
+                else:
+
+                    st.error(
+                        "Password errata"
+                    )
+
+        else:
+
+            st.success(
+                "✅ Modalità amministratore attiva"
+            )
+
+            if st.button(
+                "🚪 Logout amministratore"
+            ):
+
+                st.session_state.admin = False
+                st.rerun()
 
 # ============================================================
 # HEADER
