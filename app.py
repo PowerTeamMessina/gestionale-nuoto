@@ -286,248 +286,169 @@ def mostra_registro(titolo, tipo_evento, stagione):
 
     if (
         st.session_state.data_aperta is not None
-        and
-        st.session_state.tipo_aperto == tipo_evento
+        and st.session_state.tipo_aperto == tipo_evento
     ):
-
         try:
-
             data_default = pd.to_datetime(
                 st.session_state.data_aperta
             ).date()
-
         except:
             pass
 
     data_evento = st.date_input(
         "Data",
         value=data_default,
-        key=f"data_{tipo_evento}"
+        key=f"data_{tipo_evento}",
     )
 
     df_atleti = get_atleti(stagione)
 
     if df_atleti.empty:
-    
         st.warning(
             "Nessun atleta presente nella stagione selezionata."
         )
-    
+        return
+
     # -----------------------------------------
     # CARICAMENTO REGISTRO ESISTENTE
     # -----------------------------------------
-    
+
     presenze_salvate = get_presenze_data(
-    data_evento,
-    stagione,
-    tipo_evento
+        data_evento,
+        stagione,
+        tipo_evento,
     )
-    
-    registro_esistente = (
-        not presenze_salvate.empty
-    )
-    
+
+    registro_esistente = not presenze_salvate.empty
+
     if registro_esistente:
-    
         st.success(
             "✅ Registro già esistente. "
             "Puoi modificarlo e salvarlo nuovamente."
         )
-    
     else:
-    
-        st.info(
-            "📝 Nuovo registro."
-        )
-    
+        st.info("📝 Nuovo registro.")
+
     dati_salvati = {}
-    
+
     if registro_esistente:
-    
         for _, r in presenze_salvate.iterrows():
-    
-            dati_salvati[
-                int(r["atleta_id"])
-            ] = {
+            dati_salvati[int(r["atleta_id"])] = {
                 "presenza": bool(r["presenza"]),
-                "voto": (
-                    int(r["voto"])
-                    if pd.notna(r["voto"])
-                    else 4
-                ),
-                "commento": (
-                    r["commento"]
-                    if pd.notna(r["commento"])
-                    else ""
-                )
+                "voto": int(r["voto"]) if pd.notna(r["voto"]) else 4,
+                "commento": r["commento"] if pd.notna(r["commento"]) else "",
             }
-    
+
     # -----------------------------------------
     # INIZIALIZZAZIONE SESSION
     # -----------------------------------------
-    
+
     for _, row in df_atleti.iterrows():
-    
+
         atleta_id = int(row["id"])
-    
+
         if atleta_id not in st.session_state.registro:
-    
             if atleta_id in dati_salvati:
-    
-                st.session_state.registro[
-                    atleta_id
-                ] = dati_salvati[
-                    atleta_id
-                ]
-    
+                st.session_state.registro[atleta_id] = dati_salvati[atleta_id]
             else:
-    
-                st.session_state.registro[
-                    atleta_id
-                ] = {
+                st.session_state.registro[atleta_id] = {
                     "presenza": False,
                     "voto": 4,
-                    "commento": ""
+                    "commento": "",
                 }
-    
+
     # -----------------------------------------
     # RIEPILOGO
     # -----------------------------------------
-    
+
     totale = len(df_atleti)
-    
     presenti = 0
-    
+
     # -----------------------------------------
     # ATLETI
     # -----------------------------------------
-    
+
     for _, row in df_atleti.iterrows():
-    
+
         atleta_id = int(row["id"])
-    
-        st.markdown(
-            f"### {row['nome']}"
-        )
-    
+
+        st.markdown(f"### {row['nome']}")
+
         presenza = st.toggle(
             "Presente",
-            value=st.session_state.registro[
-                atleta_id
-            ]["presenza"],
-            key=f"pres_{tipo_evento}_{atleta_id}"
+            value=st.session_state.registro[atleta_id]["presenza"],
+            key=f"pres_{tipo_evento}_{atleta_id}",
         )
-    
+
         voto = None
-    
+
         if presenza:
-    
             presenti += 1
-    
-            voto_corrente = st.session_state.registro[
-                atleta_id
-            ]["voto"]
-    
+
+            voto_corrente = st.session_state.registro[atleta_id]["voto"]
+
             stelle = st.radio(
                 "Valutazione",
-                [
-                    "⭐",
-                    "⭐⭐",
-                    "⭐⭐⭐",
-                    "⭐⭐⭐⭐",
-                    "⭐⭐⭐⭐⭐"
-                ],
-                index=max(
-                    0,
-                    min(4, voto_corrente - 1)
-                ),
+                ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"],
+                index=max(0, min(4, voto_corrente - 1)),
                 horizontal=True,
-                key=f"voto_{tipo_evento}_{atleta_id}"
+                key=f"voto_{tipo_evento}_{atleta_id}",
             )
-    
-            voto = stelle_to_voto(
-                stelle
-            )
-    
+
+            voto = stelle_to_voto(stelle)
+
         commento = st.text_input(
             "Commento",
-            value=st.session_state.registro[
-                atleta_id
-            ]["commento"],
-            key=f"comm_{tipo_evento}_{atleta_id}"
+            value=st.session_state.registro[atleta_id]["commento"],
+            key=f"comm_{tipo_evento}_{atleta_id}",
         )
-    
-        st.session_state.registro[
-            atleta_id
-        ] = {
+
+        st.session_state.registro[atleta_id] = {
             "presenza": presenza,
             "voto": voto if presenza else 4,
-            "commento": commento
+            "commento": commento,
         }
-    
+
         st.markdown("---")
-    
+
     assenti = totale - presenti
-    
+
     c1, c2 = st.columns(2)
-    
-    c1.metric(
-        "Presenti",
-        presenti
-    )
-    
-    c2.metric(
-        "Assenti",
-        assenti
-    )
-    
+
+    c1.metric("Presenti", presenti)
+    c2.metric("Assenti", assenti)
+
     # -----------------------------------------
     # SALVATAGGIO
     # -----------------------------------------
-    
+
     if st.button(
         f"💾 Salva {tipo_evento}",
-        key=f"salva_{tipo_evento}"
+        key=f"salva_{tipo_evento}",
     ):
-    
         for _, row in df_atleti.iterrows():
-    
-            atleta_id = int(
-                row["id"]
-            )
-    
-            dati = st.session_state.registro[
-                atleta_id
-            ]
-    
+
+            atleta_id = int(row["id"])
+            dati = st.session_state.registro[atleta_id]
+
             salva_presenza(
                 atleta_id,
                 data_evento,
                 stagione,
                 tipo_evento,
                 dati["presenza"],
-                dati["voto"]
-                if dati["presenza"]
-                else None,
-                dati["commento"]
+                dati["voto"] if dati["presenza"] else None,
+                dati["commento"],
             )
-    
+
         crea_backup_automatico()
-    
         upload_backup_github()
-    
+
         if registro_esistente:
-    
-            st.success(
-                "✅ Registro aggiornato correttamente."
-            )
-    
+            st.success("✅ Registro aggiornato correttamente.")
         else:
-    
-            st.success(
-                "✅ Nuovo registro salvato."
-            )
-    
+            st.success("✅ Nuovo registro salvato.")
+
         st.rerun()
         
 def check_admin():
