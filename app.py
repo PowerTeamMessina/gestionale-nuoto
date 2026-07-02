@@ -999,9 +999,11 @@ with tab0:
     # BACKUP AUTOMATICO
     # --------------------------------------------------------
 
-    st.markdown("---")
+    if st.session_state.admin:
 
-    st.subheader("💾 Stato backup")
+        st.markdown("---")
+
+        st.subheader("💾 Stato backup")
 
     if os.path.exists(
         "backup_automatico.json"
