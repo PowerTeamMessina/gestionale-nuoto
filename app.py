@@ -999,7 +999,13 @@ with tab0:
     # --------------------------------------------------------
     # BACKUP AUTOMATICO
     # --------------------------------------------------------
-    if st.session_state.admin:
+    if not st.session_state.admin:
+        
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
+        )
+       
+    else:
 
         st.markdown("---")
 
@@ -1055,11 +1061,6 @@ with tab0:
                     "Nessun backup automatico disponibile."
                 )
 
-    else:
-        st.warning(
-            "🔒 Backup disponibile solo agli amministratori."
-        )
-
 # ============================================================
 # TAB 1
 # ============================================================
@@ -1072,6 +1073,7 @@ with tab1:
         )
 
     else:
+        
             
         st.warning(
             "🔒 Registro Allenamento disponibile solo agli amministratori."
