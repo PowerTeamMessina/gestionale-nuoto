@@ -352,9 +352,8 @@ st.session_state.stagione_corrente = (
 # ============================================================
 # TAB PRINCIPALI
 # ============================================================
-if st.session_state.admin:
-        
-        (tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12) = st.tabs([
+
+(tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12) = st.tabs([
         "🏠 Dashboard",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
@@ -368,18 +367,8 @@ if st.session_state.admin:
         "📋 Registro settimanale",
         "🏁 Archivio Gare",
         "📈 Analisi Stagione"
-        ])
-        pass
+])
 
-    else: (tab0, tab5, tab6, tab10, tab11, tab12) = st.tabs([
-        "🏠 Dashboard",
-        "👥 Atleti",
-        "📊 Statistiche",
-        "📅 Calendario",
-        "📋 Registro settimanale",
-        "🏁 Archivio Gare",
-        "📈 Analisi Stagione"
-        ])
 
 # ============================================================
 # BACKUP AUTOMATICO
@@ -1080,21 +1069,20 @@ with tab0:
 # TAB 1
 # ============================================================
 
-with tab1: 
-    
+with tab1:
+
     if not st.session_state.admin:
-        
+
         st.warning(
             "🔒 Attività disponibile solo agli amministratori."
         )
-        pass
 
     else:
-        
-        st.info(
-            "Parte 2: Registro Allenamento in vasca"
+
+        mostra_registro(
+            "Allenamento vasca"
         )
-        st.rerun()
+        pass
 
 # ============================================================
 # TAB 2
