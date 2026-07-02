@@ -3238,7 +3238,7 @@ if not st.session_state.admin:
             "🔒 Attività disponibile solo agli amministratori."
         )
 
-        return
+        pass
 else:
     with tab1:
     
