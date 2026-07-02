@@ -147,6 +147,77 @@ def elimina_stagione(nome):
 
     conn.commit()
 
+def get_presenze_data(
+    data_evento,
+    stagione,
+    tipo_evento
+):
+
+    return pd.read_sql(
+        """
+        SELECT *
+        FROM presenze
+        WHERE data = ?
+        AND stagione = ?
+        AND tipo_evento = ?
+        """,
+        conn,
+        params=(
+            str(data_evento),
+            stagione,
+            tipo_evento
+        )
+    )
+
+
+def salva_presenza(
+    atleta_id,
+    data_evento,
+    stagione,
+    tipo_evento,
+    presenza,
+    voto,
+    commento
+):
+
+    c.execute(
+        """
+        INSERT INTO presenze(
+            atleta_id,
+            data,
+            stagione,
+            tipo_evento,
+            presenza,
+            voto,
+            commento
+        )
+        VALUES(?,?,?,?,?,?,?)
+
+        ON CONFLICT(
+            atleta_id,
+            data,
+            stagione,
+            tipo_evento
+        )
+
+        DO UPDATE SET
+            presenza = excluded.presenza,
+            voto = excluded.voto,
+            commento = excluded.commento
+        """,
+        (
+            atleta_id,
+            str(data_evento),
+            stagione,
+            tipo_evento,
+            int(presenza),
+            voto,
+            commento
+        )
+    )
+
+    conn.commit()
+
 # ============================================================
 # FUNZIONI ATLETI
 # ============================================================
@@ -2781,81 +2852,6 @@ with tab11:
             "archivio_gare.csv",
             "text/csv"
         )
-            
-# ============================================================
-# REGISTRI
-# ============================================================
-
-def get_presenze_data(
-    data_evento,
-    stagione,
-    tipo_evento
-):
-
-    return pd.read_sql(
-        """
-        SELECT *
-        FROM presenze
-        WHERE data = ?
-        AND stagione = ?
-        AND tipo_evento = ?
-        """,
-        conn,
-        params=(
-            str(data_evento),
-            stagione,
-            tipo_evento
-        )
-    )
-
-
-def salva_presenza(
-    atleta_id,
-    data_evento,
-    stagione,
-    tipo_evento,
-    presenza,
-    voto,
-    commento
-):
-
-    c.execute(
-        """
-        INSERT INTO presenze(
-            atleta_id,
-            data,
-            stagione,
-            tipo_evento,
-            presenza,
-            voto,
-            commento
-        )
-        VALUES(?,?,?,?,?,?,?)
-
-        ON CONFLICT(
-            atleta_id,
-            data,
-            stagione,
-            tipo_evento
-        )
-
-        DO UPDATE SET
-            presenza = excluded.presenza,
-            voto = excluded.voto,
-            commento = excluded.commento
-        """,
-        (
-            atleta_id,
-            str(data_evento),
-            stagione,
-            tipo_evento,
-            int(presenza),
-            voto,
-            commento
-        )
-    )
-
-    conn.commit()
     
 # ============================================================
 # TAB 12 - ANALISI STAGIONE
