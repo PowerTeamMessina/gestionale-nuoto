@@ -3128,8 +3128,6 @@ def mostra_registro(
     # SALVATAGGIO
     # -----------------------------------------
 
-if st.session_state.admin:
-
     if st.button(
         f"💾 Salva {tipo_evento}",
         key=f"salva_{tipo_evento}"
