@@ -1080,7 +1080,7 @@ with tab1:
         st.info(
             "Parte 2: Registro Allenamento in vasca"
         )
-
+        st.rerun()
 
 # ============================================================
 # TAB 2
@@ -1100,6 +1100,7 @@ with tab2:
         st.info(
             "Parte 2: Registro Allenamento a secco"
         )
+        st.rerun()
 
 # ============================================================
 # TAB 3
@@ -1119,6 +1120,7 @@ with tab3:
             st.info(
                 "Parte 2: Registro gare"
             )
+            st.rerun()
 
 # ============================================================
 # TAB 4
