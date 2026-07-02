@@ -320,6 +320,260 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 
 ])
 
 # ============================================================
+# BACKUP AUTOMATICO
+# ============================================================
+
+def crea_backup_automatico():
+
+    dati = {}
+
+    dati["stagioni"] = pd.read_sql(
+        "SELECT * FROM stagioni",
+        conn
+    ).to_dict(orient="records")
+
+    dati["atleti"] = pd.read_sql(
+        "SELECT * FROM atleti",
+        conn
+    ).to_dict(orient="records")
+
+    dati["presenze"] = pd.read_sql(
+        "SELECT * FROM presenze",
+        conn
+    ).to_dict(orient="records")
+
+    with open(
+        "backup_automatico.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            dati,
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
+
+def upload_backup_github():
+
+    token = st.secrets["GITHUB_TOKEN"]
+    owner = st.secrets["GITHUB_OWNER"]
+    repo = st.secrets["GITHUB_REPO"]
+
+    path = "backup_automatico.json"
+
+    with open(
+        path,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        contenuto = f.read()
+
+    contenuto_b64 = base64.b64encode(
+        contenuto.encode("utf-8")
+    ).decode("utf-8")
+
+    url = (
+        f"https://api.github.com/repos/"
+        f"{owner}/{repo}/contents/{path}"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    sha = None
+
+    risposta = requests.get(
+        url,
+        headers=headers
+    )
+
+    if risposta.status_code == 200:
+
+        sha = risposta.json()["sha"]
+
+    payload = {
+        "message": "Aggiornamento backup automatico",
+        "content": contenuto_b64
+    }
+
+    if sha is not None:
+
+        payload["sha"] = sha
+
+    upload = requests.put(
+        url,
+        headers=headers,
+        json=payload
+    )
+
+    if upload.status_code in [200, 201]:
+
+        st.success(
+            "✅ Backup sincronizzato su GitHub"
+        )
+
+    else:
+
+        st.error(
+            f"❌ Errore GitHub: "
+            f"{upload.status_code}"
+        )
+
+def scarica_backup_github():
+
+    token = st.secrets["GITHUB_TOKEN"]
+    owner = st.secrets["GITHUB_OWNER"]
+    repo = st.secrets["GITHUB_REPO"]
+
+    url = (
+        f"https://api.github.com/repos/"
+        f"{owner}/{repo}/contents/"
+        f"backup_automatico.json"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    risposta = requests.get(
+        url,
+        headers=headers
+    )
+
+    if risposta.status_code != 200:
+
+        st.error(
+            "❌ Impossibile scaricare il backup."
+        )
+
+        return False
+
+    data = risposta.json()
+
+    contenuto = base64.b64decode(
+        data["content"]
+    ).decode("utf-8")
+
+    with open(
+        "backup_automatico.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        f.write(contenuto)
+
+    st.success(
+        "✅ Backup scaricato da GitHub"
+    )
+
+    return True
+
+def ripristina_backup_locale():
+
+    with open(
+        "backup_automatico.json",
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        dati = json.load(f)
+
+    c.execute(
+        "DELETE FROM presenze"
+    )
+
+    c.execute(
+        "DELETE FROM atleti"
+    )
+
+    c.execute(
+        "DELETE FROM stagioni"
+    )
+
+    for row in dati.get(
+        "stagioni",
+        []
+    ):
+
+        c.execute(
+            """
+            INSERT INTO stagioni(
+                id,
+                nome
+            )
+            VALUES(?,?)
+            """,
+            (
+                row["id"],
+                row["nome"]
+            )
+        )
+
+    for row in dati.get(
+        "atleti",
+        []
+    ):
+
+        c.execute(
+            """
+            INSERT INTO atleti(
+                id,
+                nome,
+                categoria,
+                stagione
+            )
+            VALUES(?,?,?,?)
+            """,
+            (
+                row["id"],
+                row["nome"],
+                row["categoria"],
+                row["stagione"]
+            )
+        )
+
+    for row in dati.get(
+        "presenze",
+        []
+    ):
+
+        c.execute(
+            """
+            INSERT INTO presenze(
+                id,
+                atleta_id,
+                data,
+                stagione,
+                tipo_evento,
+                presenza,
+                voto,
+                commento
+            )
+            VALUES(?,?,?,?,?,?,?,?)
+            """,
+            (
+                row["id"],
+                row["atleta_id"],
+                row["data"],
+                row["stagione"],
+                row["tipo_evento"],
+                row["presenza"],
+                row["voto"],
+                row["commento"]
+            )
+        )
+
+    conn.commit()
+
+    return True
+
+# ============================================================
 # TAB 0 - DASHBOARD
 # ============================================================
 
@@ -2577,260 +2831,6 @@ def voto_to_stelle(voto):
 
 def stelle_to_voto(stelle):
     return stelle.count("⭐")
-
-# ============================================================
-# BACKUP AUTOMATICO
-# ============================================================
-
-def crea_backup_automatico():
-
-    dati = {}
-
-    dati["stagioni"] = pd.read_sql(
-        "SELECT * FROM stagioni",
-        conn
-    ).to_dict(orient="records")
-
-    dati["atleti"] = pd.read_sql(
-        "SELECT * FROM atleti",
-        conn
-    ).to_dict(orient="records")
-
-    dati["presenze"] = pd.read_sql(
-        "SELECT * FROM presenze",
-        conn
-    ).to_dict(orient="records")
-
-    with open(
-        "backup_automatico.json",
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        json.dump(
-            dati,
-            f,
-            ensure_ascii=False,
-            indent=2
-        )
-
-def upload_backup_github():
-
-    token = st.secrets["GITHUB_TOKEN"]
-    owner = st.secrets["GITHUB_OWNER"]
-    repo = st.secrets["GITHUB_REPO"]
-
-    path = "backup_automatico.json"
-
-    with open(
-        path,
-        "r",
-        encoding="utf-8"
-    ) as f:
-
-        contenuto = f.read()
-
-    contenuto_b64 = base64.b64encode(
-        contenuto.encode("utf-8")
-    ).decode("utf-8")
-
-    url = (
-        f"https://api.github.com/repos/"
-        f"{owner}/{repo}/contents/{path}"
-    )
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json"
-    }
-
-    sha = None
-
-    risposta = requests.get(
-        url,
-        headers=headers
-    )
-
-    if risposta.status_code == 200:
-
-        sha = risposta.json()["sha"]
-
-    payload = {
-        "message": "Aggiornamento backup automatico",
-        "content": contenuto_b64
-    }
-
-    if sha is not None:
-
-        payload["sha"] = sha
-
-    upload = requests.put(
-        url,
-        headers=headers,
-        json=payload
-    )
-
-    if upload.status_code in [200, 201]:
-
-        st.success(
-            "✅ Backup sincronizzato su GitHub"
-        )
-
-    else:
-
-        st.error(
-            f"❌ Errore GitHub: "
-            f"{upload.status_code}"
-        )
-
-def scarica_backup_github():
-
-    token = st.secrets["GITHUB_TOKEN"]
-    owner = st.secrets["GITHUB_OWNER"]
-    repo = st.secrets["GITHUB_REPO"]
-
-    url = (
-        f"https://api.github.com/repos/"
-        f"{owner}/{repo}/contents/"
-        f"backup_automatico.json"
-    )
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json"
-    }
-
-    risposta = requests.get(
-        url,
-        headers=headers
-    )
-
-    if risposta.status_code != 200:
-
-        st.error(
-            "❌ Impossibile scaricare il backup."
-        )
-
-        return False
-
-    data = risposta.json()
-
-    contenuto = base64.b64decode(
-        data["content"]
-    ).decode("utf-8")
-
-    with open(
-        "backup_automatico.json",
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        f.write(contenuto)
-
-    st.success(
-        "✅ Backup scaricato da GitHub"
-    )
-
-    return True
-
-def ripristina_backup_locale():
-
-    with open(
-        "backup_automatico.json",
-        "r",
-        encoding="utf-8"
-    ) as f:
-
-        dati = json.load(f)
-
-    c.execute(
-        "DELETE FROM presenze"
-    )
-
-    c.execute(
-        "DELETE FROM atleti"
-    )
-
-    c.execute(
-        "DELETE FROM stagioni"
-    )
-
-    for row in dati.get(
-        "stagioni",
-        []
-    ):
-
-        c.execute(
-            """
-            INSERT INTO stagioni(
-                id,
-                nome
-            )
-            VALUES(?,?)
-            """,
-            (
-                row["id"],
-                row["nome"]
-            )
-        )
-
-    for row in dati.get(
-        "atleti",
-        []
-    ):
-
-        c.execute(
-            """
-            INSERT INTO atleti(
-                id,
-                nome,
-                categoria,
-                stagione
-            )
-            VALUES(?,?,?,?)
-            """,
-            (
-                row["id"],
-                row["nome"],
-                row["categoria"],
-                row["stagione"]
-            )
-        )
-
-    for row in dati.get(
-        "presenze",
-        []
-    ):
-
-        c.execute(
-            """
-            INSERT INTO presenze(
-                id,
-                atleta_id,
-                data,
-                stagione,
-                tipo_evento,
-                presenza,
-                voto,
-                commento
-            )
-            VALUES(?,?,?,?,?,?,?,?)
-            """,
-            (
-                row["id"],
-                row["atleta_id"],
-                row["data"],
-                row["stagione"],
-                row["tipo_evento"],
-                row["presenza"],
-                row["voto"],
-                row["commento"]
-            )
-        )
-
-    conn.commit()
-
-    return True
         
 # ============================================================
 # REGISTRO GENERICO
