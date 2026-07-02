@@ -1000,7 +1000,7 @@ with tab0:
     # --------------------------------------------------------
     # BACKUP AUTOMATICO
     # --------------------------------------------------------
-
+if st.session_state.admin:
     if st.session_state.admin:
 
         st.markdown("---")
