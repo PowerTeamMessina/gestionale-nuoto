@@ -280,12 +280,12 @@ def check_admin():
         st.session_state.admin = False
 
     st.markdown("---")
-    st.subheader("🔐 Accesso Admin TEST")
+    st.subheader("🔐 Accesso amministratore")
 
     if not st.session_state.admin:
 
-       password = st.text_input(
-            "Password",
+        password = st.text_input(
+            "Password amministratore",
             type="password"
         )
 
@@ -298,22 +298,21 @@ def check_admin():
 
             else:
 
-                st.sidebar.error(
-                    "Password errata"
+                st.error(
+                    "❌ Password errata"
                 )
 
     else:
 
-        st.sidebar.success(
-            "✅ Admin attivo"
+        st.success(
+            "✅ Modalità amministratore attiva"
         )
 
-        if st.sidebar.button(
-            "🚪 Logout"
-        ):
+        if st.button("🚪 Logout amministratore"):
 
             st.session_state.admin = False
             st.rerun()
+
 
 # ============================================================
 # HEADER
@@ -328,6 +327,8 @@ st.markdown(
 )
 
 check_admin()
+
+st.write("Admin:", st.session_state.admin)
 
 stagioni = get_stagioni()
 
