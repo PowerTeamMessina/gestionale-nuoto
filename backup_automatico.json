@@ -7,17 +7,17 @@
   ],
   "atleti": [
     {
-      "id": 1,
-      "nome": "Gabriele Grifo",
-      "categoria": "Assoluto",
+      "id": 3,
+      "nome": "Gabriele",
+      "categoria": "Assoluti",
       "stagione": "2025/2026"
     }
   ],
   "presenze": [
     {
-      "id": 1,
-      "atleta_id": 1,
-      "data": "2026-07-01",
+      "id": 2,
+      "atleta_id": 3,
+      "data": "2026-07-02",
       "stagione": "2025/2026",
       "tipo_evento": "Allenamento in vasca",
       "presenza": 1,
