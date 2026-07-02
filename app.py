@@ -1066,6 +1066,7 @@ if not st.session_state.admin:
     st.warning(
         "🔒 Backup disponibile solo agli amministratori."
     )
+    st.stop()
 
 else:
 
@@ -1084,6 +1085,7 @@ if not st.session_state.admin:
     st.warning(
         "🔒 Backup disponibile solo agli amministratori."
     )
+    st.stop()
 
 else:
 
