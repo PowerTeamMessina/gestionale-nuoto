@@ -279,46 +279,41 @@ def check_admin():
     if "admin" not in st.session_state:
         st.session_state.admin = False
 
-    with st.sidebar:
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🔐 Accesso Admin")
 
-        st.markdown("---")
-        st.subheader("🔐 Accesso amministratore")
+    if not st.session_state.admin:
 
-        if not st.session_state.admin:
+        password = st.sidebar.text_input(
+            "Password",
+            type="password"
+        )
 
-            password = st.text_input(
-                "Password amministratore",
-                type="password",
-                key="admin_password"
-            )
+        if st.sidebar.button("Accedi"):
 
-            if st.button(
-                "Accedi come amministratore"
-            ):
+            if password == st.secrets["ADMIN_PASSWORD"]:
 
-                if password == st.secrets["ADMIN_PASSWORD"]:
-
-                    st.session_state.admin = True
-                    st.rerun()
-
-                else:
-
-                    st.error(
-                        "Password errata"
-                    )
-
-        else:
-
-            st.success(
-                "✅ Modalità amministratore attiva"
-            )
-
-            if st.button(
-                "🚪 Logout amministratore"
-            ):
-
-                st.session_state.admin = False
+                st.session_state.admin = True
                 st.rerun()
+
+            else:
+
+                st.sidebar.error(
+                    "Password errata"
+                )
+
+    else:
+
+        st.sidebar.success(
+            "✅ Admin attivo"
+        )
+
+        if st.sidebar.button(
+            "🚪 Logout"
+        ):
+
+            st.session_state.admin = False
+            st.rerun()
 
 # ============================================================
 # HEADER
