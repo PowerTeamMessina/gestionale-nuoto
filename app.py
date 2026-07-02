@@ -278,11 +278,7 @@ if "tipo_aperto" not in st.session_state:
 # REGISTRO GENERICO
 # ============================================================
 
-def mostra_registro(
-    titolo,
-    tipo_evento,
-    stagione
-):
+def mostra_registro(titolo, tipo_evento, stagione):
 
     st.header(titolo)
 
@@ -1118,9 +1114,7 @@ with tab1:
 
     if st.session_state.admin:
 
-        mostra_registro(
-            "Allenamento vasca"
-        )
+        mostra_registro("📋 Allenamento in vasca", "Allenamento in vasca", stagione_selezionata)
         pass
 
     else:
