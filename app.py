@@ -286,15 +286,15 @@ if df_atleti.empty:
 
 return
 
-    # -----------------------------------------
-    # CARICAMENTO REGISTRO ESISTENTE
-    # -----------------------------------------
+# -----------------------------------------
+# CARICAMENTO REGISTRO ESISTENTE
+# -----------------------------------------
 
-    presenze_salvate = get_presenze_data(
-        data_evento,
-        stagione,
-        tipo_evento
-    )
+presenze_salvate = get_presenze_data(
+data_evento,
+stagione,
+tipo_evento
+)
 
     registro_esistente = (
         not presenze_salvate.empty
