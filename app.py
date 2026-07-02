@@ -3229,37 +3229,3 @@ def mostra_registro(
 
         st.rerun()
 
-# ============================================================
-# TAB REGISTRI
-# ============================================================
-if not st.session_state.admin:
-
-        st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
-        )
-
-        pass
-else:
-    with tab1:
-    
-        mostra_registro(
-            "📋 Allenamento in vasca",
-            "Allenamento in vasca",
-            stagione_selezionata
-        )
-
-    with tab2:
-
-        mostra_registro(
-            "🏋️ Allenamento a secco",
-            "Allenamento a secco",
-            stagione_selezionata
-        )
-
-    with tab3:
-
-        mostra_registro(
-            "🏁 Gare",
-            "Gara",
-            stagione_selezionata
-        )
