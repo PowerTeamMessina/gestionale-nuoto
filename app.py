@@ -279,17 +279,17 @@ def check_admin():
     if "admin" not in st.session_state:
         st.session_state.admin = False
 
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("🔐 Accesso Admin")
+    st.markdown("---")
+    st.subheader("🔐 Accesso Admin TEST")
 
     if not st.session_state.admin:
 
-        password = st.sidebar.text_input(
+       password = st.text_input(
             "Password",
             type="password"
         )
 
-        if st.sidebar.button("Accedi"):
+        if st.button("Accedi"):
 
             if password == st.secrets["ADMIN_PASSWORD"]:
 
