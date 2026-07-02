@@ -2048,6 +2048,7 @@ with tab8:
         st.warning(
             "🔒 Backup disponibile solo agli amministratori."
         )
+        pass
 
     else:
 
