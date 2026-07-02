@@ -313,8 +313,6 @@ def mostra_registro(titolo, tipo_evento, stagione):
             "Nessun atleta presente nella stagione selezionata."
         )
     
-    return
-    
     # -----------------------------------------
     # CARICAMENTO REGISTRO ESISTENTE
     # -----------------------------------------
