@@ -1084,8 +1084,6 @@ with tab3:
 
 with tab4:
 
-    with tab4:
-
     if st.session_state.admin:
 
         # tutto il codice modifica atleti
