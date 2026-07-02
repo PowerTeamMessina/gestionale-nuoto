@@ -1109,16 +1109,16 @@ with tab3:
 
         if not st.session_state.admin:
         
-        st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
-        )
-        pass
+            st.warning(
+                "🔒 Attività disponibile solo agli amministratori."
+            )
+            pass
 
-    else:
+        else:
         
-        st.info(
-            "Parte 2: Registro gare"
-        )
+            st.info(
+                "Parte 2: Registro gare"
+            )
 
 # ============================================================
 # TAB 4
