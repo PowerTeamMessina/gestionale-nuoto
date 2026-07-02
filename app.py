@@ -1837,8 +1837,6 @@ with tab6:
 
 with tab7:
 
-    with tab4:
-
     if not st.session_state.admin:
         
         st.warning(
