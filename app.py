@@ -1066,12 +1066,15 @@ with tab0:
 
 
 if st.session_state.admin:
-
-    with tab1:
+    mostra_registro(
+        "📋 Allenamento in vasca",
+        "Allenamento in vasca",
+        stagione_selezionata
+    )
         
-        st.info(
-            "Parte 2: Registro Allenamento in vasca"
-        )
+    st.info(
+        "Parte 2: Registro Allenamento in vasca"
+    )
 
 else:
             
@@ -3214,11 +3217,6 @@ def mostra_registro(
 
 with tab1:
 
-    mostra_registro(
-        "📋 Allenamento in vasca",
-        "Allenamento in vasca",
-        stagione_selezionata
-    )
 
 with tab2:
 
