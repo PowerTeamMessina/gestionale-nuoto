@@ -1075,9 +1075,9 @@ else:
 
     with tab1:
             
-    st.warning(
-        "🔒 Registro Allenamento disponibile solo agli amministratori."
-    )
+        st.warning(
+            "🔒 Registro Allenamento disponibile solo agli amministratori."
+        )
 
 # ============================================================
 # TAB 2
