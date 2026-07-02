@@ -2074,242 +2074,242 @@ with tab8:
 
         st.markdown("---")
 
-    # =====================================================
-    # EXPORT JSON COMPLETO
-    # =====================================================
+        # =====================================================
+        # EXPORT JSON COMPLETO
+        # =====================================================
 
-    st.subheader("📥 Backup JSON completo")
+        st.subheader("📥 Backup JSON completo")
 
-    if st.button("📥 Genera backup JSON"):
+        if st.button("📥 Genera backup JSON"):
 
-        dati = {}
+            dati = {}
 
-        dati["stagioni"] = pd.read_sql(
-            "SELECT * FROM stagioni",
-            conn
-        ).to_dict(orient="records")
+            dati["stagioni"] = pd.read_sql(
+                "SELECT * FROM stagioni",
+                conn
+            ).to_dict(orient="records")
 
-        dati["atleti"] = pd.read_sql(
-            "SELECT * FROM atleti",
-            conn
-        ).to_dict(orient="records")
+            dati["atleti"] = pd.read_sql(
+                "SELECT * FROM atleti",
+                conn
+            ).to_dict(orient="records")
 
-        dati["presenze"] = pd.read_sql(
-            "SELECT * FROM presenze",
-            conn
-        ).to_dict(orient="records")
+            dati["presenze"] = pd.read_sql(
+                "SELECT * FROM presenze",
+                conn
+            ).to_dict(orient="records")
 
-        json_data = json.dumps(
-            dati,
-            ensure_ascii=False,
-            indent=2
+            json_data = json.dumps(
+                dati,
+                ensure_ascii=False,
+                indent=2
+            )
+
+            st.download_button(
+                "💾 Scarica backup JSON",
+                json_data,
+                file_name="backup_nuoto.json",
+                mime="application/json"
+            )
+
+        st.markdown("---")
+
+        # =====================================================
+        # IMPORT JSON
+        # =====================================================
+
+        st.subheader("📤 Ripristino da JSON")
+
+        uploaded_file = st.file_uploader(
+            "Carica backup JSON",
+            type="json"
         )
 
-        st.download_button(
-            "💾 Scarica backup JSON",
-            json_data,
-            file_name="backup_nuoto.json",
-            mime="application/json"
+        conferma_import = st.checkbox(
+            "Confermo il ripristino completo"
         )
 
-    st.markdown("---")
+        if (
+            uploaded_file is not None
+            and
+            st.button("📤 Importa backup")
+        ):
 
-    # =====================================================
-    # IMPORT JSON
-    # =====================================================
+            if not conferma_import:
 
-    st.subheader("📤 Ripristino da JSON")
-
-    uploaded_file = st.file_uploader(
-        "Carica backup JSON",
-        type="json"
-    )
-
-    conferma_import = st.checkbox(
-        "Confermo il ripristino completo"
-    )
-
-    if (
-        uploaded_file is not None
-        and
-        st.button("📤 Importa backup")
-    ):
-
-        if not conferma_import:
-
-            st.error(
-                "Devi confermare il ripristino."
-            )
-
-        else:
-
-            dati = json.loads(
-                uploaded_file
-                .getvalue()
-                .decode("utf-8")
-            )
-
-            c.execute(
-                "DELETE FROM presenze"
-            )
-
-            c.execute(
-                "DELETE FROM atleti"
-            )
-
-            c.execute(
-                "DELETE FROM stagioni"
-            )
-
-            for row in dati.get(
-                "stagioni",
-                []
-            ):
-
-                c.execute(
-                    """
-                    INSERT INTO stagioni(
-                        id,
-                        nome
-                    )
-                    VALUES(?,?)
-                    """,
-                    (
-                        row["id"],
-                        row["nome"]
-                    )
+                st.error(
+                    "Devi confermare il ripristino."
                 )
 
-            for row in dati.get(
-                "atleti",
-                []
-            ):
+            else:
 
-                c.execute(
-                    """
-                    INSERT INTO atleti(
-                        id,
-                        nome,
-                        categoria,
-                        stagione
-                    )
-                    VALUES(?,?,?,?)
-                    """,
-                    (
-                        row["id"],
-                        row["nome"],
-                        row["categoria"],
-                        row["stagione"]
-                    )
+                dati = json.loads(
+                    uploaded_file
+                    .getvalue()
+                    .decode("utf-8")
                 )
 
-            for row in dati.get(
-                "presenze",
-                []
-            ):
-
                 c.execute(
-                    """
-                    INSERT INTO presenze(
-                        id,
-                        atleta_id,
-                        data,
-                        stagione,
-                        tipo_evento,
-                        presenza,
-                        voto,
-                        commento
-                    )
-                    VALUES(?,?,?,?,?,?,?,?)
-                    """,
-                    (
-                        row["id"],
-                        row["atleta_id"],
-                        row["data"],
-                        row["stagione"],
-                        row["tipo_evento"],
-                        row["presenza"],
-                        row["voto"],
-                        row["commento"]
-                    )
+                    "DELETE FROM presenze"
                 )
 
-            conn.commit()
+                c.execute(
+                    "DELETE FROM atleti"
+                )
 
-            st.success(
-                "Backup importato correttamente."
+                c.execute(
+                    "DELETE FROM stagioni"
+                )
+
+                for row in dati.get(
+                    "stagioni",
+                    []
+                ):
+
+                    c.execute(
+                        """
+                        INSERT INTO stagioni(
+                            id,
+                            nome
+                        )
+                        VALUES(?,?)
+                        """,
+                        (
+                            row["id"],
+                            row["nome"]
+                        )
+                    )
+
+                for row in dati.get(
+                    "atleti",
+                    []
+                ):
+
+                    c.execute(
+                        """
+                        INSERT INTO atleti(
+                            id,
+                            nome,
+                            categoria,
+                            stagione
+                        )
+                        VALUES(?,?,?,?)
+                        """,
+                        (
+                            row["id"],
+                            row["nome"],
+                            row["categoria"],
+                            row["stagione"]
+                        )
+                    )
+
+                for row in dati.get(
+                    "presenze",
+                    []
+                ):
+
+                    c.execute(
+                        """
+                        INSERT INTO presenze(
+                            id,
+                            atleta_id,
+                            data,
+                            stagione,
+                            tipo_evento,
+                            presenza,
+                            voto,
+                            commento
+                        )
+                        VALUES(?,?,?,?,?,?,?,?)
+                        """,
+                        (
+                            row["id"],
+                            row["atleta_id"],
+                            row["data"],
+                            row["stagione"],
+                            row["tipo_evento"],
+                            row["presenza"],
+                            row["voto"],
+                            row["commento"]
+                        )
+                    )
+
+                conn.commit()
+
+                st.success(
+                    "Backup importato correttamente."
+                )
+
+                st.rerun()
+
+        st.markdown("---")
+
+        # =====================================================
+        # EXPORT EXCEL
+        # =====================================================
+
+        st.subheader("📊 Export Excel")
+
+        if st.button(
+            "📊 Genera Excel stagione"
+        ):
+
+            output = BytesIO()
+
+            storico = pd.read_sql(
+                """
+                SELECT
+                    p.data,
+                    p.tipo_evento,
+                    a.nome,
+                    a.categoria,
+                    p.presenza,
+                    p.voto,
+                    p.commento
+                FROM presenze p
+                JOIN atleti a
+                    ON a.id = p.atleta_id
+                WHERE p.stagione = ?
+                """,
+                conn,
+                params=(stagione_selezionata,)
             )
 
-            st.rerun()
-
-    st.markdown("---")
-
-    # =====================================================
-    # EXPORT EXCEL
-    # =====================================================
-
-    st.subheader("📊 Export Excel")
-
-    if st.button(
-        "📊 Genera Excel stagione"
-    ):
-
-        output = BytesIO()
-
-        storico = pd.read_sql(
-            """
-            SELECT
-                p.data,
-                p.tipo_evento,
-                a.nome,
-                a.categoria,
-                p.presenza,
-                p.voto,
-                p.commento
-            FROM presenze p
-            JOIN atleti a
-                ON a.id = p.atleta_id
-            WHERE p.stagione = ?
-            """,
-            conn,
-            params=(stagione_selezionata,)
-        )
-
-        atleti = get_atleti(
-            stagione_selezionata
-        )
-
-        with pd.ExcelWriter(
-            output,
-            engine="openpyxl"
-        ) as writer:
-
-            atleti.to_excel(
-                writer,
-                sheet_name="Atleti",
-                index=False
+            atleti = get_atleti(
+                stagione_selezionata
             )
 
-            storico.to_excel(
-                writer,
-                sheet_name="Storico",
-                index=False
-            )
+            with pd.ExcelWriter(
+                output,
+                engine="openpyxl"
+            ) as writer:
 
-        output.seek(0)
+                atleti.to_excel(
+                    writer,
+                    sheet_name="Atleti",
+                    index=False
+                )
 
-        st.download_button(
-            "📥 Scarica Excel",
-            output.getvalue(),
-            file_name=(
-                f"nuoto_"
-                f"{stagione_selezionata}.xlsx"
-            ),
-            mime=(
-                "application/vnd.openxmlformats-"
-                "officedocument.spreadsheetml.sheet"
+                storico.to_excel(
+                    writer,
+                    sheet_name="Storico",
+                    index=False
+                )
+
+            output.seek(0)
+
+            st.download_button(
+                "📥 Scarica Excel",
+                output.getvalue(),
+                file_name=(
+                    f"nuoto_"
+                    f"{stagione_selezionata}.xlsx"
+                ),
+                mime=(
+                    "application/vnd.openxmlformats-"
+                    "officedocument.spreadsheetml.sheet"
+                )
             )
-        )
 
 # ============================================================
 # TAB 9 - CALENDARIO REGISTRAZIONI
