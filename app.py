@@ -1081,16 +1081,16 @@ else:
 
 if not st.session_state.admin:
 
-        st.warning(
-            "🔒 Backup disponibile solo agli amministratori."
-        )
+    st.warning(
+        "🔒 Backup disponibile solo agli amministratori."
+    )
 
-    else:
+else:
 
-        with tab2:
-        st.info(
-            "Parte 2: Registro Allenamento a secco"
-        )
+    with tab2:
+    st.info(
+        "Parte 2: Registro Allenamento a secco"
+    )
 
 # ============================================================
 # TAB 3
@@ -1098,16 +1098,16 @@ if not st.session_state.admin:
 
 if not st.session_state.admin:
 
-        st.warning(
-            "🔒 Backup disponibile solo agli amministratori."
-        )
+    st.warning(
+        "🔒 Backup disponibile solo agli amministratori."
+    )
 
-    else:
+else:
 
-        with tab3:
-        st.info(
-            "Parte 2: Registro Gare"
-        )
+    with tab3:
+    st.info(
+        "Parte 2: Registro Gare"
+    )
 
 # ============================================================
 # TAB 4
