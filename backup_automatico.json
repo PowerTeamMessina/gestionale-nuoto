@@ -288,7 +288,7 @@
       "tipo_evento": "Allenamento in vasca",
       "presenza": 1,
       "voto": 4.0,
-      "commento": ""
+      "commento": "Pausa"
     },
     {
       "id": 18,
@@ -308,7 +308,7 @@
       "tipo_evento": "Allenamento in vasca",
       "presenza": 1,
       "voto": 3.0,
-      "commento": ""
+      "commento": "Andatura non idonea"
     },
     {
       "id": 20,
