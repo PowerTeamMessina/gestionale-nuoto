@@ -274,7 +274,7 @@ if "data_aperta" not in st.session_state:
 if "tipo_aperto" not in st.session_state:
     st.session_state.tipo_aperto = None
 
-    # ============================================================
+# ============================================================
 # REGISTRO GENERICO
 # ============================================================
 
@@ -284,9 +284,9 @@ if df_atleti.empty:
         "Nessun atleta presente nella stagione selezionata."
     )
 
-    return
+return
 
-# -----------------------------------------
+    # -----------------------------------------
     # CARICAMENTO REGISTRO ESISTENTE
     # -----------------------------------------
 
