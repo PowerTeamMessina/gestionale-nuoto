@@ -1097,171 +1097,171 @@ with tab3:
 # TAB 4
 # ============================================================
 
-    with tab4:
+with tab4:
 
-        if st.session_state.admin:
+    if st.session_state.admin:
 
-            pass
+        pass
 
-        else:
+    else:
 
-            st.info(
-                "Per modificare gli atleti è necessario l'accesso amministratore."
+        st.info(
+            "Per modificare gli atleti è necessario l'accesso amministratore."
+        )
+
+        st.header("👥 Gestione Atleti")
+
+        with st.form(
+            "form_nuovo_atleta",
+            clear_on_submit=True
+        ):
+
+            nome = st.text_input(
+                "Nome atleta"
             )
-
-            st.header("👥 Gestione Atleti")
-
-            with st.form(
-                "form_nuovo_atleta",
-                clear_on_submit=True
-            ):
-
-                nome = st.text_input(
-                    "Nome atleta"
-                )
         
-                categoria = st.selectbox(
-                    "Categoria",
-                    [
-                        "Assoluti",
-                        "Ragazzi",
-                        "Esordienti A",
-                        "Esordienti B"
-                    ]
-                )
-
-                aggiungi = st.form_submit_button(
-                    "➕ Aggiungi atleta"
-                )
-
-                if aggiungi:
-
-                    if nome.strip() == "":
-
-                        st.error(
-                            "Inserisci il nome dell'atleta."
-                        )
-
-                    else:
-
-                        aggiungi_atleta(
-                            nome.strip(),
-                            categoria.strip(),
-                            stagione_selezionata
-                        )
-
-                        st.success(
-                            "Atleta aggiunto correttamente."
-                        )
-
-                        st.rerun()
-
-            st.markdown("---")
-
-            df_atleti = get_atleti(
-                stagione_selezionata
+            categoria = st.selectbox(
+                "Categoria",
+                [
+                    "Assoluti",
+                    "Ragazzi",
+                    "Esordienti A",
+                    "Esordienti B"
+                ]
             )
 
-            if df_atleti.empty:
+            aggiungi = st.form_submit_button(
+                "➕ Aggiungi atleta"
+            )
 
-                st.info(
-                    "Nessun atleta inserito."
-                )
+            if aggiungi:
 
-            else:
-
-                st.subheader(
-                    "Lista atleti"
-                )
-
-                st.dataframe(
-                    df_atleti,
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-                st.markdown("---")
-
-                st.subheader(
-                    "✏️ Modifica categoria"
-                )
-
-                opzioni = {}
-
-                for _, row in df_atleti.iterrows():
-
-                    testo = (
-                        f"{row['nome']} "
-                        f"({pulisci_categoria(row['categoria'])})"
+                if nome.strip() == "":
+                    
+                    st.error(
+                        "Inserisci il nome dell'atleta."
                     )
 
-                    opzioni[testo] = int(
-                        row["id"]
-                    )
+                else:
 
-                atleta_scelto = st.selectbox(
-                    "Atleta",
-                    list(opzioni.keys()),
-                    key="sel_atleta_categoria"
-                )
-
-                nuova_categoria = st.text_input(
-                    "Nuova categoria",
-                    key="nuova_categoria"
-                )
-
-                if st.button(
-                    "💾 Aggiorna categoria"
-                ):
-
-                    aggiorna_categoria_atleta(
-                        opzioni[atleta_scelto],
-                        nuova_categoria
+                    aggiungi_atleta(
+                        nome.strip(),
+                        categoria.strip(),
+                        stagione_selezionata
                     )
 
                     st.success(
-                        "Categoria aggiornata."
+                        "Atleta aggiunto correttamente."
                     )
 
                     st.rerun()
 
-                st.markdown("---")
+        st.markdown("---")
 
-                st.subheader(
-                    "🗑️ Elimina atleta"
+        df_atleti = get_atleti(
+            stagione_selezionata
+        )
+
+        if df_atleti.empty:
+
+            st.info(
+                "Nessun atleta inserito."
+            )
+
+        else:
+
+            st.subheader(
+                "Lista atleti"
+            )
+
+            st.dataframe(
+                df_atleti,
+                use_container_width=True,
+                hide_index=True
+            )
+
+            st.markdown("---")
+
+            st.subheader(
+                "✏️ Modifica categoria"
+            )
+
+            opzioni = {}
+
+            for _, row in df_atleti.iterrows():
+
+                testo = (
+                    f"{row['nome']} "
+                    f"({pulisci_categoria(row['categoria'])})"
                 )
 
-                atleta_delete = st.selectbox(
-                    "Seleziona atleta da eliminare",
-                    list(opzioni.keys()),
-                    key="sel_delete_atleta"
+                opzioni[testo] = int(
+                    row["id"]
                 )
 
-                conferma = st.checkbox(
-                    "Confermo eliminazione atleta"
+            atleta_scelto = st.selectbox(
+                "Atleta",
+                list(opzioni.keys()),
+                key="sel_atleta_categoria"
+            )
+
+            nuova_categoria = st.text_input(
+                "Nuova categoria",
+                key="nuova_categoria"
+            )
+
+            if st.button(
+                "💾 Aggiorna categoria"
+            ):
+
+                aggiorna_categoria_atleta(
+                    opzioni[atleta_scelto],
+                    nuova_categoria
                 )
 
-                if st.button(
-                    "🗑️ Elimina atleta"
-                ):
+                st.success(
+                    "Categoria aggiornata."
+                )
 
-                    if not conferma:
+                st.rerun()
 
-                        st.error(
-                            "Devi confermare."
-                        )
+            st.markdown("---")
 
-                    else:
+            st.subheader(
+                "🗑️ Elimina atleta"
+            )
+
+            atleta_delete = st.selectbox(
+                "Seleziona atleta da eliminare",
+                list(opzioni.keys()),
+                key="sel_delete_atleta"
+            )
+
+            conferma = st.checkbox(
+                "Confermo eliminazione atleta"
+            )
+
+            if st.button(
+                "🗑️ Elimina atleta"
+            ):
+
+                if not conferma:
+
+                    st.error(
+                        "Devi confermare."
+                    )
+
+                else:
     
-                        elimina_atleta(
-                            opzioni[atleta_delete]
-                        )
+                    elimina_atleta(
+                        opzioni[atleta_delete]
+                    )
 
-                        st.success(
-                            "Atleta eliminato."
-                        )
+                    st.success(
+                        "Atleta eliminato."
+                    )
 
-                        st.rerun()
+                    st.rerun()
 
 # ============================================================
 # TAB 5
