@@ -1978,37 +1978,39 @@ with tab7:
 # TAB 8
 # ============================================================
 
+
 with tab8:
- 
-if not st.session_state.admin:
 
-    st.warning(
-        "🔒 Backup disponibile solo agli amministratori."
-    )
+    if not st.session_state.admin:
 
-else:
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
+        )
 
-    st.header("💾 Backup & Export")
+    else:
 
-    st.markdown("---")
+        st.header("💾 Backup & Export")
 
-    st.subheader("📥 Ripristino da GitHub")
-    
-    if st.button(
-        "📥 Scarica e ripristina backup GitHub"
-    ):
+        st.markdown("---")
 
-        if scarica_backup_github():
+        st.subheader("📥 Ripristino da GitHub")
 
-            ripristina_backup_locale()
+        if st.button(
+            "📥 Scarica e ripristina backup GitHub"
+        ):
 
-            st.success(
-                "✅ Backup ripristinato correttamente"
-            )
+            if scarica_backup_github():
 
-            st.rerun()
+                ripristina_backup_locale()
 
-    st.markdown("---")
+                st.success(
+                    "✅ Backup ripristinato correttamente"
+                )
+
+                st.rerun()
+
+        st.markdown("---")
+
     # =====================================================
     # EXPORT JSON COMPLETO
     # =====================================================
