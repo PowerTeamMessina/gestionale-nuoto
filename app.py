@@ -1100,7 +1100,10 @@ with tab3:
 with tab4:
 
     if not st.session_state.admin:
-
+        
+        st.warning(
+            "🔒 Attivitò disponibile solo agli amministratori."
+        )
         pass
 
     else:
