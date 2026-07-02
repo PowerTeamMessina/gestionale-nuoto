@@ -1382,14 +1382,7 @@ with tab3:
 
 with tab4:
 
-    if not st.session_state.admin:
-        
-        st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
-        )
-        pass
-
-    else:
+    if st.session_state.admin:
 
         st.info(
             "Per modificare gli atleti è necessario l'accesso amministratore."
@@ -1548,6 +1541,13 @@ with tab4:
                     )
 
                     st.rerun()
+                    
+    else:
+        st.warning(
+            "🔒 Attività disponibile solo agli amministratori."
+        )
+        pass
+
 
 # ============================================================
 # TAB 5
