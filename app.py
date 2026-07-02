@@ -314,6 +314,27 @@ def aggiorna_categoria_atleta(
     conn.commit()
 
 # ============================================================
+# FUNZIONI STELLE
+# ============================================================
+
+def voto_to_stelle(voto):
+
+    if voto is None:
+        return ""
+
+    try:
+        voto = int(voto)
+    except:
+        return ""
+
+    return "⭐" * voto
+
+
+def stelle_to_voto(stelle):
+    return stelle.count("⭐")
+
+
+# ============================================================
 # UTILITA'
 # ============================================================
 
@@ -3053,25 +3074,3 @@ with tab12:
             use_container_width=True,
             hide_index=True
         )
-
-
-# ============================================================
-# FUNZIONI STELLE
-# ============================================================
-
-def voto_to_stelle(voto):
-
-    if voto is None:
-        return ""
-
-    try:
-        voto = int(voto)
-    except:
-        return ""
-
-    return "⭐" * voto
-
-
-def stelle_to_voto(stelle):
-    return stelle.count("⭐")
-
