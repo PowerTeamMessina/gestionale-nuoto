@@ -1063,16 +1063,16 @@ with tab0:
 
 if not st.session_state.admin:
 
-        st.warning(
-            "🔒 Backup disponibile solo agli amministratori."
-        )
+    st.warning(
+        "🔒 Backup disponibile solo agli amministratori."
+    )
 
-    else:
+else:
 
-        with tab1:
-            st.info(
-            "Parte 2: Registro Allenamento in vasca"
-        )
+    with tab1:
+        st.info(
+        "Parte 2: Registro Allenamento in vasca"
+    )
 
 # ============================================================
 # TAB 2
