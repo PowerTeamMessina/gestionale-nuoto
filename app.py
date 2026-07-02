@@ -274,6 +274,51 @@ if "data_aperta" not in st.session_state:
 if "tipo_aperto" not in st.session_state:
     st.session_state.tipo_aperto = None
 
+    # ============================================================
+# REGISTRO GENERICO
+# ============================================================
+
+def mostra_registro(
+    titolo,
+    tipo_evento,
+    stagione
+):
+
+    st.header(titolo)
+
+    data_default = date.today()
+
+    if (
+        st.session_state.data_aperta is not None
+        and
+        st.session_state.tipo_aperto == tipo_evento
+    ):
+
+        try:
+
+            data_default = pd.to_datetime(
+                st.session_state.data_aperta
+            ).date()
+
+        except:
+            pass
+
+    data_evento = st.date_input(
+        "Data",
+        value=data_default,
+        key=f"data_{tipo_evento}"
+    )
+
+    df_atleti = get_atleti(stagione)
+
+    if df_atleti.empty:
+
+        st.warning(
+            "Nessun atleta presente nella stagione selezionata."
+        )
+
+        return
+        
 def check_admin():
 
     if "admin" not in st.session_state:
@@ -2967,51 +3012,6 @@ def voto_to_stelle(voto):
 
 def stelle_to_voto(stelle):
     return stelle.count("⭐")
-        
-# ============================================================
-# REGISTRO GENERICO
-# ============================================================
-
-def mostra_registro(
-    titolo,
-    tipo_evento,
-    stagione
-):
-
-    st.header(titolo)
-
-    data_default = date.today()
-
-    if (
-        st.session_state.data_aperta is not None
-        and
-        st.session_state.tipo_aperto == tipo_evento
-    ):
-
-        try:
-
-            data_default = pd.to_datetime(
-                st.session_state.data_aperta
-            ).date()
-
-        except:
-            pass
-
-    data_evento = st.date_input(
-        "Data",
-        value=data_default,
-        key=f"data_{tipo_evento}"
-    )
-
-    df_atleti = get_atleti(stagione)
-
-    if df_atleti.empty:
-
-        st.warning(
-            "Nessun atleta presente nella stagione selezionata."
-        )
-
-        return
 
     # -----------------------------------------
     # CARICAMENTO REGISTRO ESISTENTE
