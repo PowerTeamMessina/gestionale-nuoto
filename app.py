@@ -1105,9 +1105,9 @@ if not st.session_state.admin:
 else:
 
     with tab3:
-    st.info(
-        "Parte 2: Registro Gare"
-    )
+        st.info(
+            "Parte 2: Registro Gare"
+        )
 
 # ============================================================
 # TAB 4
@@ -1119,19 +1119,19 @@ if not st.session_state.admin:
             "🔒 Backup disponibile solo agli amministratori."
         )
 
+else:
+
+    with tab4:
+
+    if st.session_state.admin:
+
+        pass
+
     else:
 
-        with tab4:
-
-        if st.session_state.admin:
-
-            pass
-
-        else:
-
-            st.info(
-                "Per modificare gli atleti è necessario l'accesso amministratore."
-            )
+        st.info(
+            "Per modificare gli atleti è necessario l'accesso amministratore."
+        )
 
         st.header("👥 Gestione Atleti")
 
