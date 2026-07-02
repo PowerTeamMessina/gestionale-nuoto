@@ -1009,57 +1009,57 @@ with tab0:
 
         st.markdown("---")
 
-            st.subheader("💾 Stato backup")
+        st.subheader("💾 Stato backup")
 
-            if os.path.exists(
-                "backup_automatico.json"
-            ):
+         if os.path.exists(
+            "backup_automatico.json"
+        ):
 
-                ultima_modifica = datetime.fromtimestamp(
-                    os.path.getmtime(
-                        "backup_automatico.json"
-                    )
+            ultima_modifica = datetime.fromtimestamp(
+                os.path.getmtime(
+                    "backup_automatico.json"
                 )
+            )
 
-                dimensione = round(
-                    os.path.getsize(
-                        "backup_automatico.json"
-                    ) / 1024,
-                    2
+            dimensione = round(
+                os.path.getsize(
+                    "backup_automatico.json"
+                ) / 1024,
+                2
+            )
+
+            c1, c2 = st.columns(2)
+
+            c1.metric(
+                "📅 Ultimo backup",
+                ultima_modifica.strftime(
+                    "%d/%m/%Y %H:%M"
                 )
+            )
 
-                c1, c2 = st.columns(2)
+            c2.metric(
+                "📦 Dimensione",
+                f"{dimensione} KB"
+            )
 
-                c1.metric(
-                    "📅 Ultimo backup",
-                    ultima_modifica.strftime(
-                        "%d/%m/%Y %H:%M"
-                    )
-                )
+            with open(
+                "backup_automatico.json",
+                "r",
+                encoding="utf-8"
+            ) as f:
 
-                c2.metric(
-                    "📦 Dimensione",
-                    f"{dimensione} KB"
-                )
-
-                with open(
+                st.download_button(
+                    "📥 Scarica backup automatico",
+                    f.read(),
                     "backup_automatico.json",
-                    "r",
-                    encoding="utf-8"
-                ) as f:
-
-                    st.download_button(
-                        "📥 Scarica backup automatico",
-                        f.read(),
-                        "backup_automatico.json",
-                        "application/json"
-                    )
-
-            else:
-
-                st.warning(
-                    "Nessun backup automatico disponibile."
+                    "application/json"
                 )
+
+        else:
+
+            st.warning(
+                "Nessun backup automatico disponibile."
+            )
 
 # ============================================================
 # TAB 1
