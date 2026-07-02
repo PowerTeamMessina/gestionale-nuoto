@@ -1738,98 +1738,105 @@ with tab5:
 # ============================================================
 
 with tab6:
-
-    st.header("🗂️ Storico")
-
-    storico = pd.read_sql(
-        """
-        SELECT
-            p.data,
-            p.tipo_evento,
-            a.nome,
-            a.categoria,
-            p.presenza,
-            p.voto,
-            p.commento
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE p.stagione = ?
-        ORDER BY p.data DESC
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    if storico.empty:
-
-        st.info(
-            "Nessun storico disponibile."
+    if not st.session_state.admin:
+        
+        st.warning(
+            "🔒 Attività disponibile solo agli amministratori."
         )
+        pass
 
     else:
+        st.header("🗂️ Storico")
 
-        filtro = st.selectbox(
-            "Filtro evento",
-            [
-                "Tutti",
-                "Allenamento in vasca",
-                "Allenamento a secco",
-                "Gara"
-            ],
-            key="filtro_storico"
+        storico = pd.read_sql(
+            """
+            SELECT
+                p.data,
+                p.tipo_evento,
+                a.nome,
+                a.categoria,
+                p.presenza,
+                p.voto,
+                p.commento
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE p.stagione = ?
+            ORDER BY p.data DESC
+            """,
+            conn,
+            params=(stagione_selezionata,)
         )
 
-        if filtro != "Tutti":
+        if storico.empty:
 
-            storico = storico[
-                storico["tipo_evento"] == filtro
-            ]
-
-        storico["presenza"] = storico["presenza"].map(
-            {
-                1: "Presente",
-                0: "Assente"
-            }
-        )
-
-        storico["stelle"] = (
-            storico["voto"]
-            .fillna(0)
-            .astype(int)
-            .apply(
-                lambda x: "⭐" * x
+            st.info(
+                "Nessun storico disponibile."
             )
-        )
 
-        st.dataframe(
-            storico[
+        else:
+
+            filtro = st.selectbox(
+                "Filtro evento",
                 [
-                    "data",
-                    "tipo_evento",
-                    "nome",
-                    "categoria",
-                    "presenza",
-                    "stelle",
-                    "commento"
+                    "Tutti",
+                    "Allenamento in vasca",
+                    "Allenamento a secco",
+                    "Gara"
+                ],
+                key="filtro_storico"
+            )
+
+            if filtro != "Tutti":
+
+                storico = storico[
+                    storico["tipo_evento"] == filtro
                 ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
 
-        csv = (
-            storico
-            .to_csv(index=False)
-            .encode("utf-8")
-        )
+            storico["presenza"] = storico["presenza"].map(
+                {
+                    1: "Presente",
+                    0: "Assente"
+                }
+            )
 
-        st.download_button(
-            "📥 Scarica storico CSV",
-            csv,
-            "storico.csv",
-            "text/csv"
-        )
+            storico["stelle"] = (
+                storico["voto"]
+                .fillna(0)
+                .astype(int)
+                .apply(
+                    lambda x: "⭐" * x
+                )
+            )
+
+            st.dataframe(
+                storico[
+                    [
+                        "data",
+                        "tipo_evento",
+                        "nome",
+                        "categoria",
+                        "presenza",
+                        "stelle",
+                        "commento"
+                    ]
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
+            csv = (
+                storico
+                .to_csv(index=False)
+                .encode("utf-8")
+            )
+
+            st.download_button(
+                "📥 Scarica storico CSV",
+                csv,
+                "storico.csv",
+                "text/csv"
+            )
 
 # ============================================================
 # TAB 7
