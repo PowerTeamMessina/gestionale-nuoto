@@ -1073,10 +1073,6 @@ with tab1:
             "Parte 2: Registro Allenamento in vasca"
         )
 
-        mostra_registro(
-            "Allenamento vasca"
-        )
-
     else:
 
         st.warning(
