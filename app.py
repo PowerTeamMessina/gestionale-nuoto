@@ -1667,6 +1667,8 @@ with tab8:
 
     st.markdown("---")
 
+    st.subheader("📥 Ripristino da Github")
+    
     if st.button(
         "📥 Scarica e ripristina backup GitHub"
     ):
