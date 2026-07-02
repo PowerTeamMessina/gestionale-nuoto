@@ -1071,18 +1071,17 @@ with tab0:
 
 with tab1:
 
-    if not st.session_state.admin:
-
-        st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
-        )
-
-    else:
+    if st.session_state.admin:
 
         mostra_registro(
             "Allenamento vasca"
         )
         pass
+
+    else:
+        st.warning(
+            "🔒 Attività disponibile solo agli amministratori."
+        )
 
 # ============================================================
 # TAB 2
