@@ -1056,8 +1056,26 @@ with tab4:
             "Nome atleta"
         )
 
-        categoria = st.text_input(
-            "Categoria"
+        categorie = [
+            "Assoluti",
+            "Ragazzi",
+            "Esordienti A",
+            "Esordienti B"
+        ]
+
+        indice = 0
+
+        if row["categoria"] in categorie:
+
+            indice = categorie.index(
+                row["categoria"]
+            )
+
+        categoria = st.selectbox(
+            "Categoria",
+            categorie,
+            index=indice,
+            key=f"cat_{row['id']}"
         )
 
         aggiungi = st.form_submit_button(
