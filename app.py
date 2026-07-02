@@ -1055,12 +1055,17 @@ with tab4:
         nome = st.text_input(
             "Nome atleta"
         )
-
         
-        categoria = st.text_input(
+        categoria = st.selectbox(
             "Categoria",
-        value=row["categoria"]
+            [
+                "Assoluti",
+                "Ragazzi",
+                "Esordienti A",
+                "Esordienti B"
+            ]
         )
+
 
         aggiungi = st.form_submit_button(
             "➕ Aggiungi atleta"
