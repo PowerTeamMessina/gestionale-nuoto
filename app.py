@@ -279,7 +279,13 @@ if "tipo_aperto" not in st.session_state:
 # ============================================================
 
 st.title("🏊 Gestionale Nuoto Power Team 🏊")
-st.subtitle("by Gabriele Grifò")
+
+st.markdown(
+    """
+    *created by Gabriele Grifò
+    """
+)
+
 
 stagioni = get_stagioni()
 
