@@ -1068,6 +1068,15 @@ with tab0:
 
 with tab1: 
     
+    if not st.session_state.admin:
+        
+        st.warning(
+            "🔒 Attività disponibile solo agli amministratori."
+        )
+        pass
+
+    else:
+        
         st.info(
             "Parte 2: Registro Allenamento in vasca"
         )
@@ -1079,6 +1088,15 @@ with tab1:
 
 with tab2:
 
+    if not st.session_state.admin:
+        
+        st.warning(
+            "🔒 Attività disponibile solo agli amministratori."
+        )
+        pass
+
+    else:
+        
         st.info(
             "Parte 2: Registro Allenamento a secco"
         )
@@ -1089,6 +1107,15 @@ with tab2:
 
 with tab3:
 
+        if not st.session_state.admin:
+        
+        st.warning(
+            "🔒 Attività disponibile solo agli amministratori."
+        )
+        pass
+
+    else:
+        
         st.info(
             "Parte 2: Registro gare"
         )
@@ -1102,7 +1129,7 @@ with tab4:
     if not st.session_state.admin:
         
         st.warning(
-            "🔒 Attivitò disponibile solo agli amministratori."
+            "🔒 Attività disponibile solo agli amministratori."
         )
         pass
 
