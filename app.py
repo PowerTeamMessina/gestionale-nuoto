@@ -999,9 +999,14 @@ with tab0:
     # --------------------------------------------------------
     # BACKUP AUTOMATICO
     # --------------------------------------------------------
-    if st.session_state.admin:
-        if st.session_state.admin:
+    if not st.session_state.admin:
 
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
+        )
+        st.stop()
+
+    else:
             st.markdown("---")
 
             st.subheader("💾 Stato backup")
