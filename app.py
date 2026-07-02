@@ -1086,7 +1086,7 @@ with tab4:
 
     if st.session_state.admin:
 
-        # tutto il codice modifica atleti
+        pass
 
     else:
 
