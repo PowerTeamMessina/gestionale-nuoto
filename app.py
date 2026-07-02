@@ -1080,20 +1080,17 @@ with tab1:
 # TAB 2
 # ============================================================
 
+with tab2:
+    if not st.session_state.admin:
 
-if not st.session_state.admin:
-
-    st.warning(
-        "🔒 Backup disponibile solo agli amministratori."
-    )
-    st.stop()
-
-else:
-
-    with tab2:
-        st.info(
-            "Parte 2: Registro Allenamento a secco"
+        st.warning(
+            "🔒 Backup disponibile solo agli amministratori."
         )
+
+    else:
+            st.info(
+                "Parte 2: Registro Allenamento a secco"
+            )
 
 # ============================================================
 # TAB 3
