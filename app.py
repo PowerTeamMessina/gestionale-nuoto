@@ -1345,19 +1345,16 @@ with tab1:
 
 with tab2:
 
-    if not st.session_state.admin:
+    if st.session_state.admin:
+
+        mostra_registro("📋 Allenamento a secco", "Allenamento a secco", stagione_selezionata)
+        pass
+        
+    else:
         
         st.warning(
             "🔒 Attività disponibile solo agli amministratori."
         )
-        pass
-
-    else:
-        
-        st.info(
-            "Parte 2: Registro Allenamento a secco"
-        )
-        st.rerun()
 
 # ============================================================
 # TAB 3
