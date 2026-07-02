@@ -371,9 +371,7 @@ if st.session_state.admin:
         ])
         pass
 
-    else:
-        
-        (tab0, tab5, tab6, tab10, tab11, tab12) = st.tabs([
+    else: (tab0, tab5, tab6, tab10, tab11, tab12) = st.tabs([
         "🏠 Dashboard",
         "👥 Atleti",
         "📊 Statistiche",
