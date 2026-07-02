@@ -1123,22 +1123,22 @@ else:
 
     with tab4:
 
-    if st.session_state.admin:
+        if st.session_state.admin:
 
-        pass
+            pass
 
-    else:
+        else:
 
-        st.info(
-            "Per modificare gli atleti è necessario l'accesso amministratore."
-        )
+            st.info(
+                "Per modificare gli atleti è necessario l'accesso amministratore."
+            )
 
-        st.header("👥 Gestione Atleti")
+            st.header("👥 Gestione Atleti")
 
-        with st.form(
-            "form_nuovo_atleta",
-            clear_on_submit=True
-        ):
+            with st.form(
+                "form_nuovo_atleta",
+                clear_on_submit=True
+            ):
 
             nome = st.text_input(
                 "Nome atleta"
