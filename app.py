@@ -327,7 +327,6 @@ st.markdown(
     """
 )
 
-st.write(st.session_state.admin)
 check_admin()
 
 stagioni = get_stagioni()
