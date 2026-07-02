@@ -1011,7 +1011,7 @@ with tab0:
 
         st.subheader("💾 Stato backup")
 
-         if os.path.exists(
+        if os.path.exists(
             "backup_automatico.json"
         ):
 
