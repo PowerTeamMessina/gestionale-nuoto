@@ -976,8 +976,8 @@
       "data": "2026-07-06",
       "stagione": "2025/2026",
       "tipo_evento": "Allenamento in vasca",
-      "presenza": 0,
-      "voto": NaN,
+      "presenza": 1,
+      "voto": 4.0,
       "commento": ""
     },
     {
