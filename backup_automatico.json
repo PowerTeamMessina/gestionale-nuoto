@@ -2119,6 +2119,226 @@
       "presenza": 0,
       "voto": NaN,
       "commento": ""
+    },
+    {
+      "id": 597,
+      "atleta_id": 5,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 598,
+      "atleta_id": 21,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 599,
+      "atleta_id": 22,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 600,
+      "atleta_id": 24,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 601,
+      "atleta_id": 6,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 602,
+      "atleta_id": 7,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 603,
+      "atleta_id": 25,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 604,
+      "atleta_id": 4,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 605,
+      "atleta_id": 8,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 606,
+      "atleta_id": 9,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 607,
+      "atleta_id": 10,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 608,
+      "atleta_id": 23,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 609,
+      "atleta_id": 11,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 610,
+      "atleta_id": 17,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 611,
+      "atleta_id": 12,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 612,
+      "atleta_id": 18,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 613,
+      "atleta_id": 13,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 614,
+      "atleta_id": 14,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
+    },
+    {
+      "id": 615,
+      "atleta_id": 19,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 616,
+      "atleta_id": 20,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 617,
+      "atleta_id": 15,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 618,
+      "atleta_id": 16,
+      "data": "2026-07-13",
+      "stagione": "2025/2026",
+      "tipo_evento": "Allenamento in vasca",
+      "presenza": 1,
+      "voto": 5.0,
+      "commento": ""
     }
   ]
 }
