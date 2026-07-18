@@ -3396,8 +3396,8 @@
       "data": "2026-07-18",
       "stagione": "2025/2026",
       "tipo_evento": "Gare",
-      "presenza": 0,
-      "voto": NaN,
+      "presenza": 1,
+      "voto": 7.0,
       "commento": ""
     },
     {
