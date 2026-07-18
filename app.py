@@ -1291,7 +1291,52 @@ with tab0:
                 st.caption(
                     f"Media voto: {valore}"
                 )
-    
+
+    with c7:
+
+        st.subheader("🎯 Hall of Fame - Rendimento")
+
+        if not query_voti.empty:
+
+            podio = query_voti.copy()
+
+            podio["media"] = (
+                podio["media"]
+                .round(2)
+            )
+
+            podio = podio.sort_values(
+                by="media",
+                ascending=False
+            )
+
+            valori = (
+                podio["media"]
+                .drop_duplicates()
+                .head(3)
+                .tolist()
+            )
+
+            medaglie = ["🥇", "🥈", "🥉"]
+
+            for i, valore in enumerate(valori):
+
+                gruppo = podio[
+                    podio["media"] == valore
+                ]
+
+                nomi = ", ".join(
+                    gruppo["nome"].tolist()
+                )
+
+                st.markdown(
+                     f"### {medaglie[i]} {nomi}"
+                )
+
+                st.caption(
+                    f"Media voto: {valore}"
+                )
+                
     # --------------------------------------------------------
     # HALL OF SHAME
     # --------------------------------------------------------
