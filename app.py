@@ -1298,13 +1298,20 @@ with tab0:
         nomi = ", ".join(
             gruppo["nome"].tolist()
         )
-    
+
         colonne[i].markdown(
-            f"## {medaglie[i]} {nomi}"
+            f"<h1 style='text-align:center'>{medaglie[i]}</h1>",
+            unsafe_allow_html=True
+        )
+        
+        colonne[i].markdown(
+            f"<h2 style='text-align:center'>{nomi}</h2>",
+            unsafe_allow_html=True
         )
     
-        colonne[i].caption(
-            f"Punteggio {valore}"
+        colonne[i].markdown(
+            f"<h3 style='text-align:center'>Punteggio {valore}</h3>",
+            unsafe_allow_html=True
         )
 
     c6, c7 = st.columns(2)
