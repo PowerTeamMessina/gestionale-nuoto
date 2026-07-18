@@ -1892,6 +1892,120 @@ with tab5:
 
     st.header("📊 Classifiche")
 
+    storico = pd.read_sql(
+        """
+        SELECT
+            a.nome,
+            a.categoria,
+            p.tipo_evento,
+            p.presenza,
+            p.voto
+        FROM presenze p
+        JOIN atleti a
+            ON a.id = p.atleta_id
+        WHERE p.stagione = ?
+        """,
+        conn,
+        params=(stagione_selezionata,)
+    )
+
+    if storico.empty:
+
+        st.info(
+            "Nessun dato disponibile."
+        )
+
+    else:
+
+        filtro = st.selectbox(
+            "Tipo evento",
+            [
+                "Tutti",
+                "Allenamento in vasca",
+                "Allenamento a secco",
+                "Gare"
+            ]
+        )
+
+        if filtro != "Tutti":
+
+            storico = storico[
+                storico["tipo_evento"] == filtro
+            ]
+
+        stats = storico.groupby(
+            ["nome", "categoria"],
+            dropna=False
+        ).agg(
+            registrazioni=(
+                "presenza",
+                "count"
+            ),
+            presenze=(
+                "presenza",
+                "sum"
+            ),
+            media_voti=(
+                "voto",
+                "mean"
+            )
+        ).reset_index()
+
+        stats["assenze"] = (
+            stats["registrazioni"]
+            - stats["presenze"]
+        )
+
+        stats["percentuale"] = (
+            stats["presenze"]
+            / stats["registrazioni"]
+            * 100
+        ).round(1)
+
+        stats["media_voti"] = (
+            stats["media_voti"]
+            .fillna(0)
+            .round(2)
+        )
+
+        totale_reg = int(
+            stats["registrazioni"].sum()
+        )
+
+        totale_pres = int(
+            stats["presenze"].sum()
+        )
+
+        totale_ass = int(
+            stats["assenze"].sum()
+        )
+
+        media_globale = round(
+            stats["media_voti"].mean(),
+            2
+        )
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        c1.metric(
+            "Registrazioni",
+            totale_reg
+        )
+
+        c2.metric(
+            "Presenze",
+            totale_pres
+        )
+
+        c3.metric(
+            "Assenze",
+            totale_ass
+        )
+
+        c4.metric(
+            "Media voti",
+            media_globale
+        )
         # =====================================================
         # CLASSIFICA GENERALE
         # =====================================================
