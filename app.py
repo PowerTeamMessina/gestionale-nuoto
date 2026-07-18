@@ -714,15 +714,17 @@ def mostra_registro(titolo, tipo_evento, stagione):
 
         atleta_id = int(row["id"])
 
-        if atleta_id not in st.session_state.registro:
-            if atleta_id in dati_salvati:
-                st.session_state.registro[atleta_id] = dati_salvati[atleta_id]
-            else:
-                st.session_state.registro[atleta_id] = {
-                    "presenza": False,
-                    "voto": 6,
-                    "commento": "",
-                }
+        if atleta_id in dati_salvati:
+
+            st.session_state.registro[atleta_id] = dati_salvati[atleta_id]
+
+        else:
+
+            st.session_state.registro[atleta_id] = {
+                "presenza": False,
+                "voto": 6,
+                "commento": "",
+            }
 
     # -----------------------------------------
     # RIEPILOGO
