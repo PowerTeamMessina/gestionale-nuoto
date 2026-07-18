@@ -1294,24 +1294,26 @@ with tab0:
 
     with c7:
 
-        st.subheader("🎯 Hall of Fame - Rendimento")
+        st.subheader("🏆 Hall of Fame - Presenze")
 
-        if not query_voti.empty:
+        if not query_dashboard.empty:
 
-            podio = query_voti.copy()
+            podio = query_dashboard.copy()
 
-            podio["media"] = (
-                podio["media"]
-                .round(2)
-            )
+            podio["percentuale"] = (
+                podio["presenze"]
+                /
+                podio["registrazioni"]
+                * 100
+            ).round(1)
 
             podio = podio.sort_values(
-                by="media",
+                by="percentuale",
                 ascending=False
             )
 
             valori = (
-                podio["media"]
+                podio["percentuale"]
                 .drop_duplicates()
                 .head(3)
                 .tolist()
@@ -1322,7 +1324,7 @@ with tab0:
             for i, valore in enumerate(valori):
 
                 gruppo = podio[
-                    podio["media"] == valore
+                    podio["percentuale"] == valore
                 ]
 
                 nomi = ", ".join(
@@ -1330,11 +1332,11 @@ with tab0:
                 )
 
                 st.markdown(
-                     f"### {medaglie[i]} {nomi}"
+                    f"### {medaglie[i]} {nomi}"
                 )
 
                 st.caption(
-                    f"Media voto: {valore}"
+                    f"{valore}% presenza"
                 )
                 
     # --------------------------------------------------------
