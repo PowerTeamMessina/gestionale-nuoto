@@ -1277,10 +1277,6 @@ with tab0:
                 f"Punteggio {valore}"
             )
     
-        st.caption(
-            f"Punteggio {valore}"
-        )
-    
     c6, c7 = st.columns(2)
 
     # --------------------------------------------------------
