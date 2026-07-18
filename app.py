@@ -1351,7 +1351,7 @@ with tab0:
                 )
 
                 st.markdown(
-                    f"### {medaglie[i]} {nomi}"
+                    f"#### {medaglie[i]} {nomi}"
                 )
 
                 st.caption(
@@ -1398,7 +1398,7 @@ with tab0:
                 )
 
                 st.markdown(
-                    f"### {medaglie[i]} {nomi}"
+                    f"#### {medaglie[i]} {nomi}"
                 )
 
                 st.caption(
