@@ -1247,11 +1247,6 @@ with tab0:
 
     st.subheader("🌟 Hall of Fame Generale")
 
-    classifica_generale = classifica_generale.sort_values(
-    by="punteggio",
-    ascending=False
-    ).reset_index(drop=True)
-
     valori = (
         classifica_generale["punteggio"]
         .drop_duplicates()
