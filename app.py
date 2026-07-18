@@ -998,13 +998,14 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-(tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12) = st.tabs([
+(tab0, tab1, tab2, tab3, tab4, tab5, tab_statistiche, tab6, tab7, tab8, tab9, tab10, tab11, tab12) = st.tabs([
         "🏠 Dashboard",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
         "🏁 Gare",
         "👥 Atleti",
         "📊 Classifiche",
+        "👤 Statistiche atleta",
         "🗂️ Storico",
         "⚙️ Stagioni",
         "💾 Backup",
@@ -1891,6 +1892,258 @@ with tab5:
 
     st.header("📊 Classifiche")
 
+        # =====================================================
+        # CLASSIFICA GENERALE
+        # =====================================================
+        
+        st.markdown("---")
+        
+        st.subheader("🌟 Classifica generale")
+        
+        classifica_generale = stats.copy()
+        
+        classifica_generale["punteggio"] = (
+            (
+                classifica_generale["media_voti"]
+                +
+                classifica_generale["percentuale"] / 10
+            )
+            / 2
+        ).round(2)
+        
+        classifica_generale = classifica_generale.sort_values(
+            by="punteggio",
+            ascending=False
+        ).reset_index(drop=True)
+        
+        posizioni = []
+        
+        for i in range(len(classifica_generale)):
+        
+            if i == 0:
+        
+                posizioni.append(1)
+        
+            else:
+        
+                stesso_punteggio = (
+                    classifica_generale.iloc[i]["punteggio"]
+                    ==
+                    classifica_generale.iloc[i - 1]["punteggio"]
+                )
+        
+                if stesso_punteggio:
+        
+                    posizioni.append(
+                        posizioni[-1]
+                    )
+        
+                else:
+        
+                    posizioni.append(i + 1)
+        
+        classifica_generale.insert(
+            0,
+            "Posizione",
+            posizioni
+        )
+        
+        st.dataframe(
+            classifica_generale[
+                [
+                    "Posizione",
+                    "nome",
+                    "categoria",
+                    "punteggio",
+                    "media_voti",
+                    "percentuale",
+                    "presenze",
+                    "assenze"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+        # =====================================================
+        # CLASSIFICA PRESENZE
+        # =====================================================
+
+        st.markdown("---")
+
+        st.subheader("🏆 Classifica presenze")
+
+        classifica = stats.copy()
+
+        # Ordina prima per percentuale presenza decrescente
+        classifica = classifica.sort_values(
+            by="percentuale",
+            ascending=False
+        ).reset_index(drop=True)
+
+        # Calcolo posizioni con ex aequo
+        posizioni = []
+
+        for i in range(len(classifica)):
+
+            if i == 0:
+
+                posizioni.append(1)
+
+            else:
+
+                if (
+                    classifica.iloc[i]["percentuale"]
+                    ==
+                    classifica.iloc[i - 1]["percentuale"]
+                ):
+
+                    posizioni.append(
+                    posizioni[-1]
+                )
+
+                else:
+
+                    posizioni.append(i + 1)
+
+        classifica.insert(
+            0,
+            "Posizione",
+            posizioni
+        )
+
+        st.dataframe(
+            classifica[
+                [
+                    "Posizione",
+                    "nome",
+                    "categoria",
+                    "presenze",
+                    "assenze",
+                    "percentuale"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+        csv = (
+            stats
+            .to_csv(index=False)
+            .encode("utf-8")
+        )
+
+        st.download_button(
+                "📥 Scarica statistiche CSV",
+                csv,
+                "statistiche.csv",
+                "text/csv"
+        )
+        
+        # =====================================================
+        # CLASSIFICA RENDIMENTO
+        # =====================================================
+
+        st.markdown("---")
+
+        st.subheader("🎯 Classifica rendimento complessivo")
+
+        rendimento = stats.copy()
+
+        rendimento = rendimento.sort_values(
+            by=[
+                "media_voti",
+                "percentuale"
+            ],
+            ascending=[
+                False,
+                False
+            ]
+        ).reset_index(drop=True)
+
+        medaglie_rendimento = []
+
+        rank = []
+
+        posizione = 1
+
+        for i in range(len(rendimento)):
+
+            if i == 0:
+
+                rank.append(1)
+
+            else:
+
+                stesso_voto = (
+                    rendimento.iloc[i]["media_voti"]
+                    ==
+                    rendimento.iloc[i - 1]["media_voti"]
+                )
+
+                stessa_presenza = (
+                    rendimento.iloc[i]["percentuale"]
+                    ==
+                    rendimento.iloc[i - 1]["percentuale"]
+                )
+
+                if stesso_voto and stessa_presenza:
+
+                    rank.append(rank[-1])
+
+                else:
+
+                    posizione = i + 1
+                    rank.append(posizione)
+
+        rendimento.insert(
+            0,
+            "Rank",
+            rank
+        )
+
+        st.dataframe(
+            rendimento[
+                [
+                    "Rank",
+                    "nome",
+                    "categoria",
+                    "media_voti",
+                    "presenze",
+                    "percentuale"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.markdown("---")
+        st.subheader("🏊 Classifica rendimento - Allenamento in vasca")
+
+        classifica_rendimento_evento(
+            storico,
+            "Allenamento in vasca"
+        )
+
+        st.markdown("---")
+        st.subheader("🏋️ Classifica rendimento - Allenamento a secco")
+
+        classifica_rendimento_evento(
+            storico,
+            "Allenamento a secco"
+        )
+
+        st.markdown("---")
+        st.subheader("🏁 Classifica rendimento - Gare")
+
+        classifica_rendimento_evento(
+            storico,
+            "Gare"
+        )
+
+with tab_statistiche:
+
+    st.header("👤 Statistiche atleta")
+
     storico = pd.read_sql(
         """
         SELECT
@@ -2205,253 +2458,6 @@ with tab5:
                 hide_index=True
             )
 
-        # =====================================================
-        # CLASSIFICA GENERALE
-        # =====================================================
-        
-        st.markdown("---")
-        
-        st.subheader("🌟 Classifica generale")
-        
-        classifica_generale = stats.copy()
-        
-        classifica_generale["punteggio"] = (
-            (
-                classifica_generale["media_voti"]
-                +
-                classifica_generale["percentuale"] / 10
-            )
-            / 2
-        ).round(2)
-        
-        classifica_generale = classifica_generale.sort_values(
-            by="punteggio",
-            ascending=False
-        ).reset_index(drop=True)
-        
-        posizioni = []
-        
-        for i in range(len(classifica_generale)):
-        
-            if i == 0:
-        
-                posizioni.append(1)
-        
-            else:
-        
-                stesso_punteggio = (
-                    classifica_generale.iloc[i]["punteggio"]
-                    ==
-                    classifica_generale.iloc[i - 1]["punteggio"]
-                )
-        
-                if stesso_punteggio:
-        
-                    posizioni.append(
-                        posizioni[-1]
-                    )
-        
-                else:
-        
-                    posizioni.append(i + 1)
-        
-        classifica_generale.insert(
-            0,
-            "Posizione",
-            posizioni
-        )
-        
-        st.dataframe(
-            classifica_generale[
-                [
-                    "Posizione",
-                    "nome",
-                    "categoria",
-                    "punteggio",
-                    "media_voti",
-                    "percentuale",
-                    "presenze",
-                    "assenze"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
-        # =====================================================
-        # CLASSIFICA PRESENZE
-        # =====================================================
-
-        st.markdown("---")
-
-        st.subheader("🏆 Classifica presenze")
-
-        classifica = stats.copy()
-
-        # Ordina prima per percentuale presenza decrescente
-        classifica = classifica.sort_values(
-            by="percentuale",
-            ascending=False
-        ).reset_index(drop=True)
-
-        # Calcolo posizioni con ex aequo
-        posizioni = []
-
-        for i in range(len(classifica)):
-
-            if i == 0:
-
-                posizioni.append(1)
-
-            else:
-
-                if (
-                    classifica.iloc[i]["percentuale"]
-                    ==
-                    classifica.iloc[i - 1]["percentuale"]
-                ):
-
-                    posizioni.append(
-                    posizioni[-1]
-                )
-
-                else:
-
-                    posizioni.append(i + 1)
-
-        classifica.insert(
-            0,
-            "Posizione",
-            posizioni
-        )
-
-        st.dataframe(
-            classifica[
-                [
-                    "Posizione",
-                    "nome",
-                    "categoria",
-                    "presenze",
-                    "assenze",
-                    "percentuale"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
-
-        csv = (
-            stats
-            .to_csv(index=False)
-            .encode("utf-8")
-        )
-
-        st.download_button(
-                "📥 Scarica statistiche CSV",
-                csv,
-                "statistiche.csv",
-                "text/csv"
-        )
-        
-        # =====================================================
-        # CLASSIFICA RENDIMENTO
-        # =====================================================
-
-        st.markdown("---")
-
-        st.subheader("🎯 Classifica rendimento complessivo")
-
-        rendimento = stats.copy()
-
-        rendimento = rendimento.sort_values(
-            by=[
-                "media_voti",
-                "percentuale"
-            ],
-            ascending=[
-                False,
-                False
-            ]
-        ).reset_index(drop=True)
-
-        medaglie_rendimento = []
-
-        rank = []
-
-        posizione = 1
-
-        for i in range(len(rendimento)):
-
-            if i == 0:
-
-                rank.append(1)
-
-            else:
-
-                stesso_voto = (
-                    rendimento.iloc[i]["media_voti"]
-                    ==
-                    rendimento.iloc[i - 1]["media_voti"]
-                )
-
-                stessa_presenza = (
-                    rendimento.iloc[i]["percentuale"]
-                    ==
-                    rendimento.iloc[i - 1]["percentuale"]
-                )
-
-                if stesso_voto and stessa_presenza:
-
-                    rank.append(rank[-1])
-
-                else:
-
-                    posizione = i + 1
-                    rank.append(posizione)
-
-        rendimento.insert(
-            0,
-            "Rank",
-            rank
-        )
-
-        st.dataframe(
-            rendimento[
-                [
-                    "Rank",
-                    "nome",
-                    "categoria",
-                    "media_voti",
-                    "presenze",
-                    "percentuale"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
-
-        st.markdown("---")
-        st.subheader("🏊 Classifica rendimento - Allenamento in vasca")
-
-        classifica_rendimento_evento(
-            storico,
-            "Allenamento in vasca"
-        )
-
-        st.markdown("---")
-        st.subheader("🏋️ Classifica rendimento - Allenamento a secco")
-
-        classifica_rendimento_evento(
-            storico,
-            "Allenamento a secco"
-        )
-
-        st.markdown("---")
-        st.subheader("🏁 Classifica rendimento - Gare")
-
-        classifica_rendimento_evento(
-            storico,
-            "Gare"
-        )
 
 # ============================================================
 # TAB 6
