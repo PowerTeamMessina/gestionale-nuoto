@@ -1309,7 +1309,6 @@ with tab0:
             [
                 "Hall of Shame",
                 "nome",
-                "categoria",
                 "assenze",
                 "registrazioni",
                 "percentuale_assenze"
