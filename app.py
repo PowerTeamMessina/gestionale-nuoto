@@ -1911,32 +1911,60 @@ with tab5:
 
         st.markdown("---")
 
-        st.subheader("🎯 Classifica rendimento")
+        st.subheader("🎯 Classifica rendimento complessivo")
 
         rendimento = stats.copy()
 
         rendimento = rendimento.sort_values(
-            by="media_voti",
-            ascending=False
+            by=[
+                "media_voti",
+                "percentuale"
+            ],
+            ascending=[
+                False,
+                False
+            ]
         ).reset_index(drop=True)
 
         medaglie_rendimento = []
 
+        rank = []
+
+        posizione = 1
+
         for i in range(len(rendimento)):
 
             if i == 0:
-                medaglie_rendimento.append("🥇")
-            elif i == 1:
-                medaglie_rendimento.append("🥈")
-            elif i == 2:
-                medaglie_rendimento.append("🥉")
+
+                rank.append(1)
+
             else:
-                medaglie_rendimento.append(str(i + 1))
+
+                stesso_voto = (
+                    rendimento.iloc[i]["media_voti"]
+                    ==
+                    rendimento.iloc[i - 1]["media_voti"]
+                )
+
+                stessa_presenza = (
+                    rendimento.iloc[i]["percentuale"]
+                    ==
+                    rendimento.iloc[i - 1]["percentuale"]
+                )
+
+                if stesso_voto and stessa_presenza:
+
+                    rank.append(rank[-1])
+
+                else:
+
+                    posizione = i + 1
+                    rank.append(posizione)
 
         rendimento.insert(
             0,
-            "Rank",
-            medaglie_rendimento
+            "Posizione",
+            rank
         )
 
         st.dataframe(
