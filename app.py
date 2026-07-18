@@ -1448,7 +1448,7 @@ with tab0:
     classifica_shame = classifica_shame.sort_values(
         by="punteggio",
         ascending=True
-    )
+    ).reset_index(drop=True)
     
     valori = (
         classifica_shame["punteggio"]
