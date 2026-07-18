@@ -3219,6 +3219,226 @@
       "presenza": 0,
       "voto": NaN,
       "commento": ""
+    },
+    {
+      "id": 773,
+      "atleta_id": 5,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 774,
+      "atleta_id": 21,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 775,
+      "atleta_id": 22,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 776,
+      "atleta_id": 24,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 1,
+      "voto": 7.0,
+      "commento": ""
+    },
+    {
+      "id": 777,
+      "atleta_id": 6,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 778,
+      "atleta_id": 7,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 779,
+      "atleta_id": 25,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 780,
+      "atleta_id": 4,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 781,
+      "atleta_id": 8,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 1,
+      "voto": 7.0,
+      "commento": ""
+    },
+    {
+      "id": 782,
+      "atleta_id": 9,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 783,
+      "atleta_id": 10,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 784,
+      "atleta_id": 23,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 785,
+      "atleta_id": 11,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 786,
+      "atleta_id": 17,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 787,
+      "atleta_id": 12,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 788,
+      "atleta_id": 18,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 789,
+      "atleta_id": 13,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 1,
+      "voto": 9.0,
+      "commento": ""
+    },
+    {
+      "id": 790,
+      "atleta_id": 14,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 791,
+      "atleta_id": 19,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 792,
+      "atleta_id": 20,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 793,
+      "atleta_id": 15,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
+    },
+    {
+      "id": 794,
+      "atleta_id": 16,
+      "data": "2026-07-18",
+      "stagione": "2025/2026",
+      "tipo_evento": "Gare",
+      "presenza": 0,
+      "voto": NaN,
+      "commento": ""
     }
   ]
 }
