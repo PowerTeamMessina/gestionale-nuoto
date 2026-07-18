@@ -1995,6 +1995,29 @@ with tab5:
             hide_index=True
         )
 
+        st.markdown("---")
+        st.subheader("🏊 Classifica rendimento - Allenamento in vasca")
+
+        classifica_rendimento_evento(
+            storico,
+            "Allenamento in vasca"
+        )
+
+        st.markdown("---")
+        st.subheader("🏋️ Classifica rendimento - Allenamento a secco")
+
+        classifica_rendimento_evento(
+            storico,
+            "Allenamento a secco"
+        )
+
+        st.markdown("---")
+        st.subheader("🏁 Classifica rendimento - Gare")
+
+        classifica_rendimento_evento(
+            storico,
+            "Gara"
+        )
 
 # ============================================================
 # TAB 6
