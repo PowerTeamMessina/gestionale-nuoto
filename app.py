@@ -1249,27 +1249,33 @@ with tab0:
 
     c1, c2, c3 = st.columns(3)
 
+    cc1, c2, c3 = st.columns(3)
+
     colonne = [c1, c2, c3]
-
+    
     medaglie = ["🥇", "🥈", "🥉"]
-
+    
     for i, valore in enumerate(valori[:3]):
-
+    
         gruppo = classifica_generale[
             classifica_generale["punteggio"] == valore
         ]
-
+    
         nomi = ", ".join(
             gruppo["nome"].tolist()
         )
     
         with colonnest.markdown(
-            f"## {medaglie[i]}"
-        )
+                f"## {medaglie[i]}"
+            )
     
-        st.markdown(
-            f"**{nomi}**"
-        )
+            st.markdown(
+                f"**{nomi}**"
+            )
+    
+            st.caption(
+                f"Punteggio {valore}"
+            )
     
         st.caption(
             f"Punteggio {valore}"
