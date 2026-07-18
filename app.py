@@ -1240,6 +1240,90 @@ with tab0:
     st.markdown("---")
 
     st.subheader("🏆 Hall of FAME 🏆")
+
+        # --------------------------------------------------------
+        # HALL OF FAME GENERALE
+        # --------------------------------------------------------
+
+    st.subheader("🌟 Hall of Fame Generale")
+
+    if query_dashboard.empty or query_voti.empty:
+
+        st.info("Nessun dato disponibile.")
+
+    else:
+
+        classifica_generale = query_dashboard.copy()
+
+        classifica_generale["percentuale"] = (
+            classifica_generale["presenze"]
+            /
+            classifica_generale["registrazioni"]
+            * 100
+        ).round(1)
+
+        classifica_generale = classifica_generale.merge(
+            query_voti,
+            on="nome",
+            how="inner"
+        )
+
+        classifica_generale["media"] = (
+            classifica_generale["media"]
+            .round(2)
+        )
+
+        classifica_generale["punteggio_finale"] = (
+            (
+                classifica_generale["media"]
+                +
+                classifica_generale["percentuale"] / 10
+            )
+            /
+            2
+        ).round(2)
+
+        classifica_generale = classifica_generale.sort_values(
+            by="punteggio_finale",
+            ascending=False
+        ).reset_index(drop=True)
+
+        valori = (
+            classifica_generale["punteggio_finale"]
+            .drop_duplicates()
+            .head(3)
+            .tolist()
+        )
+
+        medaglie = ["🥇", "🥈", "🥉"]
+
+        for i, valore in enumerate(valori):
+
+            gruppo = classifica_generale[
+                classifica_generale["punteggio_finale"] == valore
+            ]
+
+            nomi = ", ".join(
+                gruppo["nome"].tolist()
+            )
+
+            media_gruppo = round(
+                gruppo["media"].mean(),
+                2
+            )
+
+            presenza_gruppo = round(
+                gruppo["percentuale"].mean(),
+                1
+            )   
+
+            st.markdown(
+                f"### {medaglie[i]} {nomi}"
+            )
+
+            st.caption(
+                f"Punteggio: {valore} | Media voto: {media_gruppo} | Presenza media: {presenza_gruppo}%"
+            )
     
     c6, c7 = st.columns(2)
 
