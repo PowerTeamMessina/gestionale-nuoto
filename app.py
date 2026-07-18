@@ -1411,7 +1411,82 @@ with tab0:
 
     st.markdown("---")
 
+    punteggio_shame = (
+        media
+        +
+        percentuale / 10
+    ) / 2
+
     st.subheader("💀 Hall of SHAME 💀")
+
+    st.subheader("☠️ Hall of SHAME Generale ☠️")
+    
+    classifica_shame = query_dashboard.copy()
+    
+    classifica_shame["percentuale"] = (
+        classifica_shame["presenze"]
+        /
+        classifica_shame["registrazioni"]
+        * 100
+    ).round(1)
+    
+    classifica_shame = classifica_shame.merge(
+        query_voti,
+        on="nome",
+        how="inner"
+    )
+    
+    classifica_shame["punteggio"] = (
+        (
+            classifica_shame["media"]
+            +
+            classifica_shame["percentuale"] / 10
+        )
+        / 2
+    ).round(2)
+    
+    classifica_shame = classifica_shame.sort_values(
+        by="punteggio",
+        ascending=True
+    )
+    
+    valori = (
+        classifica_shame["punteggio"]
+        .drop_duplicates()
+        .head(3)
+        .tolist()
+    )
+    
+    c1, c2, c3 = st.columns(3)
+    
+    colonne = [c1, c2, c3]
+    
+    medaglie = ["💀", "💩", "🪦"]
+    
+    for i, valore in enumerate(valori[:3]):
+    
+        gruppo = classifica_shame[
+            classifica_shame["punteggio"] == valore
+        ]
+    
+        nomi = ", ".join(
+            gruppo["nome"].tolist()
+        )
+    
+        colonne[i].markdown(
+            f"<h1 style='text-align:center'>{medaglie[i]}</h1>",
+            unsafe_allow_html=True
+        )
+    
+        colonne[i].markdown(
+            f"<h2 style='text-align:center'>{nomi}</h2>",
+            unsafe_allow_html=True
+        )
+    
+        colonne[i].markdown(
+            f"<h3 style='text-align:center'>☠️ {valore}</h3>",
+            unsafe_allow_html=True
+        )
 
     c8, c9 = st.columns(2)
     
