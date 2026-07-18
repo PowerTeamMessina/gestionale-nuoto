@@ -1247,7 +1247,7 @@ with tab0:
     # PODIO PRESENZE
     # --------------------------------------------------------
 
-    with c6:
+    with c7:
 
         st.subheader("🏆 Podio presenze")
 
@@ -1310,7 +1310,7 @@ with tab0:
     # PODIO RENDIMENTO
     # --------------------------------------------------------
 
-    with c7:
+    with c6:
 
         st.subheader("🎯 Podio rendimento")
 
