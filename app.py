@@ -1491,7 +1491,7 @@ with tab0:
             unsafe_allow_html=True
         )
 
-     st.markdown("---")
+    st.markdown("---")
 
     c8, c9 = st.columns(2)
     
