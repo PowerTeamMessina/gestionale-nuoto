@@ -1411,10 +1411,6 @@ with tab0:
 
     st.markdown("---")
 
-    punteggio_shame = (media + percentuale / 10) / 2
-
-    st.subheader("💀 Hall of SHAME 💀")
-
     st.subheader("☠️ Hall of SHAME Generale ☠️")
     
     classifica_shame = query_dashboard.copy()
@@ -1432,6 +1428,7 @@ with tab0:
         how="inner"
     )
     
+    # stesso punteggio della Hall of Fame
     classifica_shame["punteggio"] = (
         (
             classifica_shame["media"]
@@ -1441,6 +1438,7 @@ with tab0:
         / 2
     ).round(2)
     
+    # qui però prendiamo i peggiori
     classifica_shame = classifica_shame.sort_values(
         by="punteggio",
         ascending=True
