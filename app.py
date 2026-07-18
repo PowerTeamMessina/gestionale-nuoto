@@ -1302,8 +1302,6 @@ with tab0:
         icone
     )
 
-    st.write(classifica_assenze.columns.tolist())
-
     st.dataframe(
         classifica_assenze[
             [
