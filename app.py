@@ -1890,33 +1890,33 @@ with tab5:
             posizioni
         )
 
-    st.dataframe(
-        classifica[
-            [
-                "Posizione",
-                "nome",
-                "categoria",
-                "presenze",
-                "assenze",
-                "percentuale"
-            ]
-        ],
-        use_container_width=True,
-        hide_index=True
-    )
+        st.dataframe(
+            classifica[
+                [
+                    "Posizione",
+                    "nome",
+                    "categoria",
+                    "presenze",
+                    "assenze",
+                    "percentuale"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
 
-    csv = (
-        stats
-        .to_csv(index=False)
-        .encode("utf-8")
-    )
+        csv = (
+            stats
+            .to_csv(index=False)
+            .encode("utf-8")
+        )
 
-    st.download_button(
-            "📥 Scarica statistiche CSV",
-            csv,
-            "statistiche.csv",
-            "text/csv"
-    )
+        st.download_button(
+                "📥 Scarica statistiche CSV",
+                csv,
+                "statistiche.csv",
+                "text/csv"
+        )
         
         # =====================================================
         # CLASSIFICA RENDIMENTO
