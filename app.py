@@ -1891,33 +1891,19 @@ with tab5:
         )
 
     st.dataframe(
-    classifica[
-        [
-            "Posizione",
-            "nome",
-            "categoria",
-            "presenze",
-            "assenze",
-            "percentuale"
-        ]
-    ],
-    use_container_width=True,
-    hide_index=True
-)
-            
-            classifica[
-                [
-                    "Rank",
-                    "nome",
-                    "categoria",
-                    "presenze",
-                    "assenze",
-                    "percentuale"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
+        classifica[
+            [
+                "Posizione",
+                "nome",
+                "categoria",
+                "presenze",
+                "assenze",
+                "percentuale"
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True
+    )
 
         csv = (
             stats
