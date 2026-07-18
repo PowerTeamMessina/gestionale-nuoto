@@ -1243,130 +1243,129 @@ with tab0:
     
     c6, c7 = st.columns(2)
 
-# --------------------------------------------------------
-# PODIO PRESENZE
-# --------------------------------------------------------
+    # --------------------------------------------------------
+    # PODIO PRESENZE
+    # --------------------------------------------------------
 
-with c6:
+    with c6:
 
-    st.subheader("🏆 Podio presenze")
+        st.subheader("🏆 Podio presenze")
 
-    if query_dashboard.empty:
+        if query_dashboard.empty:
 
-        st.info("Nessun dato disponibile.")
+            st.info("Nessun dato disponibile.")
 
-    else:
+        else:
 
-        podio_presenze = query_dashboard.copy()
+            podio_presenze = query_dashboard.copy()
 
-        podio_presenze["percentuale"] = (
-            podio_presenze["presenze"]
-            /
-            podio_presenze["registrazioni"]
-            * 100
-        ).round(1)
+            podio_presenze["percentuale"] = (
+                podio_presenze["presenze"]
+                /
+                podio_presenze["registrazioni"]
+                * 100
+            ).round(1)
 
-        podio_presenze = podio_presenze.sort_values(
-            by="percentuale",
-            ascending=False
-        ).reset_index(drop=True)
+            podio_presenze = podio_presenze.sort_values(
+                by="percentuale",
+                ascending=False
+            ).reset_index(drop=True)
 
-        valori_presenza = (
-            podio_presenze["percentuale"]
-            .drop_duplicates()
-            .head(3)
-            .tolist()
-        )
-
-        righe_podio = []
-
-        medaglie = ["🥇", "🥈", "🥉"]
-
-        for i, valore in enumerate(valori_presenza):
-
-            gruppo = podio_presenze[
-                podio_presenze["percentuale"] == valore
-            ]
-
-            nomi = ", ".join(
-                gruppo["nome"].tolist()
+            valori_presenza = (
+                podio_presenze["percentuale"]
+                .drop_duplicates()
+                .head(3)
+                .tolist()
             )
 
-            righe_podio.append(
-                {
-                    "Medaglia": medaglie[i],
-                    "Atleta/i": nomi,
-                    "% Presenza": valore
-                }
+            righe_podio = []
+
+            medaglie = ["🥇", "🥈", "🥉"]
+
+            for i, valore in enumerate(valori_presenza):
+
+                gruppo = podio_presenze[
+                    podio_presenze["percentuale"] == valore
+                ]
+
+                nomi = ", ".join(
+                    gruppo["nome"].tolist()
+                )
+
+                righe_podio.append(
+                    {
+                        "Medaglia": medaglie[i],
+                        "Atleta/i": nomi,
+                        "% Presenza": valore
+                    }
+                )
+
+            st.dataframe(
+                pd.DataFrame(righe_podio),
+                use_container_width=True,
+                hide_index=True
+            )
+            
+    # --------------------------------------------------------
+    # PODIO RENDIMENTO
+    # --------------------------------------------------------
+
+    with c7:
+
+        st.subheader("🎯 Podio rendimento")
+
+        if query_voti.empty:
+
+            st.info("Nessun dato disponibile.")
+
+        else:
+
+            podio_rendimento = query_voti.copy()
+
+            podio_rendimento["media"] = (
+                podio_rendimento["media"]
+                .round(2)
             )
 
-        st.dataframe(
-            pd.DataFrame(righe_podio),
-            use_container_width=True,
-            hide_index=True
-        )
+            podio_rendimento = podio_rendimento.sort_values(
+                by="media",
+                ascending=False
+            ).reset_index(drop=True)
 
-
-# --------------------------------------------------------
-# PODIO RENDIMENTO
-# --------------------------------------------------------
-
-with c7:
-
-    st.subheader("🎯 Podio rendimento")
-
-    if query_voti.empty:
-
-        st.info("Nessun dato disponibile.")
-
-    else:
-
-        podio_rendimento = query_voti.copy()
-
-        podio_rendimento["media"] = (
-            podio_rendimento["media"]
-            .round(2)
-        )
-
-        podio_rendimento = podio_rendimento.sort_values(
-            by="media",
-            ascending=False
-        ).reset_index(drop=True)
-
-        valori_rendimento = (
-            podio_rendimento["media"]
-            .drop_duplicates()
-            .head(3)
-            .tolist()
-        )
-
-        righe_podio = []
-
-        medaglie = ["🥇", "🥈", "🥉"]
-
-        for i, valore in enumerate(valori_rendimento):
-
-            gruppo = podio_rendimento[
-                podio_rendimento["media"] == valore
-            ]
-
-            nomi = ", ".join(
-                gruppo["nome"].tolist()
+            valori_rendimento = (
+                podio_rendimento["media"]
+                .drop_duplicates()
+                .head(3)
+                .tolist()
             )
 
-            righe_podio.append(
-                {
-                    "Medaglia": medaglie[i],
-                    "Atleta/i": nomi,
-                    "Media voto": valore
-                }
-            )
+            righe_podio = []
 
-        st.dataframe(
-            pd.DataFrame(righe_podio),
-            use_container_width=True,
-            hide_index=True
-        )
+            medaglie = ["🥇", "🥈", "🥉"]
+
+            for i, valore in enumerate(valori_rendimento):
+
+                gruppo = podio_rendimento[
+                    podio_rendimento["media"] == valore
+                ]
+
+                nomi = ", ".join(
+                    gruppo["nome"].tolist()
+                )
+
+                righe_podio.append(
+                    {
+                        "Medaglia": medaglie[i],
+                        "Atleta/i": nomi,
+                        "Media voto": valore
+                    }
+                )
+
+            st.dataframe(
+                pd.DataFrame(righe_podio),
+                use_container_width=True,
+                hide_index=True
+            )
     
     # --------------------------------------------------------
     # HALL OF SHAME
