@@ -1855,6 +1855,8 @@ with tab5:
 
         posizioni = []
 
+        posizione = 1
+
         for i in range(len(classifica)):
 
             if i == 0:
@@ -1871,13 +1873,12 @@ with tab5:
 
             if stessa_percentuale:
 
-                posizioni.append(
-                    posizioni[-1]
-                )
+                posizioni.append(posizioni[-1])
 
             else:
 
-                posizioni.append(i + 1)
+                posizione = i + 1
+                posizioni.append(posizione)
 
         medaglie = []
 
