@@ -1411,11 +1411,7 @@ with tab0:
 
     st.markdown("---")
 
-    punteggio_shame = (
-        media
-        +
-        percentuale / 10
-    ) / 2
+    punteggio_shame = (media + percentuale / 10) / 2
 
     st.subheader("💀 Hall of SHAME 💀")
 
