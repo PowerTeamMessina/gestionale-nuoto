@@ -1122,7 +1122,6 @@ with tab0:
         params=(stagione_selezionata,)
     )
 
-    st.subheader("💀 Hall of FAME 💀")
 
     miglior_presenza = "-"
     miglior_percentuale = 0
@@ -1240,6 +1239,8 @@ with tab0:
 
     st.markdown("---")
 
+    st.subheader("🏆 Hall of FAME 🏆")
+    
     c6, c7 = st.columns(2)
 
     c6.metric(
