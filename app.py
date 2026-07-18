@@ -313,104 +313,104 @@ def aggiorna_categoria_atleta(
 
     conn.commit()
 
-    def classifica_rendimento_evento(
-        storico,
-        tipo_evento
-    ):
+def classifica_rendimento_evento(
+    storico,
+    tipo_evento
+):
 
-        dati = storico[
-            storico["tipo_evento"] == tipo_evento
+    dati = storico[
+        storico["tipo_evento"] == tipo_evento
+    ]
+
+    if dati.empty:
+
+        st.info("Nessun dato disponibile.")
+        return
+
+    ranking = dati.groupby(
+        ["nome", "categoria"],
+        dropna=False
+    ).agg(
+        registrazioni=("presenza", "count"),
+        presenze=("presenza", "sum"),
+        media_voti=("voto", "mean")
+    ).reset_index()
+
+    ranking["percentuale"] = (
+        ranking["presenze"]
+        /
+        ranking["registrazioni"]
+        * 100
+    ).round(1)
+
+    ranking["media_voti"] = (
+        ranking["media_voti"]
+        .fillna(0)
+        .round(2)
+    )
+
+    ranking = ranking.sort_values(
+        by=[
+            "media_voti",
+            "percentuale"
+        ],
+        ascending=[
+            False,
+            False
         ]
+    ).reset_index(drop=True)
 
-        if dati.empty:
+    posizioni = []
 
-            st.info("Nessun dato disponibile.")
-            return
+    for i in range(len(ranking)):
 
-        ranking = dati.groupby(
-            ["nome", "categoria"],
-            dropna=False
-        ).agg(
-            registrazioni=("presenza", "count"),
-            presenze=("presenza", "sum"),
-            media_voti=("voto", "mean")
-        ).reset_index()
+        if i == 0:
+            
+            posizioni.append(1)
 
-        ranking["percentuale"] = (
-            ranking["presenze"]
-            /
-            ranking["registrazioni"]
-            * 100
-        ).round(1)
+        else:
 
-        ranking["media_voti"] = (
-            ranking["media_voti"]
-            .fillna(0)
-            .round(2)
-        )
+            stesso_voto = (
+                ranking.iloc[i]["media_voti"]
+                ==
+                ranking.iloc[i - 1]["media_voti"]
+            )
 
-        ranking = ranking.sort_values(
-            by=[
-                "media_voti",
-                "percentuale"
-            ],
-            ascending=[
-                False,
-                False
-            ]
-        ).reset_index(drop=True)
+            stessa_presenza = (
+                ranking.iloc[i]["percentuale"]
+                ==
+                ranking.iloc[i - 1]["percentuale"]
+            )
 
-        posizioni = []
+            if stesso_voto and stessa_presenza:
 
-        for i in range(len(ranking)):
-
-            if i == 0:
-
-                posizioni.append(1)
+                posizioni.append(
+                    posizioni[-1]
+                )
 
             else:
 
-                stesso_voto = (
-                    ranking.iloc[i]["media_voti"]
-                    ==
-                    ranking.iloc[i - 1]["media_voti"]
-                )
+                posizioni.append(i + 1)
 
-                stessa_presenza = (
-                    ranking.iloc[i]["percentuale"]
-                    ==
-                    ranking.iloc[i - 1]["percentuale"]
-                )
+    ranking.insert(
+        0,
+        "Posizione",
+        posizioni
+    )
 
-                if stesso_voto and stessa_presenza:
-
-                    posizioni.append(
-                        posizioni[-1]
-                    )
-
-                else:
-
-                    posizioni.append(i + 1)
-
-        ranking.insert(
-            0,
-            "Posizione",
-            posizioni
-        )
-
-        st.dataframe(
-            ranking[
-                [
-                    "Posizione",
-                    "nome",
-                    "categoria",
-                    "media_voti",
-                    "percentuale"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
+    st.dataframe(
+        ranking[
+            [
+                "Posizione",
+                "nome",
+                "categoria",
+                "media_voti",
+                "percentuale"
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True
+    )
 
 # ============================================================
 # BACKUP AUTOMATICO
