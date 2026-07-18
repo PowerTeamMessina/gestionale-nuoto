@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS atleti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     categoria TEXT,
-    stagione TEXT NOT NULL
+    stagione TEXT NOT NULL,
+    email TEXT,
+    password TEXT
 )
 """)
 
@@ -68,6 +70,22 @@ CREATE TABLE IF NOT EXISTS presenze (
     )
 )
 """)
+
+conn.commit()
+
+try:
+    c.execute(
+        "ALTER TABLE atleti ADD COLUMN email TEXT"
+    )
+except:
+    pass
+
+try:
+    c.execute(
+        "ALTER TABLE atleti ADD COLUMN password TEXT"
+    )
+except:
+    pass
 
 conn.commit()
 
@@ -251,7 +269,9 @@ def get_tutti_atleti():
 def aggiungi_atleta(
     nome,
     categoria,
-    stagione
+    stagione,
+    email,
+    password
 ):
 
     c.execute(
@@ -259,14 +279,18 @@ def aggiungi_atleta(
         INSERT INTO atleti(
             nome,
             categoria,
-            stagione
+            stagione,
+            email,
+            password
         )
-        VALUES(?,?,?)
+        VALUES(?,?,?,?,?)
         """,
         (
             nome,
             categoria,
-            stagione
+            stagione,
+            email,
+            password
         )
     )
 
@@ -1796,6 +1820,14 @@ with tab4:
                 ],
             )
 
+            email = st.text_input(
+                "Email atleta"
+            )
+        
+            password = st.text_input(
+                "Password atleta"
+            )
+
             aggiungi = st.form_submit_button("➕ Aggiungi atleta")
 
             if aggiungi:
@@ -1806,6 +1838,8 @@ with tab4:
                         nome.strip(),
                         categoria.strip(),
                         stagione_selezionata,
+                        email.strip(),
+                        password.strip()
                     )
 
                     st.success("Atleta aggiunto correttamente.")
@@ -1822,7 +1856,16 @@ with tab4:
             st.subheader("Lista atleti")
 
             st.dataframe(
-                df_atleti,
+                df_atleti[
+                    [
+                        "id",
+                        "nome",
+                        "categoria",
+                        "email",
+                        "password",
+                        "stagione"
+                    ]
+                ],
                 use_container_width=True,
                 hide_index=True,
             )
