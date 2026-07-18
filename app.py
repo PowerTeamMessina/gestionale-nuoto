@@ -1924,7 +1924,8 @@ with tab5:
                 "Allenamento in vasca",
                 "Allenamento a secco",
                 "Gare"
-            ]
+            ],
+            key="filtro_classifiche"
         )
 
         if filtro != "Tutti":
@@ -2288,7 +2289,8 @@ with tab_statistiche:
                 "Allenamento in vasca",
                 "Allenamento a secco",
                 "Gare"
-            ]
+            ],
+            key="filtro_statistiche_atleta"
         )
 
         if filtro != "Tutti":
