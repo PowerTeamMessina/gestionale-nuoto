@@ -1349,14 +1349,14 @@ with tab0:
 
     classifica_assenze = assenti.copy()
 
+    classifica_assenze["percentuale_assenze"] = (
+        100 - classifica_assenze["percentuale"]
+    ).round(1)
+
     classifica_assenze = classifica_assenze.sort_values(
         by="percentuale_assenze",
         ascending=False
     ).reset_index(drop=True)
-
-    classifica_assenze["percentuale_assenze"] = (
-        100 - classifica_assenze["percentuale"]
-    ).round(1)
 
     icone = []
 
