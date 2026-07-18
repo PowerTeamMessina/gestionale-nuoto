@@ -683,8 +683,8 @@ def mostra_registro(titolo, tipo_evento, stagione):
         st.session_state.ultima_data_caricata != chiave_data
     ):
 
-    st.session_state.registro = {}
-    st.session_state.ultima_data_caricata = chiave_data
+        st.session_state.registro = {}
+        st.session_state.ultima_data_caricata = chiave_data
 
     registro_esistente = not presenze_salvate.empty
 
