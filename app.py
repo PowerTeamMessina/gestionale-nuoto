@@ -1247,6 +1247,30 @@ with tab0:
 
     st.subheader("🌟 Hall of Fame Generale")
 
+    classifica_generale = query_dashboard.copy()
+
+    classifica_generale["percentuale"] = (
+        classifica_generale["presenze"]
+        /
+        classifica_generale["registrazioni"]
+        * 100
+    ).round(1)
+    
+    classifica_generale = classifica_generale.merge(
+        query_voti,
+        on="nome",
+        how="inner"
+    )
+    
+    classifica_generale["punteggio"] = (
+        (
+            classifica_generale["media"]
+            +
+            classifica_generale["percentuale"] / 10
+        )
+        / 2
+    ).round(2)
+
     classifica_generale = classifica_generale.sort_values(
         by="punteggio",
         ascending=False
