@@ -1905,18 +1905,18 @@ with tab5:
         hide_index=True
     )
 
-        csv = (
-            stats
-            .to_csv(index=False)
-            .encode("utf-8")
-        )
+    csv = (
+        stats
+        .to_csv(index=False)
+        .encode("utf-8")
+    )
 
-        st.download_button(
+    st.download_button(
             "📥 Scarica statistiche CSV",
             csv,
             "statistiche.csv",
             "text/csv"
-        )
+    )
         
         # =====================================================
         # CLASSIFICA RENDIMENTO
