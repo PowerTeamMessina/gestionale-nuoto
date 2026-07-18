@@ -1263,8 +1263,7 @@ with tab0:
             gruppo["nome"].tolist()
         )
     
-        with 
-            colonnest.markdown(
+        with colonne[i]:
                 f"## {medaglie[i]}"
             )
     
