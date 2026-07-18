@@ -1134,16 +1134,31 @@ with tab0:
             * 100
         )
 
-        best = query_dashboard.sort_values(
-            "percentuale",
-            ascending=False
-        ).iloc[0]
+        miglior_presenza = "-"
+        miglior_percentuale = 0
 
-        miglior_presenza = best["nome"]
-        miglior_percentuale = round(
-            best["percentuale"],
-            1
-        )
+        if not query_dashboard.empty:
+
+            query_dashboard["percentuale"] = (
+                query_dashboard["presenze"]
+                /
+                query_dashboard["registrazioni"]
+            * 100
+            )
+
+            miglior_percentuale = round(
+                query_dashboard["percentuale"].max(),
+                1 
+            )
+
+            ex_aequo = query_dashboard[
+                query_dashboard["percentuale"]
+                == query_dashboard["percentuale"].max()
+            ]
+
+            miglior_presenza = ", ".join(
+                ex_aequo["nome"].tolist()
+            )
 
     # --------------------------------------------------------
     # CLASSIFICA VOTI
