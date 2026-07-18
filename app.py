@@ -575,6 +575,8 @@ st.markdown(
 
 check_admin()
 
+aggiornamento_automatico_giornaliero()
+
 st.write("Admin:", st.session_state.admin)
 
 stagioni = get_stagioni()
@@ -870,6 +872,36 @@ def ripristina_backup_locale():
     conn.commit()
 
     return True
+
+def aggiornamento_automatico_giornaliero():
+
+    file_data = "ultimo_aggiornamento.txt"
+
+    oggi = datetime.now().strftime("%Y-%m-%d")
+
+    ultima_data = None
+
+    if os.path.exists(file_data):
+
+        with open(file_data, "r") as f:
+            ultima_data = f.read().strip()
+
+    if ultima_data != oggi:
+
+        try:
+
+            if scarica_backup_github():
+
+                ripristina_backup_locale()
+
+                with open(file_data, "w") as f:
+                    f.write(oggi)
+
+        except Exception as e:
+
+            st.error(
+                f"Errore aggiornamento automatico: {e}"
+            )
 
 # ============================================================
 # TAB 0 - DASHBOARD
