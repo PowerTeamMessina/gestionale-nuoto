@@ -313,26 +313,6 @@ def aggiorna_categoria_atleta(
 
     conn.commit()
 
-# ============================================================
-# FUNZIONI STELLE
-# ============================================================
-
-def voto_to_stelle(voto):
-
-    if voto is None:
-        return ""
-
-    try:
-        voto = int(voto)
-    except:
-        return ""
-
-    return "⭐" * voto
-
-
-def stelle_to_voto(stelle):
-    return stelle.count("⭐")
-
 
 # ============================================================
 # UTILITA'
@@ -427,7 +407,7 @@ def mostra_registro(titolo, tipo_evento, stagione):
         for _, r in presenze_salvate.iterrows():
             dati_salvati[int(r["atleta_id"])] = {
                 "presenza": bool(r["presenza"]),
-                "voto": int(r["voto"]) if pd.notna(r["voto"]) else 4,
+                "voto": int(r["voto"]) if pd.notna(r["voto"]) else 6,
                 "commento": r["commento"] if pd.notna(r["commento"]) else "",
             }
 
@@ -445,7 +425,7 @@ def mostra_registro(titolo, tipo_evento, stagione):
             else:
                 st.session_state.registro[atleta_id] = {
                     "presenza": False,
-                    "voto": 4,
+                    "voto": 6,
                     "commento": "",
                 }
 
@@ -479,15 +459,13 @@ def mostra_registro(titolo, tipo_evento, stagione):
 
             voto_corrente = st.session_state.registro[atleta_id]["voto"]
 
-            stelle = st.radio(
-                "Valutazione",
-                ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"],
-                index=max(0, min(4, voto_corrente - 1)),
-                horizontal=True,
-                key=f"voto_{tipo_evento}_{atleta_id}",
+            voto = st.slider(
+                "Voto",
+                min_value=1,
+                max_value=10,
+                value=voto_corrente if voto_corrente is not None else 6,
+                key=f"voto_{tipo_evento}_{atleta_id}"
             )
-
-            voto = stelle_to_voto(stelle)
 
         commento = st.text_input(
             "Commento",
@@ -497,7 +475,7 @@ def mostra_registro(titolo, tipo_evento, stagione):
 
         st.session_state.registro[atleta_id] = {
             "presenza": presenza,
-            "voto": voto if presenza else 4,
+            "voto": voto if presenza else 6,
             "commento": commento,
         }
 
@@ -947,10 +925,10 @@ with tab0:
         totale_gare = 0
 
     # --------------------------------------------------------
-    # MEDIA STELLE
+    # MEDIA voti
     # --------------------------------------------------------
 
-    media_stelle = pd.read_sql(
+    media_voti = pd.read_sql(
         """
         SELECT AVG(voto) AS media
         FROM presenze
@@ -961,8 +939,8 @@ with tab0:
         params=(stagione_selezionata,)
     ).iloc[0]["media"]
 
-    if pd.isna(media_stelle):
-        media_stelle = 0
+    if pd.isna(media_voti):
+        media_voti = 0
 
     # --------------------------------------------------------
     # ULTIMA ATTIVITA'
@@ -1025,10 +1003,10 @@ with tab0:
         )
 
     # --------------------------------------------------------
-    # CLASSIFICA STELLE
+    # CLASSIFICA VOTI
     # --------------------------------------------------------
 
-    query_stelle = pd.read_sql(
+    query_voti = pd.read_sql(
         """
         SELECT
             a.nome,
@@ -1048,9 +1026,9 @@ with tab0:
     miglior_rendimento = "-"
     miglior_media = 0
 
-    if not query_stelle.empty:
+    if not query_voti.empty:
 
-        best = query_stelle.sort_values(
+        best = query_voti.sort_values(
             "media",
             ascending=False
         ).iloc[0]
@@ -1083,8 +1061,8 @@ with tab0:
     )
 
     c4.metric(
-        "⭐ Media stelle",
-        round(media_stelle, 2)
+        "🎯 Media voti",
+        round(media_voti, 2)
     )
 
     c5.metric(
@@ -1240,11 +1218,11 @@ with tab0:
             ]
         )
 
-    grafico_stelle = pd.read_sql(
+    grafico_voti = pd.read_sql(
         """
         SELECT
             a.nome,
-            AVG(p.voto) AS media_stelle
+            AVG(p.voto) AS media_voti
         FROM presenze p
         JOIN atleti a
             ON a.id = p.atleta_id
@@ -1257,13 +1235,13 @@ with tab0:
         params=(stagione_selezionata,)
     )
 
-    if not grafico_stelle.empty:
+    if not grafico_voti.empty:
 
-        st.write("⭐ Media stelle")
+        st.write("🎯 Media voti")
 
         st.bar_chart(
-            grafico_stelle.set_index("nome")[
-                "media_stelle"
+            grafico_voti.set_index("nome")[
+                "media_voti"
             ]
         )
     
@@ -1560,7 +1538,7 @@ with tab5:
                 "presenza",
                 "sum"
             ),
-            media_stelle=(
+            media_voti=(
                 "voto",
                 "mean"
             )
@@ -1577,8 +1555,8 @@ with tab5:
             * 100
         ).round(1)
 
-        stats["media_stelle"] = (
-            stats["media_stelle"]
+        stats["media_voti"] = (
+            stats["media_voti"]
             .fillna(0)
             .round(2)
         )
@@ -1596,7 +1574,7 @@ with tab5:
         )
 
         media_globale = round(
-            stats["media_stelle"].mean(),
+            stats["media_voti"].mean(),
             2
         )
 
@@ -1618,7 +1596,7 @@ with tab5:
         )
 
         c4.metric(
-            "Media stelle",
+            "Media voti",
             media_globale
         )
 
@@ -1653,8 +1631,8 @@ with tab5:
             1
         )
 
-        media_stelle_atleta = round(
-            dati_atleta["media_stelle"].mean(),
+        media_voti_atleta = round(
+            dati_atleta["media_voti"].mean(),
             2
         )
 
@@ -1682,7 +1660,7 @@ with tab5:
 
         c4.metric(
             "⭐ Media",
-            media_stelle_atleta
+            media_voti_atleta
         )
 
         st.write(
@@ -1758,25 +1736,25 @@ with tab5:
             )
 
             # -----------------------------------------
-            # GRAFICO STELLE
+            # GRAFICO voti
             # -----------------------------------------
 
-            grafico_stelle = (
+            grafico_voti = (
                 grafico_presenze.copy()
             )
 
-            grafico_stelle = grafico_stelle[
-                grafico_stelle["voto"].notna()
+            grafico_voti = grafico_voti[
+                grafico_voti["voto"].notna()
             ]
 
-            if not grafico_stelle.empty:
+            if not grafico_voti.empty:
 
                 st.subheader(
-                    "⭐ Andamento stelle"
+                    "🎯 Andamento voti"
                 )
 
                 st.line_chart(
-                    grafico_stelle.set_index(
+                    grafico_voti.set_index(
                         "data"
                     )[
                         "voto"
@@ -1795,13 +1773,9 @@ with tab5:
                 })
             )
 
-            storico_atleta["stelle"] = (
+            storico_atleta["voto"] = (
                 storico_atleta["voto"]
-                .fillna(0)
-                .astype(int)
-                .apply(
-                    lambda x: "⭐" * x
-                )
+                .fillna("")
             )
 
             st.markdown("---")
@@ -1816,7 +1790,7 @@ with tab5:
                         "data",
                         "tipo_evento",
                         "presenza",
-                        "stelle",
+                        "voto",
                         "commento"
                     ]
                 ]
@@ -1893,12 +1867,12 @@ with tab5:
 
         st.markdown("---")
 
-        st.subheader("⭐ Classifica rendimento")
+        st.subheader("🎯 Classifica rendimento")
 
         rendimento = stats.copy()
 
         rendimento = rendimento.sort_values(
-            by="media_stelle",
+            by="media_voti",
             ascending=False
         ).reset_index(drop=True)
 
@@ -1927,7 +1901,7 @@ with tab5:
                     "Rank",
                     "nome",
                     "categoria",
-                    "media_stelle",
+                    "media_voti",
                     "presenze",
                     "percentuale"
                 ]
@@ -2004,14 +1978,7 @@ with tab6:
                 }
             )
 
-            storico["stelle"] = (
-                storico["voto"]
-                .fillna(0)
-                .astype(int)
-                .apply(
-                    lambda x: "⭐" * x
-                )
-            )
+            storico["voto"] = storico["voto"].fillna("")
 
             st.dataframe(
                 storico[
@@ -2021,7 +1988,7 @@ with tab6:
                         "nome",
                         "categoria",
                         "presenza",
-                        "stelle",
+                        "voto",
                         "commento"
                     ]
                 ],
@@ -2813,14 +2780,7 @@ with tab11:
             })
         )
 
-        archivio["stelle"] = (
-            archivio["voto"]
-            .fillna(0)
-            .astype(int)
-            .apply(
-                lambda x: "⭐" * x
-            )
-        )
+        archivio["voto"] = archivio["voto"].fillna("")
 
         totale_gare = (
             archivio["data"]
@@ -2853,7 +2813,7 @@ with tab11:
                     "nome",
                     "categoria",
                     "presenza",
-                    "stelle",
+                    "voto",
                     "commento"
                 ]
             ],
@@ -2928,7 +2888,7 @@ with tab12:
                 "presenza",
                 "sum"
             ),
-            media_stelle=(
+            media_voti=(
                 "voto",
                 "mean"
             )
@@ -2941,8 +2901,8 @@ with tab12:
             * 100
         ).round(1)
 
-        mensile["media_stelle"] = (
-            mensile["media_stelle"]
+        mensile["media_voti"] = (
+            mensile["media_voti"]
             .fillna(0)
             .round(2)
         )
@@ -2992,16 +2952,16 @@ with tab12:
         )
 
         # ----------------------------------------------------
-        # GRAFICO STELLE
+        # GRAFICO voti
         # ----------------------------------------------------
 
         st.subheader(
-            "⭐ Media stelle mensile"
+            "🎯 Media voti mensile"
         )
 
         st.line_chart(
             mensile.set_index("mese")[
-                "media_stelle"
+                "media_voti"
             ]
         )
 
@@ -3026,7 +2986,7 @@ with tab12:
                 "presenza",
                 "sum"
             ),
-            media_stelle=(
+            media_voti=(
                 "voto",
                 "mean"
             )
@@ -3039,8 +2999,8 @@ with tab12:
             * 100
         ).round(1)
 
-        confronto["media_stelle"] = (
-            confronto["media_stelle"]
+        confronto["media_voti"] = (
+            confronto["media_voti"]
             .fillna(0)
             .round(2)
         )
