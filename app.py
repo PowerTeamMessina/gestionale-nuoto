@@ -1105,8 +1105,6 @@ with tab0:
     # --------------------------------------------------------
     # CLASSIFICA PRESENZE
     # --------------------------------------------------------
-
-    st.subheader("💀 Hall of FAME 💀")
     
     query_dashboard = pd.read_sql(
         """
@@ -1123,6 +1121,8 @@ with tab0:
         conn,
         params=(stagione_selezionata,)
     )
+
+    st.subheader("💀 Hall of FAME 💀")
 
     miglior_presenza = "-"
     miglior_percentuale = 0
