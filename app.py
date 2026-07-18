@@ -1106,6 +1106,8 @@ with tab0:
     # CLASSIFICA PRESENZE
     # --------------------------------------------------------
 
+    st.subheader("💀 Hall of FAME 💀")
+    
     query_dashboard = pd.read_sql(
         """
         SELECT
