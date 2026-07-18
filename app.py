@@ -998,7 +998,7 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-(tab0, tab1, tab2, tab3, tab5, tab_statistiche, tab10, tab6, tab7, tab8, tab9, tab4, tab11, tab12) = st.tabs([
+(tab0, tab1, tab2, tab3, tab5, tab_statistiche, tab10, tab12, tab6, tab7, tab8, tab9, tab4, tab11) = st.tabs([
         "🏠 Dashboard",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
@@ -1006,13 +1006,13 @@ st.session_state.stagione_corrente = (
         "📊 Classifiche",
         "👤 Statistiche atleta",
         "📋 Registro settimanale",
+        "📈 Analisi Stagione"
         "🗂️ Storico",
         "⚙️ Stagioni",
         "💾 Backup",
         "📅 Calendario",
         "👥 Atleti",
         "🏁 Archivio Gare",
-        "📈 Analisi Stagione"
 ])
 
 # ============================================================
