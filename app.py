@@ -1853,10 +1853,31 @@ with tab5:
 
         classifica = stats.copy()
 
-        classifica = classifica.sort_values(
-            by="percentuale",
-            ascending=False
-        ).reset_index(drop=True)
+        posizioni = []
+
+        for i in range(len(classifica)):
+
+            if i == 0:
+
+                posizioni.append(1)
+
+            else:
+
+                stessa_percentuale = (
+                    classifica.iloc[i]["percentuale"]
+                    ==
+                    classifica.iloc[i - 1]["percentuale"]
+                )
+
+            if stessa_percentuale:
+
+                posizioni.append(
+                    posizioni[-1]
+                )
+
+            else:
+
+                posizioni.append(i + 1)
 
         medaglie = []
 
