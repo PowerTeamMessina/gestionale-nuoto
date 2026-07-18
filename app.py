@@ -1006,13 +1006,13 @@ st.session_state.stagione_corrente = (
         "📊 Classifiche",
         "👤 Statistiche atleta",
         "📋 Registro settimanale",
-        "📈 Analisi Stagione"
+        "📈 Analisi Stagione",
         "🗂️ Storico",
         "⚙️ Stagioni",
         "💾 Backup",
         "📅 Calendario",
         "👥 Atleti",
-        "🏁 Archivio Gare",
+        "🏁 Archivio Gare"
 ])
 
 # ============================================================
