@@ -1058,7 +1058,7 @@ with tab0:
         AS totale
         FROM presenze
         WHERE stagione = ?
-        AND tipo_evento = 'Gara'
+        AND tipo_evento = 'Gare'
         """,
         conn,
         params=(stagione_selezionata,)
@@ -1659,7 +1659,7 @@ with tab5:
                 "Tutti",
                 "Allenamento in vasca",
                 "Allenamento a secco",
-                "Gara"
+                "Gare"
             ]
         )
 
@@ -1842,7 +1842,7 @@ with tab5:
             gare_disputate = len(
                 storico_atleta[
                     storico_atleta["tipo_evento"]
-                    == "Gara"
+                    == "Gare"
                 ]
             )
 
@@ -2115,7 +2115,7 @@ with tab5:
 
         classifica_rendimento_evento(
             storico,
-            "Gara"
+            "Gare"
         )
 
 # ============================================================
@@ -2167,7 +2167,7 @@ with tab6:
                     "Tutti",
                     "Allenamento in vasca",
                     "Allenamento a secco",
-                    "Gara"
+                    "Gare"
                 ],
                 key="filtro_storico"
             )
@@ -2726,7 +2726,7 @@ with tab9:
                 "Tutti",
                 "Allenamento in vasca",
                 "Allenamento a secco",
-                "Gara"
+                "Gare"
             ],
             key="filtro_calendario"
         )
@@ -2949,7 +2949,7 @@ with tab11:
             ON a.id = p.atleta_id
         WHERE
             p.stagione = ?
-            AND p.tipo_evento = 'Gara'
+            AND p.tipo_evento = 'Gare'
         ORDER BY p.data DESC
         """,
         conn,
