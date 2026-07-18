@@ -1853,9 +1853,14 @@ with tab5:
 
         classifica = stats.copy()
 
-        posizioni = []
+        # Ordina prima per percentuale presenza decrescente
+        classifica = classifica.sort_values(
+            by="percentuale",
+            ascending=False
+        ).reset_index(drop=True)
 
-        posizione = 1
+        # Calcolo posizioni con ex aequo
+        posizioni = []
 
         for i in range(len(classifica)):
 
@@ -1865,41 +1870,41 @@ with tab5:
 
             else:
 
-                stessa_percentuale = (
+                if (
                     classifica.iloc[i]["percentuale"]
                     ==
                     classifica.iloc[i - 1]["percentuale"]
+                ):
+
+                    posizioni.append(
+                    posizioni[-1]
                 )
-
-                if stessa_percentuale:
-
-                    posizioni.append(posizioni[-1])
 
                 else:
 
-                    posizione = i + 1
-                    posizioni.append(posizione)
-
-        medaglie = []
-
-        for i in range(len(classifica)):
-
-            if i == 0:
-                medaglie.append("🥇")
-            elif i == 1:
-                medaglie.append("🥈")
-            elif i == 2:
-                medaglie.append("🥉")
-            else:
-                medaglie.append(str(i + 1))
+                    posizioni.append(i + 1)
 
         classifica.insert(
             0,
-            "Rank",
-            medaglie
+            "Posizione",
+            posizioni
         )
 
-        st.dataframe(
+    st.dataframe(
+    classifica[
+        [
+            "Posizione",
+            "nome",
+            "categoria",
+            "presenze",
+            "assenze",
+            "percentuale"
+        ]
+    ],
+    use_container_width=True,
+    hide_index=True
+)
+            
             classifica[
                 [
                     "Rank",
