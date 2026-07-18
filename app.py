@@ -1241,9 +1241,9 @@ with tab0:
 
     st.subheader("🏆 Hall of FAME 🏆")
 
-        # --------------------------------------------------------
-        # HALL OF FAME GENERALE
-        # --------------------------------------------------------
+    # --------------------------------------------------------
+    # HALL OF FAME GENERALE
+    # --------------------------------------------------------
 
     st.subheader("🌟 Hall of Fame Generale")
 
@@ -1263,7 +1263,8 @@ with tab0:
             gruppo["nome"].tolist()
         )
     
-        with colonnest.markdown(
+        with colonne[i]
+            st.markdown(
                 f"## {medaglie[i]}"
             )
     
