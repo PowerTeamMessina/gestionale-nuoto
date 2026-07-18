@@ -1249,48 +1249,48 @@ with tab0:
 
     with c6:
 
-    st.subheader("🎯 Hall of Fame - Rendimento")
+        st.subheader("🎯 Hall of Fame - Rendimento")
 
-    if not query_voti.empty:
+        if not query_voti.empty:
 
-        podio = query_voti.copy()
+            podio = query_voti.copy()
 
-        podio["media"] = (
-            podio["media"]
-            .round(2)
-        )
-
-        podio = podio.sort_values(
-            by="media",
-            ascending=False
-        )
-
-        valori = (
-            podio["media"]
-            .drop_duplicates()
-            .head(3)
-            .tolist()
-        )
-
-        medaglie = ["🥇", "🥈", "🥉"]
-
-        for i, valore in enumerate(valori):
-
-            gruppo = podio[
-                podio["media"] == valore
-            ]
-
-            nomi = ", ".join(
-                gruppo["nome"].tolist()
+            podio["media"] = (
+                podio["media"]
+                .round(2)
             )
 
-            st.markdown(
-                f"### {medaglie[i]} {nomi}"
+            podio = podio.sort_values(
+                by="media",
+                ascending=False
             )
 
-            st.caption(
-                f"Media voto: {valore}"
+            valori = (
+                podio["media"]
+                .drop_duplicates()
+                .head(3)
+                .tolist()
             )
+
+            medaglie = ["🥇", "🥈", "🥉"]
+
+            for i, valore in enumerate(valori):
+
+                gruppo = podio[
+                    podio["media"] == valore
+                ]
+
+                nomi = ", ".join(
+                    gruppo["nome"].tolist()
+                )
+
+                st.markdown(
+                    f"### {medaglie[i]} {nomi}"
+                )
+
+                st.caption(
+                    f"Media voto: {valore}"
+                )
     
     # --------------------------------------------------------
     # HALL OF SHAME
