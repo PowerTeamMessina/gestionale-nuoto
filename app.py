@@ -1258,7 +1258,7 @@ with tab0:
 
     st.markdown("---")
 
-    st.subheader("💀 Classifica assenze")
+    st.subheader("💀 Hall of SHAME 💀")
 
     classifica_assenze = query_dashboard.copy()
 
@@ -1301,6 +1301,8 @@ with tab0:
         "Hall of Shame",
         icone
     )
+
+    st.write(classifica_assenze.columns.tolist())
 
     st.dataframe(
         classifica_assenze[
