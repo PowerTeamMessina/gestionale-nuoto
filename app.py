@@ -1004,7 +1004,7 @@ st.session_state.stagione_corrente = (
         "🏋️ Allenamento secco",
         "🏁 Gare",
         "👥 Atleti",
-        "📊 Statistiche",
+        "📊 Classifiche",
         "🗂️ Storico",
         "⚙️ Stagioni",
         "💾 Backup",
@@ -1889,7 +1889,7 @@ with tab4:
 
 with tab5:
 
-    st.header("📊 Statistiche")
+    st.header("📊 Classifiche")
 
     storico = pd.read_sql(
         """
