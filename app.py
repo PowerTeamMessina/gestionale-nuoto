@@ -1353,80 +1353,88 @@ with tab0:
 
         st.subheader("🚫 Peggior presenza")
 
-        shame_presenze = query_dashboard.copy()
+        podio = query_dashboard.copy()
 
-        shame_presenze["percentuale"] = (
-            shame_presenze["presenze"]
+        podio["percentuale"] = (
+            podio["presenze"]
             /
-            shame_presenze["registrazioni"]
+            podio["registrazioni"]
             * 100
         ).round(1)
 
-        shame_presenze = shame_presenze.sort_values(
+        podio = podio.sort_values(
             by="percentuale",
             ascending=True
-        ).reset_index(drop=True)
+        )
 
         valori = (
-            shame_presenze["percentuale"]
+            podio["percentuale"]
             .drop_duplicates()
             .head(3)
             .tolist()
         )
 
-        emoji = ["💀", "💩", "🪦"]
+        medaglie = ["💀", "💩", "🪦"]
 
         for i, valore in enumerate(valori):
 
-            gruppo = shame_presenze[
-                shame_presenze["percentuale"] == valore
+            gruppo = podio[
+                podio["percentuale"] == valore
             ]
 
             nomi = ", ".join(
                 gruppo["nome"].tolist()
             )
 
-            st.write(
-                f"{emoji[i]} **{nomi}** ({valore}%)"
+            st.markdown(
+                f"### {medaglie[i]} {nomi}"
+            )
+
+            st.caption(
+                f"{valore}% presenza"
             )
 
     with c8:
 
         st.subheader("📉 Peggior rendimento")
 
-        shame_voti = query_voti.copy()
+        podio = query_voti.copy()
 
-        shame_voti["media"] = (
-            shame_voti["media"]
+        podio["media"] = (
+            podio["media"]
             .round(2)
         )
 
-        shame_voti = shame_voti.sort_values(
+        podio = podio.sort_values(
             by="media",
             ascending=True
-        ).reset_index(drop=True)
-    
+        )
+
         valori = (
-            shame_voti["media"]
+            podio["media"]
             .drop_duplicates()
             .head(3)
             .tolist()
         )
 
-        emoji = ["🤡", "🥴", "🫠"]
+        medaglie = ["🤡", "🥴", "🫠"]
 
         for i, valore in enumerate(valori):
 
-            gruppo = shame_voti[
-                shame_voti["media"] == valore
+            gruppo = podio[
+                podio["media"] == valore
             ]
 
             nomi = ", ".join(
                 gruppo["nome"].tolist()
             )
 
-            st.write(
-                f"{emoji[i]} **{nomi}** ({valore})"
+            st.markdown(
+                f"### {medaglie[i]} {nomi}"
+            )
+
+            st.caption(
+                f"Media voto: {valore}"
             )
     
     # --------------------------------------------------------
