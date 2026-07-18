@@ -1349,7 +1349,7 @@ with tab0:
 
     c8, c9 = st.columns(2)
     
-    with c8:
+    with c9:
 
         st.subheader("🚫 Peggior presenza")
 
@@ -1390,7 +1390,7 @@ with tab0:
                 f"{emoji[i]} **{nomi}** ({valore}%)"
             )
 
-    with c9:
+    with c8:
 
         st.subheader("📉 Peggior rendimento")
 
