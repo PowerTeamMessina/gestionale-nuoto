@@ -1871,14 +1871,14 @@ with tab5:
                     classifica.iloc[i - 1]["percentuale"]
                 )
 
-            if stessa_percentuale:
+                if stessa_percentuale:
 
-                posizioni.append(posizioni[-1])
+                    posizioni.append(posizioni[-1])
 
-            else:
+                else:
 
-                posizione = i + 1
-                posizioni.append(posizione)
+                    posizione = i + 1
+                    posizioni.append(posizione)
 
         medaglie = []
 
