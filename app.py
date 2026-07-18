@@ -2206,6 +2206,78 @@ with tab5:
             )
 
         # =====================================================
+        # CLASSIFICA GENERALE
+        # =====================================================
+        
+        st.markdown("---")
+        
+        st.subheader("🌟 Classifica generale")
+        
+        classifica_generale = stats.copy()
+        
+        classifica_generale["punteggio"] = (
+            (
+                classifica_generale["media_voti"]
+                +
+                classifica_generale["percentuale"] / 10
+            )
+            / 2
+        ).round(2)
+        
+        classifica_generale = classifica_generale.sort_values(
+            by="punteggio",
+            ascending=False
+        ).reset_index(drop=True)
+        
+        posizioni = []
+        
+        for i in range(len(classifica_generale)):
+        
+            if i == 0:
+        
+                posizioni.append(1)
+        
+            else:
+        
+                stesso_punteggio = (
+                    classifica_generale.iloc[i]["punteggio"]
+                    ==
+                    classifica_generale.iloc[i - 1]["punteggio"]
+                )
+        
+                if stesso_punteggio:
+        
+                    posizioni.append(
+                        posizioni[-1]
+                    )
+        
+                else:
+        
+                    posizioni.append(i + 1)
+        
+        classifica_generale.insert(
+            0,
+            "Posizione",
+            posizioni
+        )
+        
+        st.dataframe(
+            classifica_generale[
+                [
+                    "Posizione",
+                    "nome",
+                    "categoria",
+                    "punteggio",
+                    "media_voti",
+                    "percentuale",
+                    "presenze",
+                    "assenze"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+        # =====================================================
         # CLASSIFICA PRESENZE
         # =====================================================
 
