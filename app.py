@@ -1260,7 +1260,7 @@ with tab0:
 
     st.subheader("💀 Classifica assenze")
 
-    classifica_assenze = assenti.copy()
+    classifica_assenze = query_dashboard.copy()
 
     classifica_assenze["assenze"] = (
         classifica_assenze["registrazioni"]
