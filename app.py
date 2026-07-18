@@ -1314,6 +1314,8 @@ with tab0:
             unsafe_allow_html=True
         )
 
+    st.markdown("---")
+    
     c6, c7 = st.columns(2)
 
     # --------------------------------------------------------
