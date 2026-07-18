@@ -746,7 +746,7 @@ def mostra_registro(titolo, tipo_evento, stagione):
         presenza = st.toggle(
             "Presente",
             value=st.session_state.registro[atleta_id]["presenza"],
-            key=f"pres_{tipo_evento}_{atleta_id}",
+            key=f"pres_{tipo_evento}_{data_evento}_{atleta_id}",
         )
 
         voto = None
@@ -761,13 +761,13 @@ def mostra_registro(titolo, tipo_evento, stagione):
                 min_value=1,
                 max_value=10,
                 value=voto_corrente if voto_corrente is not None else 6,
-                key=f"voto_{tipo_evento}_{atleta_id}"
+                key=f"voto_{tipo_evento}_{data_evento}_{atleta_id}"
             )
 
         commento = st.text_input(
             "Commento",
             value=st.session_state.registro[atleta_id]["commento"],
-            key=f"comm_{tipo_evento}_{atleta_id}",
+            key=f"comm_{tipo_evento}_{data_evento}_{atleta_id}",
         )
 
         st.session_state.registro[atleta_id] = {
