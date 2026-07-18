@@ -1249,8 +1249,6 @@ with tab0:
 
     c1, c2, c3 = st.columns(3)
 
-    cc1, c2, c3 = st.columns(3)
-
     colonne = [c1, c2, c3]
     
     medaglie = ["🥇", "🥈", "🥉"]
