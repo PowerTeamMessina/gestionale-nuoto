@@ -1300,11 +1300,7 @@ with tab0:
         )
     
         colonne[i].markdown(
-            f"## {medaglie[i]}"
-        )
-    
-        colonne[i].markdown(
-            f"**{nomi}**"
+            f"## {medaglie[i]} {nomi}"
         )
     
         colonne[i].caption(
