@@ -1329,20 +1329,6 @@ with tab0:
                     """
                 )
 
-            st.dataframe(
-                assenti_critici[
-                    [
-                        "nome",
-                        "categoria",
-                        "presenze",
-                        "registrazioni",
-                        "percentuale"
-                    ]
-                ],
-                use_container_width=True,
-                hide_index=True
-            )
-
     st.markdown("---")
 
     st.subheader("💀 Classifica assenze")
