@@ -1375,61 +1375,87 @@ with tab0:
 
     st.subheader("💀 Hall of SHAME 💀")
 
-    classifica_assenze = query_dashboard.copy()
+    c8, c9 = st.columns(2)
+    
+    with c8:
 
-    classifica_assenze["assenze"] = (
-        classifica_assenze["registrazioni"]
-        - classifica_assenze["presenze"]
-    )
+        st.subheader("🚫 Peggior presenza")
 
-    classifica_assenze["percentuale_assenze"] = (
-        classifica_assenze["assenze"]
-        /
-        classifica_assenze["registrazioni"]
-        * 100
-    ).round(1)
+        shame_presenze = query_dashboard.copy()
 
-    classifica_assenze = classifica_assenze.sort_values(
-        by="percentuale_assenze",
-        ascending=False
-    ).reset_index(drop=True)
+        shame_presenze["percentuale"] = (
+            shame_presenze["presenze"]
+            /
+            shame_presenze["registrazioni"]
+            * 100
+        ).round(1)
 
-    icone = []
+        shame_presenze = shame_presenze.sort_values(
+            by="percentuale",
+            ascending=True
+        ).reset_index(drop=True)
 
-    for _, row in classifica_assenze.iterrows():
+        valori = (
+            shame_presenze["percentuale"]
+            .drop_duplicates()
+            .head(3)
+            .tolist()
+        )
 
-        p = row["percentuale_assenze"]
+        emoji = ["💀", "💩", "🪦"]
 
-        if p >= 70:
-            icone.append("💀💀💀")
-        elif p >= 50:
-            icone.append("🙈")
-        elif p >= 30:
-            icone.append("😴")
-        elif p >= 15:
-            icone.append("🤨")
-        else:
-            icone.append("😇")
+        for i, valore in enumerate(valori):
 
-    classifica_assenze.insert(
-        0,
-        "Hall of Shame",
-        icone
-    )
-
-    st.dataframe(
-        classifica_assenze[
-            [
-                "Hall of Shame",
-                "nome",
-                "assenze",
-                "registrazioni",
-                "percentuale_assenze"
+            gruppo = shame_presenze[
+                shame_presenze["percentuale"] == valore
             ]
-        ],
-        use_container_width=True,
-        hide_index=True
-    )
+
+            nomi = ", ".join(
+                gruppo["nome"].tolist()
+            )
+
+            st.write(
+                f"{emoji[i]} **{nomi}** ({valore}%)"
+            )
+
+    with c9:
+
+        st.subheader("📉 Peggior rendimento")
+
+        shame_voti = query_voti.copy()
+
+        shame_voti["media"] = (
+            shame_voti["media"]
+            .round(2)
+        )
+
+        shame_voti = shame_voti.sort_values(
+            by="media",
+            ascending=True
+        ).reset_index(drop=True)
+    
+        valori = (
+            shame_voti["media"]
+            .drop_duplicates()
+            .head(3)
+            .tolist()
+        )
+
+        emoji = ["🤡", "🥴", "🫠"]
+
+        for i, valore in enumerate(valori):
+
+            gruppo = shame_voti[
+                shame_voti["media"] == valore
+            ]
+
+            nomi = ", ".join(
+                gruppo["nome"].tolist()
+            )
+
+            st.write(
+                f"{emoji[i]} **{nomi}** ({valore})"
+            )
     
     # --------------------------------------------------------
     # GRAFICI
