@@ -675,6 +675,17 @@ def mostra_registro(titolo, tipo_evento, stagione):
         tipo_evento,
     )
 
+    chiave_data = f"{tipo_evento}_{data_evento}"
+
+    if (
+        "ultima_data_caricata" not in st.session_state
+        or
+        st.session_state.ultima_data_caricata != chiave_data
+    ):
+
+    st.session_state.registro = {}
+    st.session_state.ultima_data_caricata = chiave_data
+
     registro_esistente = not presenze_salvate.empty
 
     if registro_esistente:
