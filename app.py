@@ -1263,18 +1263,17 @@ with tab0:
             gruppo["nome"].tolist()
         )
     
-        with colonne[i]
-            st.markdown(
-                f"## {medaglie[i]}"
-            )
+        colonne[i].markdown(
+            f"## {medaglie[i]}"
+        )
     
-            st.markdown(
-                f"**{nomi}**"
-            )
+        colonne[i].markdown(
+            f"**{nomi}**"
+        )
     
-            st.caption(
-                f"Punteggio {valore}"
-            )
+        colonne[i].caption(
+            f"Punteggio {valore}"
+        )
 
     c6, c7 = st.columns(2)
 
