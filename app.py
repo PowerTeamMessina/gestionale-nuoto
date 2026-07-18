@@ -1186,16 +1186,24 @@ with tab0:
 
     if not query_voti.empty:
 
-        best = query_voti.sort_values(
-            "media",
-            ascending=False
-        ).iloc[0]
+        miglior_rendimento = "-"
+        miglior_media = 0
 
-        miglior_rendimento = best["nome"]
-        miglior_media = round(
-            best["media"],
-            2
-        )
+        if not query_voti.empty:
+
+            miglior_media = round(
+                query_voti["media"].max(),
+                2
+            )
+
+            ex_aequo = query_voti[
+                query_voti["media"]
+                == query_voti["media"].max()
+            ]
+
+            miglior_rendimento = ", ".join(
+                ex_aequo["nome"].tolist()
+            )
 
     # --------------------------------------------------------
     # METRICHE
