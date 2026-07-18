@@ -1253,7 +1253,7 @@ with tab0:
     )
     
     # --------------------------------------------------------
-    # ASSENTI CRONICI
+    # HALL OF SHAME
     # --------------------------------------------------------
 
     st.markdown("---")
@@ -1262,8 +1262,16 @@ with tab0:
 
     classifica_assenze = assenti.copy()
 
+    classifica_assenze["assenze"] = (
+        classifica_assenze["registrazioni"]
+        - classifica_assenze["presenze"]
+    )
+
     classifica_assenze["percentuale_assenze"] = (
-        100 - classifica_assenze["percentuale"]
+        classifica_assenze["assenze"]
+        /
+        classifica_assenze["registrazioni"]
+        * 100
     ).round(1)
 
     classifica_assenze = classifica_assenze.sort_values(
@@ -1301,6 +1309,7 @@ with tab0:
                 "nome",
                 "categoria",
                 "assenze",
+                "registrazioni",
                 "percentuale_assenze"
             ]
         ],
