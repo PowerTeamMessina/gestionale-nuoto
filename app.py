@@ -1342,7 +1342,59 @@ with tab0:
                 use_container_width=True,
                 hide_index=True
             )
-            
+
+    st.markdown("---")
+
+    st.subheader("💀 Classifica assenze")
+
+    classifica_assenze = stats.copy()
+
+    classifica_assenze["percentuale_assenze"] = (
+        100 - classifica_assenze["percentuale"]
+    ).round(1)
+
+    classifica_assenze = classifica_assenze.sort_values(
+        by="percentuale_assenze",
+        ascending=False
+    ).reset_index(drop=True)
+
+    icone = []
+
+    for _, row in classifica_assenze.iterrows():
+
+        p = row["percentuale_assenze"]
+
+        if p >= 70:
+            icone.append("💀💀💀")
+        elif p >= 50:
+            icone.append("🙈")
+        elif p >= 30:
+            icone.append("😴")
+        elif p >= 15:
+            icone.append("🤨")
+        else:
+            icone.append("😇")
+
+    classifica_assenze.insert(
+        0,
+        "Hall of Shame",
+        icone
+    )
+
+    st.dataframe(
+        classifica_assenze[
+            [
+                "Hall of Shame",
+                "nome",
+                "categoria",
+                "assenze",
+                "percentuale_assenze"
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True
+    )
+    
     # --------------------------------------------------------
     # GRAFICI
     # --------------------------------------------------------
