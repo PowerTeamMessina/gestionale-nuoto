@@ -1487,9 +1487,11 @@ with tab0:
         )
     
         colonne[i].markdown(
-            f"<h3 style='text-align:center'>☠️ {valore}</h3>",
+            f"<h3 style='text-align:center'>Punteggio {valore}</h3>",
             unsafe_allow_html=True
         )
+
+     st.markdown("---")
 
     c8, c9 = st.columns(2)
     
