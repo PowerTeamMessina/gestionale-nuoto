@@ -1262,15 +1262,15 @@ with tab0:
         nomi = ", ".join(
             gruppo["nome"].tolist()
         )
-
+    
         with colonnest.markdown(
                 f"## {medaglie[i]}"
             )
-
+    
             st.markdown(
                 f"**{nomi}**"
             )
-
+    
             st.caption(
                 f"Punteggio {valore}"
             )
