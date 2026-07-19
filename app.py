@@ -1161,7 +1161,6 @@ if st.session_state.utente_loggato is None:
 aggiornamento_automatico_giornaliero()
 
 st.write("Admin:", st.session_state.admin)
-st.write("Atleta:", st.session_state.atleta)
 
 stagioni = get_stagioni()
 
