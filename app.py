@@ -608,22 +608,6 @@ def classifica_rendimento_evento(
         posizioni
     )
 
-    storico_visibile["ritardo"] = (
-        storico_visibile["entrata_ritardo"]
-        .map({
-            1: "⏰",
-            0: ""
-        })
-    )
-    
-    storico_visibile["uscita"] = (
-        storico_visibile["uscita_anticipata"]
-        .map({
-            1: "🚪",
-            0: ""
-        })
-    )
-
     st.dataframe(
         ranking[
             [
