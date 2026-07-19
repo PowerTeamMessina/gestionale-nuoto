@@ -2613,20 +2613,6 @@ with tab_area:
             st.session_state.get("atleta", False)
         )
 
-        atleta = pd.read_sql(
-            """
-            SELECT *
-            FROM atleti
-            WHERE id = ?
-            """,
-            conn,
-            params=(
-                st.session_state.utente_loggato,
-            )
-        )
-
-        st.write("ID loggato:", st.session_state.utente_loggato)
-
         controllo = pd.read_sql(
             """
             SELECT id, nome, email, stagione
@@ -2640,6 +2626,12 @@ with tab_area:
         )
         
         st.write(controllo)
+        
+        atleta = controllo.copy()
+        
+        st.success("✅ Query atleta OK")
+        
+        nome = atleta.iloc[0]["nome"]
 
         if atleta.empty:
 
