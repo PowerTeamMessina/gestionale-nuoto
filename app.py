@@ -2754,14 +2754,26 @@ with tab_area:
             axis=1
         )
         
+       storico_visibile["voto_visibile"] = (
+            storico_visibile["voto"]
+            .fillna("")
+            .astype(str)
+        )
+        
+        storico_visibile["commento_visibile"] = (
+            storico_visibile["commento"]
+            .fillna("")
+            .astype(str)
+        )
+        
         storico_visibile.loc[
-            ~storico_visibile["sbloccato"],
-            "voto"
+            ~storico_visibile["autovalutazione_compilata"],
+            "voto_visibile"
         ] = "🔒"
         
         storico_visibile.loc[
-            ~storico_visibile["sbloccato"],
-            "commento"
+            ~storico_visibile["autovalutazione_compilata"],
+            "commento_visibile"
         ] = "Compila prima la tua autovalutazione"
 
         st.markdown("---")
@@ -2815,8 +2827,8 @@ with tab_area:
                     "tipo_evento",
                     "presenza",
                     "Autovalutazione",
-                    "voto",
-                    "commento"
+                    "voto_visibile",
+                    "commento_visibile"
                 ]
             ],
             use_container_width=True,
