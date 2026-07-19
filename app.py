@@ -7,6 +7,7 @@ import json
 import base64
 import requests
 import os
+import secrets
 from datetime import datetime
 
 # ============================================================
@@ -265,14 +266,14 @@ def get_tutti_atleti():
         conn
     )
 
-
 def aggiungi_atleta(
     nome,
     categoria,
     stagione,
-    email,
-    password
+    email
 ):
+
+    password = secrets.token_hex(4)
 
     c.execute(
         """
@@ -295,6 +296,8 @@ def aggiungi_atleta(
     )
 
     conn.commit()
+
+    return password
 
 
 def elimina_atleta(atleta_id):
@@ -1823,10 +1826,6 @@ with tab4:
             email = st.text_input(
                 "Email atleta"
             )
-        
-            password = st.text_input(
-                "Password atleta"
-            )
 
             aggiungi = st.form_submit_button("➕ Aggiungi atleta")
 
@@ -1834,15 +1833,16 @@ with tab4:
                 if nome.strip() == "":
                     st.error("Inserisci il nome dell'atleta.")
                 else:
-                    aggiungi_atleta(
+                    password_generata = aggiungi_atleta(
                         nome.strip(),
                         categoria.strip(),
                         stagione_selezionata,
-                        email.strip(),
-                        password.strip()
+                        email.strip()
                     )
 
-                    st.success("Atleta aggiunto correttamente.")
+                    st.success(
+                        f"Atleta aggiunto. Password generata: {password_generata}"
+                    )
                     st.rerun()
 
         st.markdown("---")
@@ -1862,7 +1862,6 @@ with tab4:
                         "nome",
                         "categoria",
                         "email",
-                        "password",
                         "stagione"
                     ]
                 ],
