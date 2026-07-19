@@ -2669,16 +2669,6 @@ with tab_area:
 
         st.header("👤 Area Atleta")
 
-        st.write(
-            "utente_loggato =",
-            st.session_state.utente_loggato
-        )
-        
-        st.write(
-            "atleta =",
-            st.session_state.get("atleta", False)
-        )
-
         atleta = pd.read_sql(
             """
             SELECT *
@@ -2707,7 +2697,7 @@ with tab_area:
         st.write(
             f"Categoria: {categoria}"
         )
-
+        
         storico_atleta = pd.read_sql(
             """
             SELECT
@@ -2723,49 +2713,12 @@ with tab_area:
             """,
             conn,
             params=(
-                st.session_state.utente_loggato,
+                int(st.session_state.utente_loggato),
                 stagione_selezionata
             )
         )
-
-        if not storico_atleta.empty:
-
-            presenze = int(
-                storico_atleta["presenza"].sum()
-            )
-
-            totale = len(
-                storico_atleta
-            )
-
-            percentuale = round(
-                presenze / totale * 100,
-                1
-            )
-
-            media = round(
-                storico_atleta["voto"]
-                .dropna()
-                .mean(),
-                2
-            )
-
-            c1, c2, c3 = st.columns(3)
-
-            c1.metric(
-                "✅ Presenze",
-                presenze
-            )
-
-            c2.metric(
-                "% Presenza",
-                percentuale
-            )
-
-            c3.metric(
-                "⭐ Media",
-                media
-            )
+        
+        st.write(storico_atleta)
 
 # ============================================================
 # TAB 6 STORICO
