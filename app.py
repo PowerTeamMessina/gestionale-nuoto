@@ -1162,6 +1162,28 @@ aggiornamento_automatico_giornaliero()
 
 st.write("Admin:", st.session_state.admin)
 
+if (
+    st.session_state.admin
+    or
+    st.session_state.atleta
+):
+
+    if st.button(
+        "🚪 Logout",
+        key="logout"
+    ):
+
+        st.session_state.admin = False
+
+        st.session_state.atleta = False
+
+        st.session_state.utente_loggato = None
+
+        if "password_temp" in st.session_state:
+            del st.session_state["password_temp"]
+
+        st.rerun()
+
 stagioni = get_stagioni()
 
 indice = 0
