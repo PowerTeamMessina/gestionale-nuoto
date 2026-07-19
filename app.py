@@ -1291,9 +1291,9 @@ def is_loggato():
 def is_staff():
 
     return (
-        st.session_state.get("admin", False)
+        st.session_state.admin
         or
-        st.session_state.get("tecnico", False)
+        st.session_state.tecnico
     )
 
 def is_tecnico():
