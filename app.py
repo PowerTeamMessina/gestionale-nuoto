@@ -3293,7 +3293,6 @@ with tab7:
         st.warning(
             "🔒 Accesso riservato agli amministratori."
         )
-        pass
 
     else:
 
