@@ -1242,7 +1242,7 @@ st.session_state.stagione_corrente = (
         "🏁 Archivio Gare",
         "🗂️ Storico",
         "⚙️ Stagioni",
-        "💾 Backup",
+        "💾 Backup"
 ])
 
 # ============================================================
