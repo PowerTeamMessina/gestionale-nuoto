@@ -1103,7 +1103,7 @@ def check_admin():
     st.markdown("---")
     st.subheader("🔐 Accesso amministratore")
 
-    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
+    if is_staff():
 
         password = st.text_input(
             "Password amministratore",
