@@ -3149,152 +3149,164 @@ with tab8:
 
 with tab10:
 
-    st.header("📋 Registro Settimanale")
+    if not (
+        st.session_state.get("admin", False)
+        or
+        st.session_state.get("atleta", False)
+    ):
 
-    data_riferimento = st.date_input(
-        "Seleziona una data della settimana"
-    )
-
-    inizio_settimana = (
-        pd.Timestamp(data_riferimento)
-        - pd.Timedelta(days=data_riferimento.weekday())
-    )
-
-    fine_settimana = (
-        inizio_settimana
-        + pd.Timedelta(days=6)
-    )
-
-    st.info(
-        f"Settimana dal "
-        f"{inizio_settimana.date()} "
-        f"al "
-        f"{fine_settimana.date()}"
-    )
-
-    storico = pd.read_sql(
-        """
-        SELECT
-            a.nome,
-            p.data,
-            p.presenza
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE
-            p.stagione = ?
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    if storico.empty:
-
-        st.info(
-            "Nessuna registrazione disponibile."
+        st.warning(
+            "🔒 Effettua il login per accedere al Registro Settimanale."
         )
 
     else:
 
-        storico["data"] = pd.to_datetime(
-            storico["data"]
+        st.header("📋 Registro Settimanale")
+
+        data_riferimento = st.date_input(
+            "Seleziona una data della settimana"
         )
-
-        storico = storico[
-            (
-                storico["data"]
-                >= inizio_settimana
-            )
-            &
-            (
-                storico["data"]
-                <= fine_settimana
-            )
-        ]
-
+    
+        inizio_settimana = (
+            pd.Timestamp(data_riferimento)
+            - pd.Timedelta(days=data_riferimento.weekday())
+        )
+    
+        fine_settimana = (
+            inizio_settimana
+            + pd.Timedelta(days=6)
+        )
+    
+        st.info(
+            f"Settimana dal "
+            f"{inizio_settimana.date()} "
+            f"al "
+            f"{fine_settimana.date()}"
+        )
+    
+        storico = pd.read_sql(
+            """
+            SELECT
+                a.nome,
+                p.data,
+                p.presenza
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE
+                p.stagione = ?
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        )
+    
         if storico.empty:
-
+    
             st.info(
-                "Nessuna attività nella settimana selezionata."
+                "Nessuna registrazione disponibile."
             )
-
+    
         else:
-
-            giorni = [
-                inizio_settimana + pd.Timedelta(days=i)
-                for i in range(7)
+    
+            storico["data"] = pd.to_datetime(
+                storico["data"]
+            )
+    
+            storico = storico[
+                (
+                    storico["data"]
+                    >= inizio_settimana
+                )
+                &
+                (
+                    storico["data"]
+                    <= fine_settimana
+                )
             ]
-
-            risultati = []
-
-            for atleta in sorted(
-                storico["nome"].unique()
-            ):
-
-                riga = {
-                    "Atleta": atleta
-                }
-
-                presenti = 0
-                totale = 0
-
-                dati_atleta = storico[
-                    storico["nome"] == atleta
+    
+            if storico.empty:
+    
+                st.info(
+                    "Nessuna attività nella settimana selezionata."
+                )
+    
+            else:
+    
+                giorni = [
+                    inizio_settimana + pd.Timedelta(days=i)
+                    for i in range(7)
                 ]
-
-                for giorno in giorni:
-
-                    giorno_str = giorno.strftime(
-                        "%d/%m"
-                    )
-
-                    giorno_dati = dati_atleta[
-                        dati_atleta["data"].dt.date
-                        == giorno.date()
+    
+                risultati = []
+    
+                for atleta in sorted(
+                    storico["nome"].unique()
+                ):
+    
+                    riga = {
+                        "Atleta": atleta
+                    }
+    
+                    presenti = 0
+                    totale = 0
+    
+                    dati_atleta = storico[
+                        storico["nome"] == atleta
                     ]
-
-                    if giorno_dati.empty:
-
-                        riga[giorno_str] = "-"
-
-                    else:
-
-                        presenza = int(
-                            giorno_dati[
-                                "presenza"
-                            ].max()
+    
+                    for giorno in giorni:
+    
+                        giorno_str = giorno.strftime(
+                            "%d/%m"
                         )
-
-                        if presenza == 1:
-
-                            riga[giorno_str] = "✅"
-                            presenti += 1
-
+    
+                        giorno_dati = dati_atleta[
+                            dati_atleta["data"].dt.date
+                            == giorno.date()
+                        ]
+    
+                        if giorno_dati.empty:
+    
+                            riga[giorno_str] = "-"
+    
                         else:
-
-                            riga[giorno_str] = "❌"
-
-                        totale += 1
-
-                riga["Totale"] = (
-                    f"{presenti}/{totale}"
-                    if totale > 0
-                    else "-"
+    
+                            presenza = int(
+                                giorno_dati[
+                                    "presenza"
+                                ].max()
+                            )
+    
+                            if presenza == 1:
+    
+                                riga[giorno_str] = "✅"
+                                presenti += 1
+    
+                            else:
+    
+                                riga[giorno_str] = "❌"
+    
+                            totale += 1
+    
+                    riga["Totale"] = (
+                        f"{presenti}/{totale}"
+                        if totale > 0
+                        else "-"
+                    )
+    
+                    risultati.append(
+                        riga
+                    )
+    
+                df_settimana = pd.DataFrame(
+                    risultati
                 )
-
-                risultati.append(
-                    riga
+    
+                st.dataframe(
+                    df_settimana,
+                    use_container_width=True,
+                    hide_index=True
                 )
-
-            df_settimana = pd.DataFrame(
-                risultati
-            )
-
-            st.dataframe(
-                df_settimana,
-                use_container_width=True,
-                hide_index=True
-            )
     
 # ============================================================
 # TAB 12 - ANALISI STAGIONE
