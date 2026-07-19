@@ -4389,7 +4389,7 @@ with tab12:
                 """,
                 conn,
                 params=(
-                    ,
+                    atleta_scheda,
                     stagione_selezionata
                 )
             )
@@ -4408,7 +4408,7 @@ with tab12:
                 gare_disputate = len(
                     storico_atleta[
                         storico_atleta["tipo_evento"]
-                        == "Gare"
+                       atleta_scheda == "Gare"
                     ]
                 )
     
