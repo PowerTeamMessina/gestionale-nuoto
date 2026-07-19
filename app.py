@@ -340,6 +340,32 @@ def aggiorna_categoria_atleta(
 
     conn.commit()
 
+def aggiorna_dati_atleta(
+    atleta_id,
+    categoria,
+    email,
+    password
+):
+
+    c.execute(
+        """
+        UPDATE atleti
+        SET
+            categoria = ?,
+            email = ?,
+            password = ?
+        WHERE id = ?
+        """,
+        (
+            categoria,
+            email,
+            password,
+            atleta_id
+        )
+    )
+
+    conn.commit()
+
 def classifica_rendimento_evento(
     storico,
     tipo_evento
@@ -1871,32 +1897,76 @@ with tab4:
 
             st.markdown("---")
 
-            # === MODIFICA CATEGORIA ===
-            st.subheader("✏️ Modifica categoria")
-
-            opzioni = {
-                f"{row['nome']} ({pulisci_categoria(row['categoria'])})": int(row["id"])
-                for _, row in df_atleti.iterrows()
-            }
+            # === MODIFICA DATI ATLETA ===
+            st.subheader("✏️ Modifica dati atleta")
 
             atleta_scelto = st.selectbox(
                 "Atleta",
                 list(opzioni.keys()),
-                key="sel_atleta_categoria",
+                key="sel_atleta_modifica"
             )
-
+            
+            id_atleta = opzioni[atleta_scelto]
+            
+            dati_atleta = df_atleti[
+                df_atleti["id"] == id_atleta
+            ].iloc[0]
+            
             nuova_categoria = st.text_input(
-                "Nuova categoria",
-                key="nuova_categoria",
+                "Categoria",
+                value=dati_atleta["categoria"]
+            )
+            
+            nuova_email = st.text_input(
+                "Email",
+                value=dati_atleta["email"]
+                if pd.notna(dati_atleta["email"])
+                else ""
+            )
+            
+            password_corrente = (
+                dati_atleta["password"]
+                if pd.notna(dati_atleta["password"])
+                else ""
+            )
+            
+            if "password_temp" in st.session_state:
+            
+                password_corrente = (
+                    st.session_state.password_temp
+                )
+            
+            nuova_password = st.text_input(
+                "Password",
+                value=password_corrente
             )
 
-            if st.button("💾 Aggiorna categoria"):
-                aggiorna_categoria_atleta(
-                    opzioni[atleta_scelto],
-                    nuova_categoria,
+            if st.button(
+                "🔄 Rigenera password",
+                key="rigenera_password"
+            ):
+            
+                nuova_password = secrets.token_hex(4)
+            
+                st.session_state.password_temp = (
+                    nuova_password
                 )
-
-                st.success("Categoria aggiornata.")
+            
+                st.rerun()
+            
+            if st.button("💾 Aggiorna dati atleta"):
+            
+                aggiorna_dati_atleta(
+                    id_atleta,
+                    nuova_categoria,
+                    nuova_email,
+                    nuova_password
+                )
+            
+                st.success(
+                    "Dati aggiornati."
+                )
+            
                 st.rerun()
 
             st.markdown("---")
