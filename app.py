@@ -2659,6 +2659,8 @@ with tab_area:
         
             st.stop()
         
+        st.success("Arrivato qui ✅")
+
         nome = atleta.iloc[0]["nome"]
 
         categoria = atleta.iloc[0]["categoria"]
