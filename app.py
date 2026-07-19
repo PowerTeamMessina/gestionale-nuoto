@@ -3290,7 +3290,7 @@ with tab7:
         pass
 
     else:
-        st.markdown("---")
+
         st.subheader("⚙️ Limiti del sistema")
 
         max_stagioni = int(
@@ -3377,6 +3377,8 @@ with tab7:
                 "👀 Solo l'amministratore può modificare questi valori."
             )
 
+        st.markdown("---")
+        
         st.header("⚙️ Gestione Stagioni")
 
         # =====================================================
