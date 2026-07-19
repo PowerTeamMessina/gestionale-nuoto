@@ -609,15 +609,20 @@ def classifica_rendimento_evento(
     )
     
     st.dataframe(
-        ranking[
-            [
-                "data",
-                "tipo_evento",
-                "presenza",
-                "voto",
-                "commento"
-            ]
-        ],
+        st.dataframe(
+            ranking[
+                [
+                    "Posizione",
+                    "nome",
+                    "categoria",
+                    "media_voti",
+                    "presenze",
+                    "percentuale"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
         use_container_width=True,
         hide_index=True
     )
