@@ -1167,7 +1167,7 @@ st.title("🏊 Gestionale Nuoto Power Team 🏊")
 
 st.markdown(
     """
-    *created by Gabriele Grifò
+    *created by @gabgrifo
     """
 )
 
@@ -1185,9 +1185,9 @@ aggiornamento_automatico_giornaliero()
 st.write("Admin:", st.session_state.admin)
 
 if (
-    st.session_state.admin
+    st.session_state.get("admin", False)
     or
-    st.session_state.atleta
+    st.session_state.get("atleta", False)
 ):
 
     if st.button(
