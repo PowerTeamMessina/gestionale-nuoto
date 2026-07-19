@@ -1229,9 +1229,10 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-(tab0, tab5, tab10, tab1, tab2, tab3, tab12, tab4, tab6, tab7, tab8) = st.tabs([
+(tab0, tab5, tab_area, tab10, tab1, tab2, tab3, tab12, tab4, tab6, tab7, tab8) = st.tabs([
         "🏠 Dashboard",
         "📊 Classifiche",
+        "👤 Area Atleta",
         "📋 Registro settimanale",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
@@ -2572,6 +2573,103 @@ with tab5:
         storico,
         "Gare"
     )
+
+# ============================================================
+# AREA ATLETA
+# ============================================================
+
+with tab_area:
+
+    if not st.session_state.get("atleta", False):
+
+        st.warning(
+            "🔒 Accesso riservato agli atleti."
+        )
+
+    else:
+
+        st.header("👤 Area Atleta")
+
+        atleta = pd.read_sql(
+            """
+            SELECT *
+            FROM atleti
+            WHERE id = ?
+            """,
+            conn,
+            params=(
+                st.session_state.utente_loggato,
+            )
+        )
+
+        nome = atleta.iloc[0]["nome"]
+
+        categoria = atleta.iloc[0]["categoria"]
+
+        st.subheader(nome)
+
+        st.write(
+            f"Categoria: {categoria}"
+        )
+
+        storico_atleta = pd.read_sql(
+            """
+            SELECT
+                data,
+                tipo_evento,
+                presenza,
+                voto,
+                commento
+            FROM presenze
+            WHERE atleta_id = ?
+            AND stagione = ?
+            ORDER BY data DESC
+            """,
+            conn,
+            params=(
+                st.session_state.utente_loggato,
+                stagione_selezionata
+            )
+        )
+
+        if not storico_atleta.empty:
+
+            presenze = int(
+                storico_atleta["presenza"].sum()
+            )
+
+            totale = len(
+                storico_atleta
+            )
+
+            percentuale = round(
+                presenze / totale * 100,
+                1
+            )
+
+            media = round(
+                storico_atleta["voto"]
+                .dropna()
+                .mean(),
+                2
+            )
+
+            c1, c2, c3 = st.columns(3)
+
+            c1.metric(
+                "✅ Presenze",
+                presenze
+            )
+
+            c2.metric(
+                "% Presenza",
+                percentuale
+            )
+
+            c3.metric(
+                "⭐ Media",
+                media
+            )
 
 # ============================================================
 # TAB 6 STORICO
