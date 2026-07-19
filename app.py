@@ -3159,7 +3159,7 @@ with tab_area:
 # ============================================================
 
 with tab6:
-    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
+    if not is_staff():
         
         st.warning(
             "🔒 Accesso riservato agli amministratori."
@@ -3258,7 +3258,7 @@ with tab6:
 
 with tab7:
 
-    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
+    if not is_staff():
         
         st.warning(
             "🔒 Accesso riservato agli amministratori."
@@ -3456,7 +3456,7 @@ with tab7:
 
 with tab8:
 
-    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
+    if not is_staff():
 
         st.warning(
             "🔒 Backup disponibile solo agli amministratori."
@@ -3730,7 +3730,7 @@ with tab8:
 
 with tab10:
 
-    if not (st.session_state.get("admin", False) or st.session_state.get("tecnico", False) or st.session_state.get("atleta", False)):
+    if not is_staff():
 
         st.warning(
             "🔒 Effettua il login per accedere al Registro Settimanale."
@@ -3891,7 +3891,7 @@ with tab10:
 
 with tab12:
 
-    if not st.session_state.get("admin", False):
+    if not is_staff():
 
         st.warning(
             "🔒 Accesso riservato agli amministratori."
