@@ -1122,6 +1122,14 @@ def login():
             )
         )
 
+        if atleta.empty:
+            st.warning(
+                "Nessun atleta associato al login."
+            )
+            st.stop()
+
+        nome = atleta.iloc[0]["nome"]
+
         if not atleta.empty:
 
             st.session_state.utente_loggato = (
