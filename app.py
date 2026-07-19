@@ -4370,6 +4370,15 @@ with tab12:
                 analisi["data"]
                 .dt.strftime("%Y-%m")
             )
+
+            analisi_allenamenti = analisi[
+                analisi["tipo_evento"].isin(
+                    [
+                        "Allenamento in vasca",
+                        "Allenamento a secco"
+                    ]
+                )
+            ].copy()
     
             # ----------------------------------------------------
             # ANALISI MENSILE
