@@ -2335,6 +2335,11 @@ with tab5:
                 storico["tipo_evento"] == filtro
             ]
 
+        st.write(
+            storico["tipo_evento"]
+            .value_counts(dropna=False)
+        )
+
         storico_allenamenti = storico[
             ~storico["tipo_evento"].str.contains(
                 "gara",
