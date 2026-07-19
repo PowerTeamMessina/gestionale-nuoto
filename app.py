@@ -3737,11 +3737,7 @@ with tab8:
 
 with tab10:
 
-    if not (
-        st.session_state.get("admin", False)
-        or
-        st.session_state.get("atleta", False)
-    ):
+    if not (st.session_state.get("admin", False) or st.session_state.get("atleta", False)):
 
         st.warning(
             "🔒 Effettua il login per accedere al Registro Settimanale."
