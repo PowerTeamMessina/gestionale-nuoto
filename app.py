@@ -4407,8 +4407,8 @@ with tab12:
     
                 gare_disputate = len(
                     storico_atleta[
-                        storico_atleta["tipo_evento"]
-                       atleta_scheda == "Gare"
+                        storico_atleta["tipo_evento"],
+                        atleta_scheda == "Gare"
                     ]
                 )
     
