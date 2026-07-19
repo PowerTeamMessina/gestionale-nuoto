@@ -2272,6 +2272,20 @@ with tab5:
 
     else:
         
+        st.write(
+            storico["tipo_evento"]
+            .value_counts(dropna=False)
+        )
+
+        storico_allenamenti = storico[
+            storico["tipo_evento"].isin(
+                [
+                    "Allenamento in vasca",
+                    "Allenamento a secco"
+                ]
+            )
+        ].copy()
+        
         stats_presenze = storico_allenamenti.groupby(
             ["nome", "categoria"],
             dropna=False
