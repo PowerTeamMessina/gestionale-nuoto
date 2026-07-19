@@ -1296,6 +1296,12 @@ def is_staff():
         st.session_state.get("tecnico", False)
     )
 
+def is_tecnico():
+
+    return (
+        st.session_state.get("tecnico", False)
+    )
+
 # ============================================================
 # HEADER
 # ============================================================
@@ -3357,7 +3363,7 @@ with tab7:
                     "✅ Limiti aggiornati."
                 )
 
-        elif st.session_state.get("tecnico", False):
+        if is_tecnico():
 
             st.number_input(
                 "Numero massimo stagioni",
