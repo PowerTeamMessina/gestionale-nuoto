@@ -3156,6 +3156,34 @@ with tab_area:
                         use_container_width=True
                     )
 
+                    media_admin_periodo = round(
+                        dati_grafico["voto"]
+                        .dropna()
+                        .mean(),
+                        2
+                    )
+                    
+                    media_autovalutazione_periodo = round(
+                        dati_grafico["autovalutazione"]
+                        .dropna()
+                        .mean(),
+                        2
+                    )
+                    
+                    st.markdown("---")
+                    
+                    c_media1, c_media2 = st.columns(2)
+                    
+                    c_media1.metric(
+                        "🔴 Media voto allenatore",
+                        media_admin_periodo
+                    )
+                    
+                    c_media2.metric(
+                        "🔵 Media autovalutazione atleta",
+                        media_autovalutazione_periodo
+                    )
+
             else:
 
                 st.info(
