@@ -2754,23 +2754,23 @@ with tab_area:
             axis=1
         )
         
-       storico_visibile["voto_visibile"] = (
+        storico_visibile["voto_visibile"] = (
             storico_visibile["voto"]
             .fillna("")
             .astype(str)
         )
-        
+
         storico_visibile["commento_visibile"] = (
             storico_visibile["commento"]
             .fillna("")
             .astype(str)
         )
-        
+
         storico_visibile.loc[
-            ~storico_visibile["autovalutazione_compilata"],
+            ~storico_visibile["sbloccato"],
             "voto_visibile"
         ] = "🔒"
-        
+
         storico_visibile.loc[
             ~storico_visibile["autovalutazione_compilata"],
             "commento_visibile"
