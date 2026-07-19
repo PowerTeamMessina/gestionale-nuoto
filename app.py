@@ -4298,7 +4298,7 @@ with tab12:
     
             st.subheader("👤 Scheda atleta avanzata")
     
-             = st.selectbox(
+            atleta_scheda = st.selectbox(
                 "Seleziona atleta",
                 sorted(stats["nome"].unique()),
                 key="scheda_atleta"
