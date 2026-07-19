@@ -2009,7 +2009,7 @@ with tab1:
 
 with tab2:
 
-    if st.session_state.admin:
+    if not is_staff():
 
         mostra_registro("📋 Allenamento a secco", "Allenamento a secco", stagione_selezionata)
         pass
@@ -2026,7 +2026,7 @@ with tab2:
 
 with tab3:
 
-    if st.session_state.admin:
+    if not is_staff():
 
         mostra_registro("🏁 Gare", "Gare", stagione_selezionata)
         pass
@@ -2043,7 +2043,7 @@ with tab3:
 
 with tab4:
 
-    if st.session_state.admin:
+    if not is_staff():
 
         st.info("Per modificare gli atleti è necessario l'accesso amministratore.")
 
