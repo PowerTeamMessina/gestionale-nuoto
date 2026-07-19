@@ -2810,14 +2810,26 @@ with tab_area:
             }
         )
         
+        storico_visibile["voto_visibile"] = (
+            storico_visibile["voto"]
+            .fillna("")
+            .astype(str)
+        )
+        
+        storico_visibile["commento_visibile"] = (
+            storico_visibile["commento"]
+            .fillna("")
+            .astype(str)
+        )
+        
         storico_visibile.loc[
             ~storico_visibile["autovalutazione_compilata"],
-            "voto"
+            "voto_visibile"
         ] = "🔒"
         
         storico_visibile.loc[
             ~storico_visibile["autovalutazione_compilata"],
-            "commento"
+            "commento_visibile"
         ] = "Compila prima la tua autovalutazione"
         
         st.dataframe(
