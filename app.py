@@ -1127,13 +1127,15 @@ def login():
             st.session_state.utente_loggato = (
                 atleta.iloc[0]["id"]
             )
-
+        
             st.session_state.admin = False
-
+        
+            st.session_state.atleta = True
+        
             st.success(
                 f"Benvenuto {atleta.iloc[0]['nome']}"
             )
-
+        
             st.rerun()
 
         st.error(
