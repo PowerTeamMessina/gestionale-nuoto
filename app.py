@@ -1125,13 +1125,20 @@ def check_admin():
 
     else:
 
+        else:
+
         st.success(
-            "✅ Modalità amministratore attiva"
+            "✅ Modalità amministrativa attiva"
         )
-
-        if st.button("🚪 Logout amministratore"):
-
+    
+        if st.button("🚪 Logout"):
+    
             st.session_state.admin = False
+            st.session_state.tecnico = False
+            st.session_state.atleta = False
+    
+            st.session_state.utente_loggato = None
+    
             st.rerun()
 
 def login():
