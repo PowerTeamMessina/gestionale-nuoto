@@ -1920,6 +1920,9 @@ with tab0:
           )
         GROUP BY a.nome
         """,
+        conn,
+        params=(stagione_selezionata,)
+    )
 
     if not grafico_presenze.empty:
     
