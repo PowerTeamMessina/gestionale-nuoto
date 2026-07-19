@@ -2011,14 +2011,13 @@ with tab2:
 
     if not is_staff():
 
-        mostra_registro("📋 Allenamento a secco", "Allenamento a secco", stagione_selezionata)
-        pass
-        
-    else:
-        
         st.warning(
             "🔒 Accesso riservato agli amministratori."
         )
+        
+    else:
+        
+        mostra_registro("📋 Allenamento a secco", "Allenamento a secco", stagione_selezionata)
 
 # ============================================================
 # TAB 3
@@ -2028,14 +2027,13 @@ with tab3:
 
     if not is_staff():
 
-        mostra_registro("🏁 Gare", "Gare", stagione_selezionata)
-        pass
+       t.warning(
+              "🔒 Accesso riservato agli amministratori."
+        )
         
     else:
         
-        st.warning(
-              "🔒 Accesso riservato agli amministratori."
-        )
+        mostra_registro("🏁 Gare", "Gare", stagione_selezionata)
 
 # ============================================================
 # TAB 4 ATLETI
