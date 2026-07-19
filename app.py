@@ -2626,6 +2626,14 @@ with tab_area:
 
         st.write(atleta)
 
+        if atleta.empty:
+
+            st.error(
+                f"Nessun atleta trovato con ID {st.session_state.utente_loggato}"
+            )
+        
+            st.stop()
+        
         nome = atleta.iloc[0]["nome"]
 
         categoria = atleta.iloc[0]["categoria"]
