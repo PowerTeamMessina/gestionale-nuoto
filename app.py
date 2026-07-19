@@ -1900,6 +1900,11 @@ with tab4:
             # === MODIFICA DATI ATLETA ===
             st.subheader("✏️ Modifica dati atleta")
 
+            opzioni = {
+                f"{row['nome']} ({pulisci_categoria(row['categoria'])})": int(row["id"])
+                for _, row in df_atleti.iterrows()
+            }
+
             atleta_scelto = st.selectbox(
                 "Atleta",
                 list(opzioni.keys()),
