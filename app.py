@@ -1753,46 +1753,54 @@ with tab0:
 
     st.markdown("---")
 
-    st.subheader("📉 Peggior rendimento")
+    st.subheader("🚨 Assenti cronici")
 
-    podio = query_voti.copy()
-    podio["media"] = (
-        podio["media"]
-        .round(2)
-    )
-
+    podio = query_dashboard.copy()
+    
+    podio["percentuale"] = (
+        podio["presenze"]
+        /
+        podio["registrazioni"]
+        * 100
+    ).round(1)
+    
     podio = podio.sort_values(
-        by="media",
+        by="percentuale",
         ascending=True
     )
     
     valori = (
-        podio["media"]
+        podio["percentuale"]
         .drop_duplicates()
         .head(3)
         .tolist()
     )
-
+    
     medaglie = ["🤡", "🥴", "🫠"]
-
+    
     for i, valore in enumerate(valori):
-
+    
         gruppo = podio[
-            podio["media"] == valore
+            podio["percentuale"] == valore
         ]
-
+    
         nomi = ", ".join(
             gruppo["nome"].tolist()
         )
-
+    
+        assenze_medie = round(
+            100 - valore,
+            1
+        )
+    
         st.markdown(
             f"### {medaglie[i]} {nomi}"
         )
-
-        st.caption(
-            f"Media voto: {valore}"
-        )
     
+        st.caption(
+            f"{assenze_medie}% assenze"
+        )
+        
     # --------------------------------------------------------
     # GRAFICI
     # --------------------------------------------------------
