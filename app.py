@@ -3288,21 +3288,6 @@ with tab6:
 
 with tab7:
 
-    st.write(
-        "Admin:",
-        st.session_state.get("admin", False)
-    )
-    
-    st.write(
-        "Tecnico:",
-        st.session_state.get("tecnico", False)
-    )
-    
-    st.write(
-        "is_admin():",
-        is_admin()
-    )
-
     if not is_staff():
         
         st.warning(
@@ -3313,11 +3298,101 @@ with tab7:
 
         st.header("⚙️ Limiti del sistema")
 
-        st.success("✅ BLOCCO LIMITI CARICATO")
+        max_stagioni = int(
+            pd.read_sql(
+                """
+                SELECT valore
+                FROM configurazione
+                WHERE chiave = 'max_stagioni'
+                """,
+                conn
+            ).iloc[0]["valore"]
+        )
         
-        st.write("Admin:", st.session_state.get("admin", False))
-        st.write("Tecnico:", st.session_state.get("tecnico", False))
+        max_atleti = int(
+            pd.read_sql(
+                """
+                SELECT valore
+                FROM configurazione
+                WHERE chiave = 'max_atleti_stagione'
+                """,
+                conn
+            ).iloc[0]["valore"]
+        )
         
+        # ------------------------------------------------
+        # ADMIN
+        # ------------------------------------------------
+        
+        if is_admin():
+        
+            nuovo_max_stagioni = st.number_input(
+                "Numero massimo stagioni",
+                min_value=1,
+                max_value=100,
+                value=max_stagioni,
+                key="admin_max_stagioni"
+            )
+        
+            nuovo_max_atleti = st.number_input(
+                "Numero massimo atleti per stagione",
+                min_value=1,
+                max_value=1000,
+                value=max_atleti,
+                key="admin_max_atleti"
+            )
+        
+            if st.button(
+                "💾 Salva limiti",
+                key="salva_limiti"
+            ):
+        
+                c.execute(
+                    """
+                    UPDATE configurazione
+                    SET valore = ?
+                    WHERE chiave = 'max_stagioni'
+                    """,
+                    (str(nuovo_max_stagioni),)
+                )
+        
+                c.execute(
+                    """
+                    UPDATE configurazione
+                    SET valore = ?
+                    WHERE chiave = 'max_atleti_stagione'
+                    """,
+                    (str(nuovo_max_atleti),)
+                )
+        
+                conn.commit()
+        
+                st.success(
+                    "✅ Limiti aggiornati."
+                )
+        
+        # ------------------------------------------------
+        # TECNICO
+        # ------------------------------------------------
+        
+        elif st.session_state.get("tecnico", False):
+        
+            c1, c2 = st.columns(2)
+        
+            c1.metric(
+                "Numero massimo stagioni",
+                max_stagioni
+            )
+        
+            c2.metric(
+                "Numero massimo atleti per stagione",
+                max_atleti
+            )
+        
+            st.info(
+                "👀 Solo l'amministratore può modificare questi valori."
+            )
+                
         st.markdown("---")
         
         st.header("⚙️ Gestione Stagioni")
