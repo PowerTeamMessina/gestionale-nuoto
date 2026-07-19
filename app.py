@@ -2981,8 +2981,6 @@ with tab_area:
                         "data",
                         "tipo_evento",
                         "presenza",
-                        "ritardo",
-                        "uscita",
                         "voto",
                         "commento"
                     ]
