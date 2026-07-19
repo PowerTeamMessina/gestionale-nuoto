@@ -1992,7 +1992,7 @@ with tab0:
 # ============================================================
 
 with tab1:
-    if not (st.session_state.get("admin", False) or st.session_state.get("tecnico", False)):
+    if not (st.session_state.get("admin", False)):
         st.warning(
             "🔒 Accesso riservato agli amministratori."
         )
