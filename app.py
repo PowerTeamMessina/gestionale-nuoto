@@ -2783,19 +2783,24 @@ with tab_area:
         storico_atleta = pd.read_sql(
             """
             SELECT
-                data,
-                tipo_evento,
-                presenza,
-                voto,
-                commento
-            FROM presenze
-            WHERE atleta_id = ?
-            AND stagione = ?
-            ORDER BY data DESC
+                p.data,
+                p.tipo_evento,
+                p.presenza,
+                p.entrata_ritardo,
+                p.uscita_anticipata,
+                p.voto,
+                p.commento
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE
+                a.nome = ?
+                AND p.stagione = ?
+            ORDER BY p.data DESC
             """,
             conn,
             params=(
-                int(st.session_state.utente_loggato),
+                atleta_scheda,
                 stagione_selezionata
             )
         )
