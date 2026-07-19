@@ -2338,6 +2338,15 @@ with tab5:
 
         if filtro != "Tutti":
 
+            storico_allenamenti = storico[
+                storico["tipo_evento"].isin(
+                    [
+                        "Allenamento in vasca",
+                        "Allenamento a secco"
+                    ]
+                )
+            ].copy()
+
             storico = storico[
                 storico["tipo_evento"] == filtro
             ]
@@ -3967,7 +3976,6 @@ with tab10:
 
 with tab12:
 
-
     if not st.session_state.get("admin", False):
 
         st.warning(
@@ -4020,7 +4028,7 @@ with tab12:
                     storico["tipo_evento"] == filtro
                 ]
     
-            stats = storico.groupby(
+            stats_presenze = storico_allenamenti.groupby(
                 ["nome", "categoria"],
                 dropna=False
             ).agg(
@@ -4031,13 +4039,28 @@ with tab12:
                 presenze=(
                     "presenza",
                     "sum"
-                ),
+                )
+            ).reset_index()
+            
+            stats_voti = storico.groupby(
+                ["nome", "categoria"],
+                dropna=False
+            ).agg(
                 media_voti=(
                     "voto",
                     "mean"
                 )
             ).reset_index()
-    
+            
+            stats = stats_presenze.merge(
+                stats_voti,
+                on=[
+                    "nome",
+                    "categoria"
+                ],
+                how="left"
+            )
+                
             stats["assenze"] = (
                 stats["registrazioni"]
                 - stats["presenze"]
@@ -4187,6 +4210,15 @@ with tab12:
                     stagione_selezionata
                 )
             )
+
+            storico_atleta_allenamenti = storico_atleta[
+                storico_atleta["tipo_evento"].isin(
+                    [
+                        "Allenamento in vasca",
+                        "Allenamento a secco"
+                    ]
+                )
+            ].copy()
     
             if not storico_atleta.empty:
     
@@ -4206,7 +4238,9 @@ with tab12:
                 # GRAFICO PRESENZE
                 # -----------------------------------------
     
-                grafico_presenze = storico_atleta.copy()
+                grafico_presenze = (
+                    storico_atleta_allenamenti.copy()
+                )
     
                 grafico_presenze["data"] = pd.to_datetime(
                     grafico_presenze["data"]
@@ -4310,6 +4344,15 @@ with tab12:
             conn,
             params=(stagione_selezionata,)
         )
+
+        analisi_allenamenti = analisi[
+            analisi["tipo_evento"].isin(
+                [
+                    "Allenamento in vasca",
+                    "Allenamento a secco"
+                ]
+            )
+        ].copy()
     
         if analisi.empty:
     
@@ -4332,7 +4375,7 @@ with tab12:
             # ANALISI MENSILE
             # ----------------------------------------------------
     
-            mensile = analisi.groupby(
+            mensile = analisi_allenamenti.groupby(
                 "mese"
             ).agg(
                 registrazioni=(
@@ -4430,7 +4473,7 @@ with tab12:
                 "🏊 Confronto attività"
             )
     
-            confronto = analisi.groupby(
+            confronto = analisi_allenamenti.groupby(
                 "tipo_evento"
             ).agg(
                 registrazioni=(
