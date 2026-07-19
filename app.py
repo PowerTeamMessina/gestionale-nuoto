@@ -1141,10 +1141,16 @@ def login():
         )
 
 def is_admin():
-    return st.session_state.admin
+    return st.session_state.get(
+        "admin",
+        False
+    )
 
 def is_atleta():
-    return st.session_state.atleta
+    return st.session_state.get(
+        "atleta",
+        False
+    )
 
 def is_loggato():
     return (
