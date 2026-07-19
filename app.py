@@ -2043,8 +2043,6 @@ with tab4:
 
     if is_staff():
 
-        st.info("Per modificare gli atleti è necessario l'accesso amministratore.")
-
         st.header("👥 Gestione Atleti")
 
         # === FORM NUOVO ATLETA ===
