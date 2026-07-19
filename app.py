@@ -2641,16 +2641,6 @@ with tab_area:
         
         st.write(controllo)
 
-        tutti = pd.read_sql(
-            """
-            SELECT id, nome, email, stagione
-            FROM atleti
-            """,
-            conn
-        )
-        
-        st.write(tutti)
-
         if atleta.empty:
 
             st.error(
