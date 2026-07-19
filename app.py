@@ -3320,6 +3320,26 @@ with tab7:
                 conn
             ).iloc[0]["valore"]
         )
+
+        if is_tecnico():
+
+            st.number_input(
+                "Numero massimo stagioni",
+                value=max_stagioni,
+                disabled=True,
+                key="max_stagioni_view"
+            )
+        
+            st.number_input(
+                "Numero massimo atleti per stagione",
+                value=max_atleti,
+                disabled=True,
+                key="max_atleti_view"
+            )
+        
+            st.info(
+                "👀 Solo l'amministratore può modificare questi valori."
+            )
         
         if is_admin():
         
@@ -3362,26 +3382,6 @@ with tab7:
                 st.success(
                     "✅ Limiti aggiornati."
                 )
-
-        if is_tecnico():
-
-            st.number_input(
-                "Numero massimo stagioni",
-                value=max_stagioni,
-                disabled=True,
-                key="max_stagioni_view"
-            )
-        
-            st.number_input(
-                "Numero massimo atleti per stagione",
-                value=max_atleti,
-                disabled=True,
-                key="max_atleti_view"
-            )
-        
-            st.info(
-                "👀 Solo l'amministratore può modificare questi valori."
-            )
 
         st.markdown("---")
         
