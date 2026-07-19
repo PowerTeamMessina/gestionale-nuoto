@@ -3317,19 +3317,19 @@ with tab7:
 
         if is_admin():
 
-        nuovo_max_stagioni = st.number_input(
-            "Numero massimo stagioni",
-            min_value=1,
-            max_value=100,
-            value=max_stagioni
-        )
-    
-        nuovo_max_atleti = st.number_input(
-            "Numero massimo atleti per stagione",
-            min_value=1,
-            max_value=1000,
-            value=max_atleti
-        )
+            nuovo_max_stagioni = st.number_input(
+                "Numero massimo stagioni",
+                min_value=1,
+                max_value=100,
+                value=max_stagioni
+            )
+        
+            nuovo_max_atleti = st.number_input(
+                "Numero massimo atleti per stagione",
+                min_value=1,
+                max_value=1000,
+                value=max_atleti
+            )
     
         if st.button(
             "💾 Salva limiti"
