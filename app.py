@@ -2800,7 +2800,7 @@ with tab_area:
             """,
             conn,
             params=(
-                atleta_scheda,
+                nome,
                 stagione_selezionata
             )
         )
