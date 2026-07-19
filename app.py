@@ -1999,16 +1999,9 @@ with tab1:
             "🔒 Accesso riservato a tecnici e amministratori."
         )
     else:
+    
+        mostra_registro("📋 Allenamento in vasca", "Allenamento in vasca", stagione_selezionata)
 
-        if st.session_state.admin:
-    
-            mostra_registro("📋 Allenamento in vasca", "Allenamento in vasca", stagione_selezionata)
-            pass
-    
-        else:
-            st.warning(
-                "🔒 Accesso riservato agli amministratori."
-            )
 
 # ============================================================
 # TAB 2
