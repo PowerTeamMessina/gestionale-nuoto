@@ -2718,7 +2718,53 @@ with tab_area:
             )
         )
         
-        st.write(storico_atleta)
+        st.dataframe(
+            storico_atleta[
+                [
+                    "data",
+                    "tipo_evento",
+                    "presenza"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.markdown("---")
+        st.subheader("📝 Autovalutazione")
+
+        evento = st.selectbox(
+            "Seleziona attività",
+            [
+                f"{r['data']} - {r['tipo_evento']}"
+                for _, r in storico_atleta.iterrows()
+            ]
+        )
+        
+        stanchezza = st.slider(
+            "😴 Livello di stanchezza",
+            1,
+            10,
+            5
+        )
+        
+        benessere = st.slider(
+            "😊 Come ti sei sentito",
+            1,
+            10,
+            5
+        )
+        
+        autovalutazione = st.slider(
+            "🏊 Come valuti la tua prestazione",
+            1,
+            10,
+            5
+        )
+        
+        commento_atleta = st.text_area(
+            "📝 Commento personale"
+        )
 
 # ============================================================
 # TAB 6 STORICO
