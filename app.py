@@ -607,8 +607,6 @@ def classifica_rendimento_evento(
         "Posizione",
         posizioni
     )
-
-    st.write(ranking.columns.tolist())
     
     st.dataframe(
         ranking[
@@ -616,8 +614,6 @@ def classifica_rendimento_evento(
                 "data",
                 "tipo_evento",
                 "presenza",
-                "ritardo",
-                "uscita",
                 "voto",
                 "commento"
             ]
