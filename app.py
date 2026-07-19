@@ -2094,6 +2094,17 @@ with tab4:
                 "Email atleta"
             )
 
+            max_atleti = int(
+                pd.read_sql(
+                    """
+                    SELECT valore
+                    FROM configurazione
+                    WHERE chiave = 'max_atleti_stagione'
+                    """,
+                    conn
+                ).iloc[0]["valore"]
+            )
+            
             numero_atleti_stagione = pd.read_sql(
                 """
                 SELECT COUNT(*) AS totale
