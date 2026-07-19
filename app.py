@@ -2335,7 +2335,15 @@ with tab5:
                 storico["tipo_evento"] == filtro
             ]
 
-        stats = storico.groupby(
+        storico_allenamenti = storico[
+            ~storico["tipo_evento"].str.contains(
+                "gara",
+                case=False,
+                na=False
+            )
+        ].copy()
+        
+        stats_presenze = storico_allenamenti.groupby(
             ["nome", "categoria"],
             dropna=False
         ).agg(
@@ -2346,12 +2354,27 @@ with tab5:
             presenze=(
                 "presenza",
                 "sum"
-            ),
+            )
+        ).reset_index()
+        
+        stats_voti = storico.groupby(
+            ["nome", "categoria"],
+            dropna=False
+        ).agg(
             media_voti=(
                 "voto",
                 "mean"
             )
         ).reset_index()
+        
+        stats = stats_presenze.merge(
+            stats_voti,
+            on=[
+                "nome",
+                "categoria"
+            ],
+            how="left"
+        )
 
         stats["assenze"] = (
             stats["registrazioni"]
