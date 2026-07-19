@@ -2342,7 +2342,7 @@ with tab5:
 
         storico_allenamenti = storico[
             ~storico["tipo_evento"].str.contains(
-                "gara",
+                "Gare",
                 case=False,
                 na=False
             )
