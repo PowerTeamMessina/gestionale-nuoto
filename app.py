@@ -1297,7 +1297,7 @@ if st.session_state.utente_loggato is None:
 
     st.info(
         "🔓 Modalità ospite attiva. "
-        "La Dashboard è visibile, le altre sezioni richiedono il login."
+        "La Dashboard e le classifiche sono visibili, le altre sezioni richiedono il login."
     )
 
 aggiornamento_automatico_giornaliero()
