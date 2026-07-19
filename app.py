@@ -2375,6 +2375,7 @@ with tab5:
         # =====================================================
         
     st.subheader("🌟 Classifica generale")
+    st.subsubheader("La classifica è il risultato della media aritmetica tra i voti di prestazione (attività in acqua, a secco e gare) e la percentuale di presenze")
         
     classifica_generale = stats.copy()
         
