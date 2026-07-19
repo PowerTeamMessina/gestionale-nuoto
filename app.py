@@ -1266,6 +1266,14 @@ def is_loggato():
         st.session_state.atleta
     )
 
+def is_staff():
+
+    return (
+        st.session_state.get("admin", False)
+        or
+        st.session_state.get("tecnico", False)
+    )
+
 # ============================================================
 # HEADER
 # ============================================================
@@ -1986,9 +1994,9 @@ with tab0:
 # ============================================================
 
 with tab1:
-    if not ((st.session_state.get("admin", False) or (st.session_state.get("tecnico", False)))):
+    if not is_staff():
         st.warning(
-            "🔒 Accesso riservato agli amministratori."
+            "🔒 Accesso riservato a tecnici e amministratori."
         )
     else:
 
