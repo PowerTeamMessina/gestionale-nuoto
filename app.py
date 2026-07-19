@@ -2104,10 +2104,6 @@ with tab4:
                 params=(stagione_selezionata,)
             ).iloc[0]["totale"]
             
-            st.caption(
-                f"Atleti nella stagione: {numero_atleti_stagione}/{max_atleti}"
-            )
-            
             aggiungi = st.form_submit_button(
                 "➕ Aggiungi atleta"
             )
