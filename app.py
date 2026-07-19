@@ -608,6 +608,8 @@ def classifica_rendimento_evento(
         posizioni
     )
 
+    st.write(ranking.columns.tolist())
+    
     st.dataframe(
         ranking[
             [
