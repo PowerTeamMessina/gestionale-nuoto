@@ -1144,7 +1144,7 @@ def login():
 
     if "tecnico" not in st.session_state:
         st.session_state.tecnico = False
-    
+
     if "atleta" not in st.session_state:
         st.session_state.atleta = False
 
@@ -1172,6 +1172,9 @@ def login():
         ):
 
             st.session_state.admin = True
+            st.session_state.tecnico = False
+            st.session_state.atleta = False
+
             st.session_state.utente_loggato = "admin"
 
             st.success(
@@ -1180,18 +1183,26 @@ def login():
 
             st.rerun()
 
+        # -------------------------
+        # TECNICO
+        # -------------------------
+
         if (
             username == "tecnico"
             and
             password == st.secrets["TECNICO_PASSWORD"]
         ):
-        
-            st.session_state.tecnico = True
+
             st.session_state.admin = False
+            st.session_state.tecnico = True
             st.session_state.atleta = False
-        
+
             st.session_state.utente_loggato = "tecnico"
-        
+
+            st.success(
+                "Accesso tecnico effettuato."
+            )
+
             st.rerun()
 
         # -------------------------
@@ -1214,43 +1225,26 @@ def login():
 
         if not atleta.empty:
 
-            st.session_state.utente_loggato = (
-                atleta.iloc[0]["id"]
-            )
-        
             st.session_state.admin = False
             st.session_state.tecnico = False
             st.session_state.atleta = True
-        
-            st.success(
-                f"Benvenuto {atleta.iloc[0]['nome']}"
-            )
-        
-            st.rerun()
 
-        nome = atleta.iloc[0]["nome"]
-
-        if not atleta.empty:
-
-            st.write("LOGIN TROVATO")
-            st.write(atleta)
-            
-            st.session_state.utente_loggato = (
+            st.session_state.utente_loggato = int(
                 atleta.iloc[0]["id"]
             )
-                    
-            st.session_state.admin = False
-        
-            st.session_state.atleta = True
-        
+
             st.success(
                 f"Benvenuto {atleta.iloc[0]['nome']}"
             )
-        
+
             st.rerun()
 
+        # -------------------------
+        # CREDENZIALI ERRATE
+        # -------------------------
+
         st.error(
-            "Credenziali non valide"
+            "Credenziali non valide."
         )
 
 def is_admin():
