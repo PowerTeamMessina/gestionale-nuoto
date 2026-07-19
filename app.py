@@ -1965,7 +1965,7 @@ with tab1:
     
         else:
             st.warning(
-                "🔒 Attività disponibile solo agli amministratori."
+                "🔒 Accesso riservato agli amministratori."
             )
 
 # ============================================================
@@ -1982,7 +1982,7 @@ with tab2:
     else:
         
         st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
+            "🔒 Accesso riservato agli amministratori."
         )
 
 # ============================================================
@@ -1999,11 +1999,11 @@ with tab3:
     else:
         
         st.warning(
-              "🔒 Attività disponibile solo agli amministratori."
+              "🔒 Accesso riservato agli amministratori."
         )
 
 # ============================================================
-# TAB 4
+# TAB 4 ATLETI
 # ============================================================
 
 with tab4:
@@ -2201,7 +2201,7 @@ with tab4:
                     pass
 
     else:
-        st.warning("🔒 Attività disponibile solo agli amministratori.")
+        st.warning("🔒 Accesso riservato agli amministratori.")
 
 
 # ============================================================
@@ -2581,7 +2581,7 @@ with tab6:
     if not st.session_state.admin:
         
         st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
+            "🔒 Accesso riservato agli amministratori."
         )
         pass
 
@@ -2680,7 +2680,7 @@ with tab7:
     if not st.session_state.admin:
         
         st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
+            "🔒 Accesso riservato agli amministratori."
         )
         pass
 
@@ -3306,7 +3306,7 @@ with tab12:
     if not st.session_state.get("admin", False):
 
         st.warning(
-            "🔒 Analisi stagione riservata agli amministratori."
+            "🔒 Accesso riservato agli amministratori."
         )
 
     else:
