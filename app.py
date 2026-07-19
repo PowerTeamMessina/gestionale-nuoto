@@ -1331,6 +1331,8 @@ if (
 
         st.session_state.admin = False
 
+        st.session_state.tecnico = False
+
         st.session_state.atleta = False
 
         st.session_state.utente_loggato = None
