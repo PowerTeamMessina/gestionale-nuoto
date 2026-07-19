@@ -2625,10 +2625,31 @@ with tab_area:
             )
         )
 
-        st.write(type(st.session_state.utente_loggato))
+        st.write("ID loggato:", st.session_state.utente_loggato)
+
+        controllo = pd.read_sql(
+            """
+            SELECT id, nome, email, stagione
+            FROM atleti
+            WHERE id = ?
+            """,
+            conn,
+            params=(
+                int(st.session_state.utente_loggato),
+            )
+        )
         
-        st.write("Numero righe trovate:", len(atleta))
-        st.write(atleta)
+        st.write(controllo)
+
+        tutti = pd.read_sql(
+            """
+            SELECT id, nome, email, stagione
+            FROM atleti
+            """,
+            conn
+        )
+        
+        st.write(tutti)
 
         if atleta.empty:
 
