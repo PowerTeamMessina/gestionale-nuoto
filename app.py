@@ -2041,7 +2041,7 @@ with tab3:
 
 with tab4:
 
-    if not is_staff():
+    if is_staff():
 
         st.info("Per modificare gli atleti è necessario l'accesso amministratore.")
 
