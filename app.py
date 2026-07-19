@@ -4305,7 +4305,7 @@ with tab12:
             )
     
             dati_atleta = stats[
-                stats["nome"] == 
+                stats["nome"] == atleta_scheda
             ]
 
             if dati_atleta.empty:
