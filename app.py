@@ -1629,103 +1629,50 @@ with tab0:
 
     st.markdown("---")
     
-    c6, c7 = st.columns(2)
+    st.subheader("🏆 Hall of Fame - Presenze")
 
-    # --------------------------------------------------------
-    # PODIO PRESENZE
-    # --------------------------------------------------------
+    if not query_dashboard.empty:
 
-    with c6:
+        podio = query_dashboard.copy()
 
-        st.subheader("🎯 Hall of Fame - Rendimento")
+        podio["percentuale"] = (
+            podio["presenze"]
+            /
+            podio["registrazioni"]
+            * 100
+        ).round(1)
 
-        if not query_voti.empty:
+        podio = podio.sort_values(
+            by="percentuale",
+            ascending=False
+        )
 
-            podio = query_voti.copy()
+        valori = (
+            podio["percentuale"]
+            .drop_duplicates()
+            .head(3)
+            .tolist()
+        )
 
-            podio["media"] = (
-                podio["media"]
-                .round(2)
+        medaglie = ["🥇", "🥈", "🥉"]
+
+        for i, valore in enumerate(valori):
+
+            gruppo = podio[
+                podio["percentuale"] == valore
+            ]
+
+            nomi = ", ".join(
+                gruppo["nome"].tolist()
             )
 
-            podio = podio.sort_values(
-                by="media",
-                ascending=False
+            st.markdown(
+                f"#### {medaglie[i]} {nomi}"
             )
 
-            valori = (
-                podio["media"]
-                .drop_duplicates()
-                .head(3)
-                .tolist()
+            st.caption(
+                f"{valore}% presenza"
             )
-
-            medaglie = ["🥇", "🥈", "🥉"]
-
-            for i, valore in enumerate(valori):
-
-                gruppo = podio[
-                    podio["media"] == valore
-                ]
-
-                nomi = ", ".join(
-                    gruppo["nome"].tolist()
-                )
-
-                st.markdown(
-                    f"#### {medaglie[i]} {nomi}"
-                )
-
-                st.caption(
-                    f"Media voto: {valore}"
-                )
-
-    with c7:
-
-        st.subheader("🏆 Hall of Fame - Presenze")
-
-        if not query_dashboard.empty:
-
-            podio = query_dashboard.copy()
-
-            podio["percentuale"] = (
-                podio["presenze"]
-                /
-                podio["registrazioni"]
-                * 100
-            ).round(1)
-
-            podio = podio.sort_values(
-                by="percentuale",
-                ascending=False
-            )
-
-            valori = (
-                podio["percentuale"]
-                .drop_duplicates()
-                .head(3)
-                .tolist()
-            )
-
-            medaglie = ["🥇", "🥈", "🥉"]
-
-            for i, valore in enumerate(valori):
-
-                gruppo = podio[
-                    podio["percentuale"] == valore
-                ]
-
-                nomi = ", ".join(
-                    gruppo["nome"].tolist()
-                )
-
-                st.markdown(
-                    f"#### {medaglie[i]} {nomi}"
-                )
-
-                st.caption(
-                    f"{valore}% presenza"
-                )
                 
     # --------------------------------------------------------
     # HALL OF SHAME
