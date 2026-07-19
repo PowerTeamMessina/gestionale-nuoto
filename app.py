@@ -3302,516 +3302,525 @@ with tab10:
 
 with tab12:
 
-    st.header("👤 Statistiche atleta")
 
-    storico = pd.read_sql(
-        """
-        SELECT
-            a.nome,
-            a.categoria,
-            p.tipo_evento,
-            p.presenza,
-            p.voto
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE p.stagione = ?
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
+    if not st.session_state.get("admin", False):
 
-    if storico.empty:
-
-        st.info(
-            "Nessun dato disponibile."
+        st.warning(
+            "🔒 Analisi stagione riservata agli amministratori."
         )
 
     else:
 
-        filtro = st.selectbox(
-            "Tipo evento",
-            [
-                "Tutti",
-                "Allenamento in vasca",
-                "Allenamento a secco",
-                "Gare"
-            ],
-            key="filtro_statistiche_atleta"
-        )
-
-        if filtro != "Tutti":
-
-            storico = storico[
-                storico["tipo_evento"] == filtro
-            ]
-
-        stats = storico.groupby(
-            ["nome", "categoria"],
-            dropna=False
-        ).agg(
-            registrazioni=(
-                "presenza",
-                "count"
-            ),
-            presenze=(
-                "presenza",
-                "sum"
-            ),
-            media_voti=(
-                "voto",
-                "mean"
-            )
-        ).reset_index()
-
-        stats["assenze"] = (
-            stats["registrazioni"]
-            - stats["presenze"]
-        )
-
-        stats["percentuale"] = (
-            stats["presenze"]
-            / stats["registrazioni"]
-            * 100
-        ).round(1)
-
-        stats["media_voti"] = (
-            stats["media_voti"]
-            .fillna(0)
-            .round(2)
-        )
-
-        totale_reg = int(
-            stats["registrazioni"].sum()
-        )
-
-        totale_pres = int(
-            stats["presenze"].sum()
-        )
-
-        totale_ass = int(
-            stats["assenze"].sum()
-        )
-
-        media_globale = round(
-            stats["media_voti"].mean(),
-            2
-        )
-
-        c1, c2, c3, c4 = st.columns(4)
-
-        c1.metric(
-            "Registrazioni",
-            totale_reg
-        )
-
-        c2.metric(
-            "Presenze",
-            totale_pres
-        )
-
-        c3.metric(
-            "Assenze",
-            totale_ass
-        )
-
-        c4.metric(
-            "Media voti",
-            media_globale
-        )
-
-        # =====================================================
-        # SCHEDA ATLETA AVANZATA
-        # =====================================================
-
-        st.markdown("---")
-
-        st.subheader("👤 Scheda atleta avanzata")
-
-        atleta_scheda = st.selectbox(
-            "Seleziona atleta",
-            sorted(stats["nome"].unique()),
-            key="scheda_atleta"
-        )
-
-        dati_atleta = stats[
-            stats["nome"] == atleta_scheda
-        ]
-
-        presenze_atleta = int(
-            dati_atleta["presenze"].sum()
-        )
-
-        assenze_atleta = int(
-            dati_atleta["assenze"].sum()
-        )
-
-        percentuale_atleta = round(
-            dati_atleta["percentuale"].mean(),
-            1
-        )
-
-        media_voti_atleta = round(
-            dati_atleta["media_voti"].mean(),
-            2
-        )
-
-        categoria_atleta = (
-            dati_atleta["categoria"]
-            .iloc[0]
-        )
-
-        c1, c2, c3, c4 = st.columns(4)
-
-        c1.metric(
-            "✅ Presenze",
-            presenze_atleta
-        )
-
-        c2.metric(
-            "❌ Assenze",
-            assenze_atleta
-        )
-
-        c3.metric(
-            "% Presenze",
-            percentuale_atleta
-        )
-
-        c4.metric(
-            "⭐ Media",
-            media_voti_atleta
-        )
-
-        st.write(
-            f"**Categoria:** {categoria_atleta}"
-        )
-
-        # -----------------------------------------------------
-        # STORICO ATLETA
-        # -----------------------------------------------------
-
-        storico_atleta = pd.read_sql(
+        st.header("👤 Statistiche atleta")
+    
+        storico = pd.read_sql(
             """
             SELECT
-                p.data,
+                a.nome,
+                a.categoria,
                 p.tipo_evento,
                 p.presenza,
-                p.voto,
-                p.commento
+                p.voto
             FROM presenze p
             JOIN atleti a
                 ON a.id = p.atleta_id
-            WHERE
-                a.nome = ?
-                AND p.stagione = ?
-            ORDER BY p.data DESC
+            WHERE p.stagione = ?
             """,
             conn,
-            params=(
-                atleta_scheda,
-                stagione_selezionata
-            )
+            params=(stagione_selezionata,)
         )
-
-        if not storico_atleta.empty:
-
-            gare_disputate = len(
-                storico_atleta[
-                    storico_atleta["tipo_evento"]
-                    == "Gare"
+    
+        if storico.empty:
+    
+            st.info(
+                "Nessun dato disponibile."
+            )
+    
+        else:
+    
+            filtro = st.selectbox(
+                "Tipo evento",
+                [
+                    "Tutti",
+                    "Allenamento in vasca",
+                    "Allenamento a secco",
+                    "Gare"
+                ],
+                key="filtro_statistiche_atleta"
+            )
+    
+            if filtro != "Tutti":
+    
+                storico = storico[
+                    storico["tipo_evento"] == filtro
                 ]
+    
+            stats = storico.groupby(
+                ["nome", "categoria"],
+                dropna=False
+            ).agg(
+                registrazioni=(
+                    "presenza",
+                    "count"
+                ),
+                presenze=(
+                    "presenza",
+                    "sum"
+                ),
+                media_voti=(
+                    "voto",
+                    "mean"
+                )
+            ).reset_index()
+    
+            stats["assenze"] = (
+                stats["registrazioni"]
+                - stats["presenze"]
             )
-
-            st.metric(
-                "🏁 Gare disputate",
-                gare_disputate
+    
+            stats["percentuale"] = (
+                stats["presenze"]
+                / stats["registrazioni"]
+                * 100
+            ).round(1)
+    
+            stats["media_voti"] = (
+                stats["media_voti"]
+                .fillna(0)
+                .round(2)
             )
-
-            # -----------------------------------------
-            # GRAFICO PRESENZE
-            # -----------------------------------------
-
-            grafico_presenze = storico_atleta.copy()
-
-            grafico_presenze["data"] = pd.to_datetime(
-                grafico_presenze["data"]
+    
+            totale_reg = int(
+                stats["registrazioni"].sum()
             )
-
-            grafico_presenze = (
-                grafico_presenze
-                .sort_values("data")
+    
+            totale_pres = int(
+                stats["presenze"].sum()
             )
-
+    
+            totale_ass = int(
+                stats["assenze"].sum()
+            )
+    
+            media_globale = round(
+                stats["media_voti"].mean(),
+                2
+            )
+    
+            c1, c2, c3, c4 = st.columns(4)
+    
+            c1.metric(
+                "Registrazioni",
+                totale_reg
+            )
+    
+            c2.metric(
+                "Presenze",
+                totale_pres
+            )
+    
+            c3.metric(
+                "Assenze",
+                totale_ass
+            )
+    
+            c4.metric(
+                "Media voti",
+                media_globale
+            )
+    
+            # =====================================================
+            # SCHEDA ATLETA AVANZATA
+            # =====================================================
+    
             st.markdown("---")
-
-            st.subheader(
-                "📈 Andamento presenze"
+    
+            st.subheader("👤 Scheda atleta avanzata")
+    
+            atleta_scheda = st.selectbox(
+                "Seleziona atleta",
+                sorted(stats["nome"].unique()),
+                key="scheda_atleta"
             )
-
-            st.line_chart(
-                grafico_presenze.set_index("data")[
-                    "presenza"
-                ]
-            )
-
-            # -----------------------------------------
-            # GRAFICO voti
-            # -----------------------------------------
-
-            grafico_voti = (
-                grafico_presenze.copy()
-            )
-
-            grafico_voti = grafico_voti[
-                grafico_voti["voto"].notna()
+    
+            dati_atleta = stats[
+                stats["nome"] == atleta_scheda
             ]
-
-            if not grafico_voti.empty:
-
+    
+            presenze_atleta = int(
+                dati_atleta["presenze"].sum()
+            )
+    
+            assenze_atleta = int(
+                dati_atleta["assenze"].sum()
+            )
+    
+            percentuale_atleta = round(
+                dati_atleta["percentuale"].mean(),
+                1
+            )
+    
+            media_voti_atleta = round(
+                dati_atleta["media_voti"].mean(),
+                2
+            )
+    
+            categoria_atleta = (
+                dati_atleta["categoria"]
+                .iloc[0]
+            )
+    
+            c1, c2, c3, c4 = st.columns(4)
+    
+            c1.metric(
+                "✅ Presenze",
+                presenze_atleta
+            )
+    
+            c2.metric(
+                "❌ Assenze",
+                assenze_atleta
+            )
+    
+            c3.metric(
+                "% Presenze",
+                percentuale_atleta
+            )
+    
+            c4.metric(
+                "⭐ Media",
+                media_voti_atleta
+            )
+    
+            st.write(
+                f"**Categoria:** {categoria_atleta}"
+            )
+    
+            # -----------------------------------------------------
+            # STORICO ATLETA
+            # -----------------------------------------------------
+    
+            storico_atleta = pd.read_sql(
+                """
+                SELECT
+                    p.data,
+                    p.tipo_evento,
+                    p.presenza,
+                    p.voto,
+                    p.commento
+                FROM presenze p
+                JOIN atleti a
+                    ON a.id = p.atleta_id
+                WHERE
+                    a.nome = ?
+                    AND p.stagione = ?
+                ORDER BY p.data DESC
+                """,
+                conn,
+                params=(
+                    atleta_scheda,
+                    stagione_selezionata
+                )
+            )
+    
+            if not storico_atleta.empty:
+    
+                gare_disputate = len(
+                    storico_atleta[
+                        storico_atleta["tipo_evento"]
+                        == "Gare"
+                    ]
+                )
+    
+                st.metric(
+                    "🏁 Gare disputate",
+                    gare_disputate
+                )
+    
+                # -----------------------------------------
+                # GRAFICO PRESENZE
+                # -----------------------------------------
+    
+                grafico_presenze = storico_atleta.copy()
+    
+                grafico_presenze["data"] = pd.to_datetime(
+                    grafico_presenze["data"]
+                )
+    
+                grafico_presenze = (
+                    grafico_presenze
+                    .sort_values("data")
+                )
+    
+                st.markdown("---")
+    
                 st.subheader(
-                    "🎯 Andamento voti"
+                    "📈 Andamento presenze"
                 )
-
+    
                 st.line_chart(
-                    grafico_voti.set_index(
-                        "data"
-                    )[
-                        "voto"
+                    grafico_presenze.set_index("data")[
+                        "presenza"
                     ]
                 )
-
-            # -----------------------------------------
-            # ULTIME 10 ATTIVITA'
-            # -----------------------------------------
-
-            storico_atleta["presenza"] = (
-                storico_atleta["presenza"]
-                .map({
-                    1: "✅",
-                    0: "❌"
-                })
-            )
-
-            storico_atleta["voto"] = (
-                storico_atleta["voto"]
-                .fillna("")
-            )
-
-            st.markdown("---")
-
-            st.subheader(
-                "📜 Ultime 10 attività"
-            )
-
-            st.dataframe(
-                storico_atleta[
-                    [
-                        "data",
-                        "tipo_evento",
-                        "presenza",
-                        "voto",
-                        "commento"
-                    ]
+    
+                # -----------------------------------------
+                # GRAFICO voti
+                # -----------------------------------------
+    
+                grafico_voti = (
+                    grafico_presenze.copy()
+                )
+    
+                grafico_voti = grafico_voti[
+                    grafico_voti["voto"].notna()
                 ]
-                .head(10),
+    
+                if not grafico_voti.empty:
+    
+                    st.subheader(
+                        "🎯 Andamento voti"
+                    )
+    
+                    st.line_chart(
+                        grafico_voti.set_index(
+                            "data"
+                        )[
+                            "voto"
+                        ]
+                    )
+    
+                # -----------------------------------------
+                # ULTIME 10 ATTIVITA'
+                # -----------------------------------------
+    
+                storico_atleta["presenza"] = (
+                    storico_atleta["presenza"]
+                    .map({
+                        1: "✅",
+                        0: "❌"
+                    })
+                )
+    
+                storico_atleta["voto"] = (
+                    storico_atleta["voto"]
+                    .fillna("")
+                )
+    
+                st.markdown("---")
+    
+                st.subheader(
+                    "📜 Ultime 10 attività"
+                )
+    
+                st.dataframe(
+                    storico_atleta[
+                        [
+                            "data",
+                            "tipo_evento",
+                            "presenza",
+                            "voto",
+                            "commento"
+                        ]
+                    ]
+                    .head(10),
+                    use_container_width=True,
+                    hide_index=True
+                )
+    
+        st.markdown("---")
+    
+        st.header("📈 Analisi Stagione")
+    
+        analisi = pd.read_sql(
+            """
+            SELECT
+                data,
+                tipo_evento,
+                presenza,
+                voto
+            FROM presenze
+            WHERE stagione = ?
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        )
+    
+        if analisi.empty:
+    
+            st.info(
+                "Nessun dato disponibile."
+            )
+    
+        else:
+    
+            analisi["data"] = pd.to_datetime(
+                analisi["data"]
+            )
+    
+            analisi["mese"] = (
+                analisi["data"]
+                .dt.strftime("%Y-%m")
+            )
+    
+            # ----------------------------------------------------
+            # ANALISI MENSILE
+            # ----------------------------------------------------
+    
+            mensile = analisi.groupby(
+                "mese"
+            ).agg(
+                registrazioni=(
+                    "presenza",
+                    "count"
+                ),
+                presenze=(
+                    "presenza",
+                    "sum"
+                ),
+                media_voti=(
+                    "voto",
+                    "mean"
+                )
+            ).reset_index()
+    
+            mensile["percentuale"] = (
+                mensile["presenze"]
+                /
+                mensile["registrazioni"]
+                * 100
+            ).round(1)
+    
+            mensile["media_voti"] = (
+                mensile["media_voti"]
+                .fillna(0)
+                .round(2)
+            )
+    
+            # ----------------------------------------------------
+            # BEST / WORST MONTH
+            # ----------------------------------------------------
+    
+            best_month = mensile.sort_values(
+                "percentuale",
+                ascending=False
+            ).iloc[0]
+    
+            worst_month = mensile.sort_values(
+                "percentuale",
+                ascending=True
+            ).iloc[0]
+    
+            c1, c2 = st.columns(2)
+    
+            c1.metric(
+                "🏆 Miglior mese",
+                best_month["mese"],
+                f"{best_month['percentuale']}%"
+            )
+    
+            c2.metric(
+                "📉 Peggior mese",
+                worst_month["mese"],
+                f"{worst_month['percentuale']}%"
+            )
+    
+            st.markdown("---")
+    
+            # ----------------------------------------------------
+            # GRAFICO PRESENZE
+            # ----------------------------------------------------
+    
+            st.subheader(
+                "📊 Percentuale presenze mensile"
+            )
+    
+            st.line_chart(
+                mensile.set_index("mese")[
+                    "percentuale"
+                ]
+            )
+    
+            # ----------------------------------------------------
+            # GRAFICO voti
+            # ----------------------------------------------------
+    
+            st.subheader(
+                "🎯 Media voti mensile"
+            )
+    
+            st.line_chart(
+                mensile.set_index("mese")[
+                    "media_voti"
+                ]
+            )
+    
+            st.markdown("---")
+    
+            # ----------------------------------------------------
+            # CONFRONTO EVENTI
+            # ----------------------------------------------------
+    
+            st.subheader(
+                "🏊 Confronto attività"
+            )
+    
+            confronto = analisi.groupby(
+                "tipo_evento"
+            ).agg(
+                registrazioni=(
+                    "presenza",
+                    "count"
+                ),
+                presenze=(
+                    "presenza",
+                    "sum"
+                ),
+                media_voti=(
+                    "voto",
+                    "mean"
+                )
+            ).reset_index()
+    
+            confronto["percentuale"] = (
+                confronto["presenze"]
+                /
+                confronto["registrazioni"]
+                * 100
+            ).round(1)
+    
+            confronto["media_voti"] = (
+                confronto["media_voti"]
+                .fillna(0)
+                .round(2)
+            )
+    
+            st.dataframe(
+                confronto,
                 use_container_width=True,
                 hide_index=True
             )
-
-    st.markdown("---")
-
-    st.header("📈 Analisi Stagione")
-
-    analisi = pd.read_sql(
-        """
-        SELECT
-            data,
-            tipo_evento,
-            presenza,
-            voto
-        FROM presenze
-        WHERE stagione = ?
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    if analisi.empty:
-
-        st.info(
-            "Nessun dato disponibile."
-        )
-
-    else:
-
-        analisi["data"] = pd.to_datetime(
-            analisi["data"]
-        )
-
-        analisi["mese"] = (
-            analisi["data"]
-            .dt.strftime("%Y-%m")
-        )
-
-        # ----------------------------------------------------
-        # ANALISI MENSILE
-        # ----------------------------------------------------
-
-        mensile = analisi.groupby(
-            "mese"
-        ).agg(
-            registrazioni=(
-                "presenza",
-                "count"
-            ),
-            presenze=(
-                "presenza",
-                "sum"
-            ),
-            media_voti=(
-                "voto",
-                "mean"
+    
+            st.bar_chart(
+                confronto.set_index(
+                    "tipo_evento"
+                )[
+                    "percentuale"
+                ]
             )
-        ).reset_index()
-
-        mensile["percentuale"] = (
-            mensile["presenze"]
-            /
-            mensile["registrazioni"]
-            * 100
-        ).round(1)
-
-        mensile["media_voti"] = (
-            mensile["media_voti"]
-            .fillna(0)
-            .round(2)
-        )
-
-        # ----------------------------------------------------
-        # BEST / WORST MONTH
-        # ----------------------------------------------------
-
-        best_month = mensile.sort_values(
-            "percentuale",
-            ascending=False
-        ).iloc[0]
-
-        worst_month = mensile.sort_values(
-            "percentuale",
-            ascending=True
-        ).iloc[0]
-
-        c1, c2 = st.columns(2)
-
-        c1.metric(
-            "🏆 Miglior mese",
-            best_month["mese"],
-            f"{best_month['percentuale']}%"
-        )
-
-        c2.metric(
-            "📉 Peggior mese",
-            worst_month["mese"],
-            f"{worst_month['percentuale']}%"
-        )
-
-        st.markdown("---")
-
-        # ----------------------------------------------------
-        # GRAFICO PRESENZE
-        # ----------------------------------------------------
-
-        st.subheader(
-            "📊 Percentuale presenze mensile"
-        )
-
-        st.line_chart(
-            mensile.set_index("mese")[
-                "percentuale"
-            ]
-        )
-
-        # ----------------------------------------------------
-        # GRAFICO voti
-        # ----------------------------------------------------
-
-        st.subheader(
-            "🎯 Media voti mensile"
-        )
-
-        st.line_chart(
-            mensile.set_index("mese")[
-                "media_voti"
-            ]
-        )
-
-        st.markdown("---")
-
-        # ----------------------------------------------------
-        # CONFRONTO EVENTI
-        # ----------------------------------------------------
-
-        st.subheader(
-            "🏊 Confronto attività"
-        )
-
-        confronto = analisi.groupby(
-            "tipo_evento"
-        ).agg(
-            registrazioni=(
-                "presenza",
-                "count"
-            ),
-            presenze=(
-                "presenza",
-                "sum"
-            ),
-            media_voti=(
-                "voto",
-                "mean"
+    
+            st.markdown("---")
+    
+            # ----------------------------------------------------
+            # DATI MENSILI
+            # ----------------------------------------------------
+    
+            st.subheader(
+                "📋 Dettaglio mensile"
             )
-        ).reset_index()
-
-        confronto["percentuale"] = (
-            confronto["presenze"]
-            /
-            confronto["registrazioni"]
-            * 100
-        ).round(1)
-
-        confronto["media_voti"] = (
-            confronto["media_voti"]
-            .fillna(0)
-            .round(2)
-        )
-
-        st.dataframe(
-            confronto,
-            use_container_width=True,
-            hide_index=True
-        )
-
-        st.bar_chart(
-            confronto.set_index(
-                "tipo_evento"
-            )[
-                "percentuale"
-            ]
-        )
-
-        st.markdown("---")
-
-        # ----------------------------------------------------
-        # DATI MENSILI
-        # ----------------------------------------------------
-
-        st.subheader(
-            "📋 Dettaglio mensile"
-        )
-
-        st.dataframe(
-            mensile,
-            use_container_width=True,
-            hide_index=True
-        )
+    
+            st.dataframe(
+                mensile,
+                use_container_width=True,
+                hide_index=True
+            )
