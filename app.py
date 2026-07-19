@@ -1140,6 +1140,19 @@ def login():
             "Credenziali non valide"
         )
 
+def is_admin():
+    return st.session_state.admin
+
+def is_atleta():
+    return st.session_state.atleta
+
+def is_loggato():
+    return (
+        st.session_state.admin
+        or
+        st.session_state.atleta
+    )
+
 # ============================================================
 # HEADER
 # ============================================================
@@ -1156,7 +1169,10 @@ login()
 
 if st.session_state.utente_loggato is None:
 
-    st.stop()
+    st.info(
+        "🔓 Modalità ospite attiva. "
+        "La Dashboard è visibile, le altre sezioni richiedono il login."
+    )
 
 aggiornamento_automatico_giornaliero()
 
@@ -1207,7 +1223,7 @@ st.session_state.stagione_corrente = (
 # TAB PRINCIPALI
 # ============================================================
 
-(tab0, tab1, tab2, tab3, tab5, tab_statistiche, tab10, tab12, tab4, tab11, tab6, tab7, tab8, tab9) = st.tabs([
+(tab0, tab1, tab2, tab3, tab5, tab_statistiche, tab10, tab12, tab4, tab11, tab6, tab7, tab8) = st.tabs([
         "🏠 Dashboard",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
@@ -1221,7 +1237,6 @@ st.session_state.stagione_corrente = (
         "🗂️ Storico",
         "⚙️ Stagioni",
         "💾 Backup",
-        "📅 Calendario"
 ])
 
 # ============================================================
@@ -1933,16 +1948,21 @@ with tab0:
 # ============================================================
 
 with tab1:
-
-    if st.session_state.admin:
-
-        mostra_registro("📋 Allenamento in vasca", "Allenamento in vasca", stagione_selezionata)
-        pass
-
-    else:
+    if not is_admin():
         st.warning(
-            "🔒 Attività disponibile solo agli amministratori."
-        )
+    "🔒 Accesso riservato agli amministratori."
+    )
+    else:
+
+        if st.session_state.admin:
+    
+            mostra_registro("📋 Allenamento in vasca", "Allenamento in vasca", stagione_selezionata)
+            pass
+    
+        else:
+            st.warning(
+                "🔒 Attività disponibile solo agli amministratori."
+            )
 
 # ============================================================
 # TAB 2
