@@ -3298,7 +3298,7 @@ with tab7:
     else:
 
         st.subheader("⚙️ Limiti del sistema")
-        
+
         if is_admin():
         
             nuovo_max_stagioni = st.number_input(
@@ -3340,7 +3340,7 @@ with tab7:
                 st.success(
                     "✅ Limiti aggiornati."
                 )
-
+        
         st.markdown("---")
         
         st.header("⚙️ Gestione Stagioni")
