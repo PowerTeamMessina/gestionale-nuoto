@@ -2613,9 +2613,9 @@ with tab_area:
             st.session_state.get("atleta", False)
         )
 
-        controllo = pd.read_sql(
+        atleta = pd.read_sql(
             """
-            SELECT id, nome, email, stagione
+            SELECT *
             FROM atleti
             WHERE id = ?
             """,
@@ -2625,26 +2625,15 @@ with tab_area:
             )
         )
         
-        st.write(controllo)
-        
-        atleta = controllo.copy()
-        
-        st.success("✅ Query atleta OK")
-        
-        nome = atleta.iloc[0]["nome"]
-
         if atleta.empty:
-
+        
             st.error(
-                f"Nessun atleta trovato con ID {st.session_state.utente_loggato}"
+                "Atleta non trovato."
             )
         
             st.stop()
         
-        st.success("Arrivato qui ✅")
-
         nome = atleta.iloc[0]["nome"]
-
         categoria = atleta.iloc[0]["categoria"]
 
         st.subheader(nome)
