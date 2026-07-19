@@ -2272,32 +2272,6 @@ with tab5:
 
     else:
 
-        filtro = st.selectbox(
-            "Tipo evento",
-            [
-                "Tutti",
-                "Allenamento in vasca",
-                "Allenamento a secco",
-                "Gare"
-            ],
-            key="filtro_classifiche"
-        )
-
-        if filtro != "Tutti":
-
-            storico_allenamenti = storico[
-                storico["tipo_evento"].isin(
-                    [
-                        "Allenamento in vasca",
-                        "Allenamento a secco"
-                    ]
-                )
-            ].copy()
-
-            storico = storico[
-                storico["tipo_evento"] == filtro
-            ]
-
         st.write(
             storico["tipo_evento"]
             .value_counts(dropna=False)
