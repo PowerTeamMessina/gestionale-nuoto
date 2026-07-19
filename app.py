@@ -622,9 +622,6 @@ def classifica_rendimento_evento(
         use_container_width=True,
         hide_index=True
     )
-    use_container_width=True,
-    hide_index=True
-    )
 
 # ============================================================
 # BACKUP AUTOMATICO
