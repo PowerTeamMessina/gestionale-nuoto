@@ -1142,6 +1142,12 @@ def login():
     if "admin" not in st.session_state:
         st.session_state.admin = False
 
+    if "tecnico" not in st.session_state:
+        st.session_state.tecnico = False
+    
+    if "atleta" not in st.session_state:
+        st.session_state.atleta = False
+
     st.subheader("🔐 Accesso")
 
     username = st.text_input(
@@ -1206,11 +1212,21 @@ def login():
             )
         )
 
-        if atleta.empty:
-            st.warning(
-                "Nessun atleta associato al login."
+        if not atleta.empty:
+
+            st.session_state.utente_loggato = (
+                atleta.iloc[0]["id"]
             )
-            st.stop()
+        
+            st.session_state.admin = False
+            st.session_state.tecnico = False
+            st.session_state.atleta = True
+        
+            st.success(
+                f"Benvenuto {atleta.iloc[0]['nome']}"
+            )
+        
+            st.rerun()
 
         nome = atleta.iloc[0]["nome"]
 
