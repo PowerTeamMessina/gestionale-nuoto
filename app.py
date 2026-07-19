@@ -2034,7 +2034,7 @@ with tab3:
 
     if not is_staff():
 
-        t.warning(
+        st.warning(
               "🔒 Accesso riservato agli amministratori."
         )
         
