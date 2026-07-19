@@ -3357,6 +3357,26 @@ with tab7:
                     "✅ Limiti aggiornati."
                 )
 
+        elif st.session_state.get("tecnico", False):
+
+            st.number_input(
+                "Numero massimo stagioni",
+                value=max_stagioni,
+                disabled=True,
+                key="max_stagioni_view"
+            )
+        
+            st.number_input(
+                "Numero massimo atleti per stagione",
+                value=max_atleti,
+                disabled=True,
+                key="max_atleti_view"
+            )
+        
+            st.info(
+                "👀 Solo l'amministratore può modificare questi valori."
+            )
+
         st.markdown("---")
         
         st.header("⚙️ Gestione Stagioni")
