@@ -2600,6 +2600,16 @@ with tab_area:
 
         st.header("👤 Area Atleta")
 
+        st.write(
+            "utente_loggato =",
+            st.session_state.utente_loggato
+        )
+        
+        st.write(
+            "atleta =",
+            st.session_state.get("atleta", False)
+        )
+
         atleta = pd.read_sql(
             """
             SELECT *
