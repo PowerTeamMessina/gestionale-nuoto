@@ -3314,11 +3314,6 @@ with tab7:
                 conn
             ).iloc[0]["valore"]
         )
-
-        st.subheader("⚙️ Limiti del sistema")
-
-        max_stagioni = int(...)
-        max_atleti = int(...)
         
         if is_admin():
         
