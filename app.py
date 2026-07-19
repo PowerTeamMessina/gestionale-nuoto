@@ -3408,6 +3408,14 @@ with tab7:
             placeholder="es. 2026/2027"
         )
 
+        numero_stagioni = pd.read_sql(
+            """
+            SELECT COUNT(*) AS totale
+            FROM stagioni
+            """,
+            conn
+        ).iloc[0]["totale"]
+
         if st.button(
             "➕ Crea stagione"
         ):
