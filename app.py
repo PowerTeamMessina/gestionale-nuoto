@@ -1024,6 +1024,12 @@ def check_admin():
     if "admin" not in st.session_state:
         st.session_state.admin = False
 
+    if "atleta" not in st.session_state:
+        st.session_state.atleta = False
+    
+    if "utente_loggato" not in st.session_state:
+        st.session_state.utente_loggato = None
+
     st.markdown("---")
     st.subheader("🔐 Accesso amministratore")
 
@@ -1058,6 +1064,81 @@ def check_admin():
             st.session_state.admin = False
             st.rerun()
 
+def login():
+
+    if "utente_loggato" not in st.session_state:
+        st.session_state.utente_loggato = None
+
+    if "admin" not in st.session_state:
+        st.session_state.admin = False
+
+    st.subheader("🔐 Accesso")
+
+    username = st.text_input(
+        "Username"
+    )
+
+    password = st.text_input(
+        "Password",
+        type="password"
+    )
+
+    if st.button("Accedi"):
+
+        # -------------------------
+        # ADMIN
+        # -------------------------
+
+        if (
+            username == "admin"
+            and
+            password == st.secrets["ADMIN_PASSWORD"]
+        ):
+
+            st.session_state.admin = True
+            st.session_state.utente_loggato = "admin"
+
+            st.success(
+                "Accesso amministratore effettuato."
+            )
+
+            st.rerun()
+
+        # -------------------------
+        # ATLETA
+        # -------------------------
+
+        atleta = pd.read_sql(
+            """
+            SELECT *
+            FROM atleti
+            WHERE email = ?
+            AND password = ?
+            """,
+            conn,
+            params=(
+                username,
+                password
+            )
+        )
+
+        if not atleta.empty:
+
+            st.session_state.utente_loggato = (
+                atleta.iloc[0]["id"]
+            )
+
+            st.session_state.admin = False
+
+            st.success(
+                f"Benvenuto {atleta.iloc[0]['nome']}"
+            )
+
+            st.rerun()
+
+        st.error(
+            "Credenziali non valide"
+        )
 
 # ============================================================
 # HEADER
@@ -1071,11 +1152,16 @@ st.markdown(
     """
 )
 
-check_admin()
+login()
+
+if st.session_state.utente_loggato is None:
+
+    st.stop()
 
 aggiornamento_automatico_giornaliero()
 
 st.write("Admin:", st.session_state.admin)
+st.write("Atleta:", st.session_state.atleta)
 
 stagioni = get_stagioni()
 
