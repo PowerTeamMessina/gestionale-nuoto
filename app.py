@@ -127,6 +127,30 @@ try:
 except:
     pass
 
+try:
+    c.execute("""
+        ALTER TABLE presenze
+        ADD COLUMN entrata_ritardo INTEGER DEFAULT 0
+    """)
+except:
+    pass
+
+try:
+    c.execute("""
+        ALTER TABLE presenze
+        ADD COLUMN uscita_anticipata INTEGER DEFAULT 0
+    """)
+except:
+    pass
+
+try:
+    c.execute("""
+        ALTER TABLE presenze
+        ADD COLUMN entrata_ritardo INTEGER DEFAULT 0
+    """)
+except:
+    pass
+
 conn.commit()
 
 # ============================================================
@@ -584,14 +608,32 @@ def classifica_rendimento_evento(
         posizioni
     )
 
+    storico_visibile["ritardo"] = (
+        storico_visibile["entrata_ritardo"]
+        .map({
+            1: "⏰",
+            0: ""
+        })
+    )
+    
+    storico_visibile["uscita"] = (
+        storico_visibile["uscita_anticipata"]
+        .map({
+            1: "🚪",
+            0: ""
+        })
+    )
+
     st.dataframe(
         ranking[
             [
-                "Posizione",
-                "nome",
-                "categoria",
-                "media_voti",
-                "percentuale"
+                "data",
+                "tipo_evento",
+                "presenza",
+                "ritardo",
+                "uscita",
+                "voto",
+                "commento"
             ]
         ],
         use_container_width=True,
@@ -989,6 +1031,8 @@ def mostra_registro(titolo, tipo_evento, stagione):
                 "presenza": bool(r["presenza"]),
                 "voto": int(r["voto"]) if pd.notna(r["voto"]) else 6,
                 "commento": r["commento"] if pd.notna(r["commento"]) else "",
+                "entrata_ritardo": bool(r["entrata_ritardo"]),
+                "uscita_anticipata": bool(r["uscita_anticipata"]),
             }
 
     # -----------------------------------------
@@ -1009,6 +1053,8 @@ def mostra_registro(titolo, tipo_evento, stagione):
                 "presenza": False,
                 "voto": 6,
                 "commento": "",
+                "entrata_ritardo": False,
+                "uscita_anticipata": False,
             }
 
     # -----------------------------------------
@@ -1033,9 +1079,29 @@ def mostra_registro(titolo, tipo_evento, stagione):
             value=st.session_state.registro[atleta_id]["presenza"],
             key=f"pres_{tipo_evento}_{data_evento}_{atleta_id}",
         )
-
+        
+        # -----------------------------------------
+        # RITARDO / USCITA ANTICIPATA
+        # -----------------------------------------
+        
+        c_rit, c_usc = st.columns(2)
+        
+        entrata_ritardo = c_rit.toggle(
+            "⏰ Entrata in ritardo",
+            value=False,
+            key=f"ritardo_{tipo_evento}_{data_evento}_{atleta_id}",
+            disabled=not presenza
+        )
+        
+        uscita_anticipata = c_usc.toggle(
+            "🚪 Uscita anticipata",
+            value=False,
+            key=f"uscita_{tipo_evento}_{data_evento}_{atleta_id}",
+            disabled=not presenza
+        )
+        
         voto = None
-
+        
         if presenza:
             presenti += 1
 
@@ -1059,6 +1125,8 @@ def mostra_registro(titolo, tipo_evento, stagione):
             "presenza": presenza,
             "voto": voto if presenza else 6,
             "commento": commento,
+            "entrata_ritardo": entrata_ritardo,
+            "uscita_anticipata": uscita_anticipata,
         }
 
         st.markdown("---")
@@ -2903,15 +2971,32 @@ with tab_area:
                 "commento_visibile"
             ] = "Compila prima la tua autovalutazione"
 
+            storico_atleta["ritardo"] = (
+                storico_atleta["entrata_ritardo"]
+                .map({
+                    1: "⏰",
+                    0: ""
+                })
+            )
+            
+            storico_atleta["uscita"] = (
+                storico_atleta["uscita_anticipata"]
+                .map({
+                    1: "🚪",
+                    0: ""
+                })
+            )
+
             st.dataframe(
                 storico_visibile[
                     [
                         "data",
                         "tipo_evento",
                         "presenza",
-                        "Autovalutazione",
-                        "voto_visibile",
-                        "commento_visibile"
+                        "ritardo",
+                        "uscita",
+                        "voto",
+                        "commento"
                     ]
                 ],
                 use_container_width=True,
@@ -3812,9 +3897,11 @@ with tab8:
                             tipo_evento,
                             presenza,
                             voto,
-                            commento
+                            commento,
+                            entrata_ritardo,
+                            uscita_anticipata
                         )
-                        VALUES(?,?,?,?,?,?,?,?)
+                        VALUES(?,?,?,?,?,?,?,?,?,?)
                         """,
                         (
                             row["id"],
@@ -3824,7 +3911,9 @@ with tab8:
                             row["tipo_evento"],
                             row["presenza"],
                             row["voto"],
-                            row["commento"]
+                            row["commento"],
+                            row["entrata_ritardo"],
+                            row["uscita_anticipata"]
                         )
                     )
 
@@ -4298,6 +4387,8 @@ with tab12:
                     p.data,
                     p.tipo_evento,
                     p.presenza,
+                    p.entrata_ritardo,
+                    p.uscita_anticipata,
                     p.voto,
                     p.commento
                 FROM presenze p
