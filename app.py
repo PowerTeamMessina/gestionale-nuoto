@@ -3288,6 +3288,21 @@ with tab6:
 
 with tab7:
 
+    st.write(
+        "Admin:",
+        st.session_state.get("admin", False)
+    )
+    
+    st.write(
+        "Tecnico:",
+        st.session_state.get("tecnico", False)
+    )
+    
+    st.write(
+        "is_admin():",
+        is_admin()
+    )
+
     if not is_staff():
         
         st.warning(
