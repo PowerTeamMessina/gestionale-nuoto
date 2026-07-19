@@ -1321,6 +1321,8 @@ st.write(
 if (
     st.session_state.get("admin", False)
     or
+    st.session_state.get("tecnico", False)
+    or
     st.session_state.get("atleta", False)
 ):
 
@@ -1330,9 +1332,7 @@ if (
     ):
 
         st.session_state.admin = False
-
         st.session_state.tecnico = False
-
         st.session_state.atleta = False
 
         st.session_state.utente_loggato = None
