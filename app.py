@@ -1921,22 +1921,22 @@ with tab0:
         GROUP BY a.nome
         """,
 
-        if not grafico_presenze.empty:
+    if not grafico_presenze.empty:
     
-            grafico_presenze["percentuale"] = (
-                grafico_presenze["presenze"]
-                /
-                grafico_presenze["registrazioni"]
-                * 100
-            ).round(1)
+        grafico_presenze["percentuale"] = (
+            grafico_presenze["presenze"]
+            /
+            grafico_presenze["registrazioni"]
+            * 100
+        ).round(1)
     
-            st.write("🏆 Percentuale presenze")
+        st.write("🏆 Percentuale presenze")
     
-            st.bar_chart(
-                grafico_presenze.set_index("nome")[
-                    "percentuale"
-                ]
-            )
+        st.bar_chart(
+            grafico_presenze.set_index("nome")[
+                "percentuale"
+            ]
+        )
 
     grafico_voti = pd.read_sql(
         """
