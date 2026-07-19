@@ -75,6 +75,24 @@ CREATE TABLE IF NOT EXISTS presenze (
 )
 """)
 
+c.execute("""
+CREATE TABLE IF NOT EXISTS autovalutazioni (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    atleta_id INTEGER,
+    data TEXT,
+    tipo_evento TEXT,
+    stanchezza INTEGER,
+    benessere INTEGER,
+    autovalutazione INTEGER,
+    commento TEXT,
+    UNIQUE(
+        atleta_id,
+        data,
+        tipo_evento
+    )
+)
+""")
+
 conn.commit()
 
 try:
@@ -240,6 +258,54 @@ def salva_presenza(
 
     conn.commit()
 
+def salva_autovalutazione(
+    atleta_id,
+    data_evento,
+    tipo_evento,
+    stanchezza,
+    benessere,
+    autovalutazione,
+    commento
+):
+
+    c.execute(
+        """
+        INSERT INTO autovalutazioni(
+            atleta_id,
+            data,
+            tipo_evento,
+            stanchezza,
+            benessere,
+            autovalutazione,
+            commento
+        )
+        VALUES(?,?,?,?,?,?,?)
+
+        ON CONFLICT(
+            atleta_id,
+            data,
+            tipo_evento
+        )
+
+        DO UPDATE SET
+            stanchezza = excluded.stanchezza,
+            benessere = excluded.benessere,
+            autovalutazione = excluded.autovalutazione,
+            commento = excluded.commento
+        """,
+        (
+            atleta_id,
+            data_evento,
+            tipo_evento,
+            stanchezza,
+            benessere,
+            autovalutazione,
+            commento
+        )
+    )
+
+    conn.commit()
+    
 # ============================================================
 # FUNZIONI ATLETI
 # ============================================================
