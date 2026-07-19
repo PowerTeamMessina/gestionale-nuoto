@@ -1090,7 +1090,10 @@ def check_admin():
 
     if "admin" not in st.session_state:
         st.session_state.admin = False
-
+    
+    if "tecnico" not in st.session_state:
+        st.session_state.tecnico = False
+    
     if "atleta" not in st.session_state:
         st.session_state.atleta = False
     
@@ -1169,6 +1172,20 @@ def login():
                 "Accesso amministratore effettuato."
             )
 
+            st.rerun()
+
+        if (
+            username == "tecnico"
+            and
+            password == st.secrets["TECNICO_PASSWORD"]
+        ):
+        
+            st.session_state.tecnico = True
+            st.session_state.admin = False
+            st.session_state.atleta = False
+        
+            st.session_state.utente_loggato = "tecnico"
+        
             st.rerun()
 
         # -------------------------
