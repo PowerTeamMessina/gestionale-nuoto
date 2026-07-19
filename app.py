@@ -3299,6 +3299,28 @@ with tab7:
 
         st.subheader("⚙️ Limiti del sistema")
 
+        max_stagioni = int(
+            pd.read_sql(
+                """
+                SELECT valore
+                FROM configurazione
+                WHERE chiave = 'max_stagioni'
+                """,
+                conn
+            ).iloc[0]["valore"]
+        )
+        
+        max_atleti = int(
+            pd.read_sql(
+                """
+                SELECT valore
+                FROM configurazione
+                WHERE chiave = 'max_atleti_stagione'
+                """,
+                conn
+            ).iloc[0]["valore"]
+        )
+
         if is_admin():
         
             nuovo_max_stagioni = st.number_input(
