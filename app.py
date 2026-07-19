@@ -1103,7 +1103,7 @@ def check_admin():
     st.markdown("---")
     st.subheader("🔐 Accesso amministratore")
 
-    if not st.session_state.admin:
+    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
 
         password = st.text_input(
             "Password amministratore",
@@ -1296,6 +1296,20 @@ if st.session_state.utente_loggato is None:
 aggiornamento_automatico_giornaliero()
 
 st.write("Admin:", st.session_state.admin)
+st.write(
+    "Tecnico:",
+    st.session_state.get(
+        "tecnico",
+        False
+    )
+)
+st.write(
+    "Atleta:",
+    st.session_state.get(
+        "atleta",
+        False
+    )
+)
 
 if (
     st.session_state.get("admin", False)
@@ -1909,7 +1923,7 @@ with tab0:
     # --------------------------------------------------------
     # BACKUP AUTOMATICO
     # --------------------------------------------------------
-    if not st.session_state.admin:
+    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
         
         st.warning(
             "🔒 Backup disponibile solo agli amministratori."
@@ -3152,7 +3166,7 @@ with tab_area:
 # ============================================================
 
 with tab6:
-    if not st.session_state.admin:
+    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
         
         st.warning(
             "🔒 Accesso riservato agli amministratori."
@@ -3251,7 +3265,7 @@ with tab6:
 
 with tab7:
 
-    if not st.session_state.admin:
+    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
         
         st.warning(
             "🔒 Accesso riservato agli amministratori."
@@ -3449,7 +3463,7 @@ with tab7:
 
 with tab8:
 
-    if not st.session_state.admin:
+    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
 
         st.warning(
             "🔒 Backup disponibile solo agli amministratori."
