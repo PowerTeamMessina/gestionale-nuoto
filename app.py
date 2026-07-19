@@ -2772,7 +2772,7 @@ with tab_area:
         ] = "🔒"
 
         storico_visibile.loc[
-            ~storico_visibile["autovalutazione_compilata"],
+            ~storico_visibile["sbloccato"],
             "commento_visibile"
         ] = "Compila prima la tua autovalutazione"
 
@@ -2784,11 +2784,11 @@ with tab_area:
         
         if autovalutazioni.empty:
         
-            storico_visibile["autovalutazione_compilata"] = False
+            storico_visibile["sbloccato"] = False
         
         else:
         
-            storico_visibile["autovalutazione_compilata"] = storico_visibile.apply(
+            storico_visibile["sbloccato"] = storico_visibile.apply(
                 lambda r: (
                     (
                         autovalutazioni["data"] == r["data"]
@@ -2802,7 +2802,7 @@ with tab_area:
             )
         
         storico_visibile["Autovalutazione"] = storico_visibile[
-            "autovalutazione_compilata"
+            "sbloccato"
         ].map(
             {
                 True: "✅",
@@ -2823,12 +2823,12 @@ with tab_area:
         )
         
         storico_visibile.loc[
-            ~storico_visibile["autovalutazione_compilata"],
+            ~storico_visibile["sbloccato"],
             "voto_visibile"
         ] = "🔒"
         
         storico_visibile.loc[
-            ~storico_visibile["autovalutazione_compilata"],
+            ~storico_visibile["sbloccato"],
             "commento_visibile"
         ] = "Compila prima la tua autovalutazione"
         
@@ -2916,7 +2916,7 @@ with tab_area:
         tutte_compilate = (
             not storico_visibile.empty
             and
-            storico_visibile["autovalutazione_compilata"].all()
+            storico_visibile["sbloccato"].all()
         )
         
         if tutte_compilate:
