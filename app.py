@@ -3296,8 +3296,7 @@ with tab7:
 
     else:
 
-        st.error("SONO ARRIVATO QUI")
-        st.subheader("⚙️ Limiti del sistema")
+        st.header("⚙️ Limiti del sistema")
 
         max_stagioni = int(
             pd.read_sql(
