@@ -4134,6 +4134,14 @@ with tab12:
             dati_atleta = stats[
                 stats["nome"] == atleta_scheda
             ]
+
+            if dati_atleta.empty:
+
+                st.warning(
+                    "Questo atleta non ha ancora allenamenti registrati nella stagione selezionata."
+                )
+            
+                st.stop()
     
             presenze_atleta = int(
                 dati_atleta["presenze"].sum()
