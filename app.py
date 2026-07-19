@@ -2341,10 +2341,11 @@ with tab5:
         )
 
         storico_allenamenti = storico[
-            ~storico["tipo_evento"].str.contains(
-                "Gare",
-                case=False,
-                na=False
+            storico["tipo_evento"].isin(
+                [
+                    "Allenamento in vasca",
+                    "Allenamento a secco"
+                ]
             )
         ].copy()
         
