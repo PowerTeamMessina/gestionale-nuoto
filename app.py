@@ -4233,6 +4233,206 @@ with tab12:
                     "🏁 Gare disputate",
                     gare_disputate
                 )
+
+                # -----------------------------------------
+                # GRAFICO AUTOVALUTAZIONI ATLETA
+                # -----------------------------------------
+                
+                st.markdown("---")
+                
+                st.subheader(
+                    "🧠 Autovalutazioni atleta"
+                )
+                
+                autoval_atleta = pd.read_sql(
+                    """
+                    SELECT
+                        av.data,
+                        av.tipo_evento,
+                        av.stanchezza,
+                        av.benessere,
+                        av.autovalutazione,
+                        av.commento AS commento_atleta
+                    FROM autovalutazioni av
+                    JOIN atleti a
+                        ON a.id = av.atleta_id
+                    WHERE
+                        a.nome = ?
+                        AND a.stagione = ?
+                    ORDER BY av.data ASC
+                    """,
+                    conn,
+                    params=(
+                        atleta_scheda,
+                        stagione_selezionata
+                    )
+                )
+                
+                if autoval_atleta.empty:
+                
+                    st.info(
+                        "Nessuna autovalutazione compilata da questo atleta."
+                    )
+                
+                else:
+                
+                    confronto_autoval = storico_atleta.merge(
+                        autoval_atleta,
+                        on=[
+                            "data",
+                            "tipo_evento"
+                        ],
+                        how="inner"
+                    )
+                
+                    if confronto_autoval.empty:
+                
+                        st.info(
+                            "Sono presenti autovalutazioni, ma non risultano abbinate allo storico delle attività."
+                        )
+                
+                    else:
+                
+                        confronto_autoval["data"] = pd.to_datetime(
+                            confronto_autoval["data"]
+                        )
+                
+                        confronto_autoval = confronto_autoval.sort_values(
+                            "data"
+                        )
+                
+                        dati_plot = confronto_autoval[
+                            [
+                                "data",
+                                "voto",
+                                "autovalutazione",
+                                "benessere",
+                                "stanchezza"
+                            ]
+                        ].copy()
+                
+                        dati_plot = dati_plot.rename(
+                            columns={
+                                "voto": "Voto allenatore",
+                                "autovalutazione": "Autovalutazione prestazione",
+                                "benessere": "Come si è sentito",
+                                "stanchezza": "Stanchezza"
+                            }
+                        )
+                
+                        dati_lunghi = dati_plot.melt(
+                            id_vars="data",
+                            var_name="Parametro",
+                            value_name="Valore"
+                        )
+                
+                        grafico_autoval = (
+                            alt.Chart(dati_lunghi)
+                            .mark_line(point=True)
+                            .encode(
+                                x=alt.X(
+                                    "data:T",
+                                    title="Data"
+                                ),
+                                y=alt.Y(
+                                    "Valore:Q",
+                                    title="Valore",
+                                    scale=alt.Scale(
+                                        domain=[
+                                            0,
+                                            10
+                                        ]
+                                    )
+                                ),
+                                color=alt.Color(
+                                    "Parametro:N",
+                                    scale=alt.Scale(
+                                        domain=[
+                                            "Voto allenatore",
+                                            "Autovalutazione prestazione",
+                                            "Come si è sentito",
+                                            "Stanchezza"
+                                        ],
+                                        range=[
+                                            "red",
+                                            "blue",
+                                            "green",
+                                            "gold"
+                                        ]
+                                    ),
+                                    legend=alt.Legend(
+                                        orient="bottom-right"
+                                    )
+                                )
+                            )
+                            .properties(
+                                height=400
+                            )
+                        )
+                
+                        st.altair_chart(
+                            grafico_autoval,
+                            use_container_width=True
+                        )
+                
+                        media_allenatore = round(
+                            confronto_autoval["voto"]
+                            .dropna()
+                            .mean(),
+                            2
+                        )
+                
+                        media_autovalutazione = round(
+                            confronto_autoval["autovalutazione"]
+                            .dropna()
+                            .mean(),
+                            2
+                        )
+                
+                        c_auto1, c_auto2 = st.columns(2)
+                
+                        c_auto1.metric(
+                            "🔴 Media voto allenatore",
+                            media_allenatore
+                        )
+                
+                        c_auto2.metric(
+                            "🔵 Media autovalutazione",
+                            media_autovalutazione
+                        )
+                
+                        st.markdown("---")
+                
+                        st.subheader(
+                            "📝 Commenti inseriti dall'atleta"
+                        )
+                
+                        commenti_atleta = confronto_autoval[
+                            [
+                                "data",
+                                "tipo_evento",
+                                "stanchezza",
+                                "benessere",
+                                "autovalutazione",
+                                "commento_atleta"
+                            ]
+                        ].copy()
+                
+                        commenti_atleta["data"] = (
+                            commenti_atleta["data"]
+                            .dt.strftime("%d/%m/%Y")
+                        )
+                
+                        commenti_atleta["commento_atleta"] = (
+                            commenti_atleta["commento_atleta"]
+                            .fillna("")
+                        )
+                
+                        st.dataframe(
+                            commenti_atleta,
+                            use_container_width=True,
+                            hide_index=True
+                        )
     
                 # -----------------------------------------
                 # GRAFICO PRESENZE
