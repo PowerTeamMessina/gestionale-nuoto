@@ -2523,7 +2523,8 @@ with tab5:
     st.markdown("---")
 
     st.subheader("🎯 Classifica rendimento complessivo")
-
+    st.caption("La classifica è il risultato della media aritmetica tra i voti di prestazione (attività in acqua, a secco e gare)")
+    
     rendimento = stats.copy()
 
     rendimento = rendimento.sort_values(
