@@ -1132,10 +1132,13 @@ def login():
 
         if not atleta.empty:
 
+            st.write("LOGIN TROVATO")
+            st.write(atleta)
+            
             st.session_state.utente_loggato = (
                 atleta.iloc[0]["id"]
             )
-        
+                    
             st.session_state.admin = False
         
             st.session_state.atleta = True
@@ -2624,7 +2627,15 @@ with tab_area:
 
         st.write("ID loggato:", st.session_state.utente_loggato)
 
-        st.write(atleta)
+        test = pd.read_sql(
+            """
+            SELECT id, nome, stagione
+            FROM atleti
+            """,
+            conn
+        )
+        
+        st.write(test)
 
         if atleta.empty:
 
