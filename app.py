@@ -7,8 +7,11 @@ import json
 import base64
 import requests
 import os
-import secrets
 from datetime import datetime
+import secrets
+import smtplib
+from email.mime.text import MIMEText
+
 
 # ============================================================
 # CONFIGURAZIONE
@@ -365,6 +368,52 @@ def aggiorna_dati_atleta(
     )
 
     conn.commit()
+
+def invia_credenziali_email(
+    email_destinatario,
+    password,
+    nome
+):
+
+    mittente = st.secrets["GMAIL_ADDRESS"]
+    password_mittente = st.secrets["GMAIL_PASSWORD"]
+
+    testo = f"""
+    Ciao {nome},
+    
+    Le tue credenziali per l'Area Atleta sono:
+    
+    Email: {email_destinatario}
+    Password: {password}
+
+    Con queste credenziali potrai accedere alla tua area personale e compilare i questionari relativi ad allenamenti e gare.
+
+    Buon lavoro!
+    
+    Power Team Messina
+    """
+
+    msg = MIMEText(testo)
+
+    msg["Subject"] = "Credenziali Area Atleta"
+    msg["From"] = mittente
+    msg["To"] = email_destinatario
+
+    server = smtplib.SMTP(
+        "smtp.gmail.com",
+        587
+    )
+
+    server.starttls()
+
+    server.login(
+        mittente,
+        password_mittente
+    )
+
+    server.send_message(msg)
+
+    server.quit()
 
 def classifica_rendimento_evento(
     storico,
@@ -1958,6 +2007,29 @@ with tab4:
                 )
             
                 st.rerun()
+
+            if st.button(
+                "📧 Invia credenziali",
+                key=f"invia_credenziali_{id_atleta}"
+            ):
+            
+                try:
+            
+                    invia_credenziali_email(
+                        nuova_email,
+                        nuova_password,
+                        dati_atleta["nome"]
+                    )
+            
+                    st.success(
+                        "✅ Credenziali inviate correttamente."
+                    )
+            
+                except Exception as e:
+            
+                    st.error(
+                        f"Errore invio email: {e}"
+                    )
             
             if st.button("💾 Aggiorna dati atleta"):
             
