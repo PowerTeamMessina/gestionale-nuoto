@@ -3331,9 +3331,9 @@ with tab7:
                 value=max_atleti
             )
     
-        if st.button(
-            "💾 Salva limiti"
-        ):
+            if st.button(
+                "💾 Salva limiti"
+            ):
     
             c.execute(
                 """
