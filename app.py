@@ -3411,24 +3411,32 @@ with tab7:
         if st.button(
             "➕ Crea stagione"
         ):
-
-            if nuova_stagione.strip() == "":
+            if numero_stagioni >= max_stagioni:
 
                 st.error(
-                    "Inserisci il nome della stagione."
+                    f"❌ Limite massimo di {max_stagioni} stagioni raggiunto."
                 )
-
+            
             else:
-
-                aggiungi_stagione(
-                    nuova_stagione.strip()
-                )
-
-                st.success(
-                    "Stagione creata correttamente."
-                )
-
-                st.rerun()
+            
+                # codice attuale di creazione stagione
+                if nuova_stagione.strip() == "":
+    
+                    st.error(
+                        "Inserisci il nome della stagione."
+                    )
+    
+                else:
+    
+                    aggiungi_stagione(
+                        nuova_stagione.strip()
+                    )
+    
+                    st.success(
+                        "Stagione creata correttamente."
+                    )
+    
+                    st.rerun()
 
         st.markdown("---")
 
