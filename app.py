@@ -1753,95 +1753,45 @@ with tab0:
 
     st.markdown("---")
 
-    c8, c9 = st.columns(2)
+    st.subheader("📉 Peggior rendimento")
+
+    podio = query_voti.copy()
+    podio["media"] = (
+        podio["media"]
+        .round(2)
+    )
+
+    podio = podio.sort_values(
+        by="media",
+        ascending=True
+    )
     
-    with c9:
+    valori = (
+        podio["media"]
+        .drop_duplicates()
+        .head(3)
+        .tolist()
+    )
 
-        st.subheader("🚫 Peggior presenza")
+    medaglie = ["🤡", "🥴", "🫠"]
 
-        podio = query_dashboard.copy()
+    for i, valore in enumerate(valori):
 
-        podio["percentuale"] = (
-            podio["presenze"]
-            /
-            podio["registrazioni"]
-            * 100
-        ).round(1)
+        gruppo = podio[
+            podio["media"] == valore
+        ]
 
-        podio = podio.sort_values(
-            by="percentuale",
-            ascending=True
+        nomi = ", ".join(
+            gruppo["nome"].tolist()
         )
 
-        valori = (
-            podio["percentuale"]
-            .drop_duplicates()
-            .head(3)
-            .tolist()
+        st.markdown(
+            f"### {medaglie[i]} {nomi}"
         )
 
-        medaglie = ["💀", "💩", "🪦"]
-
-        for i, valore in enumerate(valori):
-
-            gruppo = podio[
-                podio["percentuale"] == valore
-            ]
-
-            nomi = ", ".join(
-                gruppo["nome"].tolist()
-            )
-
-            st.markdown(
-                f"### {medaglie[i]} {nomi}"
-            )
-
-            st.caption(
-                f"{valore}% presenza"
-            )
-
-    with c8:
-
-        st.subheader("📉 Peggior rendimento")
-
-        podio = query_voti.copy()
-
-        podio["media"] = (
-            podio["media"]
-            .round(2)
+        st.caption(
+            f"Media voto: {valore}"
         )
-
-        podio = podio.sort_values(
-            by="media",
-            ascending=True
-        )
-
-        valori = (
-            podio["media"]
-            .drop_duplicates()
-            .head(3)
-            .tolist()
-        )
-
-        medaglie = ["🤡", "🥴", "🫠"]
-
-        for i, valore in enumerate(valori):
-
-            gruppo = podio[
-                podio["media"] == valore
-            ]
-
-            nomi = ", ".join(
-                gruppo["nome"].tolist()
-            )
-
-            st.markdown(
-                f"### {medaglie[i]} {nomi}"
-            )
-
-            st.caption(
-                f"Media voto: {valore}"
-            )
     
     # --------------------------------------------------------
     # GRAFICI
