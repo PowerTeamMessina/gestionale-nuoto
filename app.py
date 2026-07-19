@@ -4298,14 +4298,14 @@ with tab12:
     
             st.subheader("👤 Scheda atleta avanzata")
     
-            atleta_scheda = st.selectbox(
+             = st.selectbox(
                 "Seleziona atleta",
                 sorted(stats["nome"].unique()),
                 key="scheda_atleta"
             )
     
             dati_atleta = stats[
-                stats["nome"] == atleta_scheda
+                stats["nome"] == 
             ]
 
             if dati_atleta.empty:
@@ -4389,7 +4389,7 @@ with tab12:
                 """,
                 conn,
                 params=(
-                    atleta_scheda,
+                    ,
                     stagione_selezionata
                 )
             )
@@ -4446,7 +4446,7 @@ with tab12:
                     """,
                     conn,
                     params=(
-                        atleta_scheda,
+                        nome,
                         stagione_selezionata
                     )
                 )
