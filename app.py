@@ -1426,12 +1426,15 @@ with tab0:
         JOIN atleti a
             ON a.id = p.atleta_id
         WHERE p.stagione = ?
+          AND p.tipo_evento IN (
+                'Allenamento in vasca',
+                'Allenamento a secco'
+          )
         GROUP BY a.nome
         """,
         conn,
         params=(stagione_selezionata,)
     )
-
 
     miglior_presenza = "-"
     miglior_percentuale = 0
@@ -1911,28 +1914,29 @@ with tab0:
         JOIN atleti a
             ON a.id = p.atleta_id
         WHERE p.stagione = ?
+          AND p.tipo_evento IN (
+                'Allenamento in vasca',
+                'Allenamento a secco'
+          )
         GROUP BY a.nome
         """,
-        conn,
-        params=(stagione_selezionata,)
-    )
 
-    if not grafico_presenze.empty:
-
-        grafico_presenze["percentuale"] = (
-            grafico_presenze["presenze"]
-            /
-            grafico_presenze["registrazioni"]
-            * 100
-        ).round(1)
-
-        st.write("🏆 Percentuale presenze")
-
-        st.bar_chart(
-            grafico_presenze.set_index("nome")[
-                "percentuale"
-            ]
-        )
+        if not grafico_presenze.empty:
+    
+            grafico_presenze["percentuale"] = (
+                grafico_presenze["presenze"]
+                /
+                grafico_presenze["registrazioni"]
+                * 100
+            ).round(1)
+    
+            st.write("🏆 Percentuale presenze")
+    
+            st.bar_chart(
+                grafico_presenze.set_index("nome")[
+                    "percentuale"
+                ]
+            )
 
     grafico_voti = pd.read_sql(
         """
