@@ -1125,8 +1125,6 @@ def check_admin():
 
     else:
 
-        else:
-
         st.success(
             "✅ Modalità amministrativa attiva"
         )
