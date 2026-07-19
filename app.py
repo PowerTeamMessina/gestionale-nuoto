@@ -3357,7 +3357,7 @@ with tab7:
                     "✅ Limiti aggiornati."
                 )
         
-        elif st.session_state.get("tecnico", False):
+        elif st.session_state.get("tecnico", True):
         
             st.number_input(
                 "Numero massimo stagioni",
