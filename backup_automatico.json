@@ -11,176 +11,176 @@
       "nome": "Sidoti Riccardo",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": "sidotiriccardo5@gmail.com",
+      "password": "2d33f044"
     },
     {
       "id": 5,
       "nome": "Ammendolia Antonio",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 6,
       "nome": "Priolo Andrea",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 7,
       "nome": "Raso Filippo",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 8,
       "nome": "Sulfaro Gabriele",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 9,
       "nome": "Tavelli Gabriele",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 10,
       "nome": "Trimarchi Marco",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 11,
       "nome": "Akhmetov Ilias",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": "akhmetovilias2@gmail.com",
+      "password": "012eb3c0"
     },
     {
       "id": 12,
       "nome": "Bucceri Nicolò",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 13,
       "nome": "Iannello Lorenzo",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 14,
       "nome": "Mangano Marco",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": "lucabombaci1980@gmail.com",
+      "password": "51c457dc"
     },
     {
       "id": 15,
       "nome": "Silipigni Pierpaolo",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 16,
       "nome": "Siracusano Luciano",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 17,
       "nome": "Borgia Elena",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 18,
       "nome": "Coppolino Noemi",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 19,
       "nome": "Rottura Agata",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 20,
       "nome": "Sciarrone Vittoria",
       "categoria": "Ragazzi",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 21,
       "nome": "Barbaro Rebecca",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 22,
       "nome": "Bellantoni Giorgia",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 23,
       "nome": "Zaccone Giorgia",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 24,
       "nome": "Cundari Emanuela",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     },
     {
       "id": 25,
       "nome": "Scaramuzzino Claudia",
       "categoria": "Assoluti",
       "stagione": "2025/2026",
-      "email": null,
-      "password": null
+      "email": NaN,
+      "password": NaN
     }
   ],
   "presenze": [
@@ -3510,8 +3510,8 @@
       "data": "2026-07-19",
       "stagione": "2025/2026",
       "tipo_evento": "Gare",
-      "presenza": 0,
-      "voto": NaN,
+      "presenza": 1,
+      "voto": 5.0,
       "commento": ""
     },
     {
@@ -3600,8 +3600,8 @@
       "data": "2026-07-19",
       "stagione": "2025/2026",
       "tipo_evento": "Gare",
-      "presenza": 0,
-      "voto": NaN,
+      "presenza": 1,
+      "voto": 6.0,
       "commento": ""
     },
     {
