@@ -2094,22 +2094,51 @@ with tab4:
                 "Email atleta"
             )
 
-            aggiungi = st.form_submit_button("➕ Aggiungi atleta")
-
+            numero_atleti_stagione = pd.read_sql(
+                """
+                SELECT COUNT(*) AS totale
+                FROM atleti
+                WHERE stagione = ?
+                """,
+                conn,
+                params=(stagione_selezionata,)
+            ).iloc[0]["totale"]
+            
+            st.caption(
+                f"Atleti nella stagione: {numero_atleti_stagione}/{max_atleti}"
+            )
+            
+            aggiungi = st.form_submit_button(
+                "➕ Aggiungi atleta"
+            )
+            
             if aggiungi:
-                if nome.strip() == "":
-                    st.error("Inserisci il nome dell'atleta.")
+            
+                if numero_atleti_stagione >= max_atleti:
+            
+                    st.error(
+                        f"❌ Limite massimo di {max_atleti} atleti raggiunto per questa stagione."
+                    )
+            
+                elif nome.strip() == "":
+            
+                    st.error(
+                        "Inserisci il nome dell'atleta."
+                    )
+            
                 else:
+            
                     password_generata = aggiungi_atleta(
                         nome.strip(),
                         categoria.strip(),
                         stagione_selezionata,
                         email.strip()
                     )
-
+            
                     st.success(
                         f"Atleta aggiunto. Password generata: {password_generata}"
                     )
+            
                     st.rerun()
 
         st.markdown("---")
