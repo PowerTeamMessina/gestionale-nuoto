@@ -6,6 +6,7 @@ from io import BytesIO
 import json
 import base64
 import requests
+import altair as alt
 import os
 from datetime import datetime
 import secrets
@@ -2779,279 +2780,388 @@ with tab_area:
         st.markdown("---")
 
         st.subheader("📜 Le tue attività")
-        
+
         storico_visibile = storico_atleta.copy()
-        
-        if autovalutazioni.empty:
-        
-            storico_visibile["sbloccato"] = False
-        
+
+        if storico_visibile.empty:
+
+            st.info(
+                "Non hai ancora attività registrate."
+            )
+
         else:
-        
+
+            # Consideriamo presenti solo le righe con presenza diversa da zero
+            storico_visibile["presente"] = (
+                storico_visibile["presenza"] != 0
+            )
+
+            # Controlla se esiste autovalutazione SOLO per i giorni presenti
             storico_visibile["sbloccato"] = storico_visibile.apply(
                 lambda r: (
+                    r["presente"]
+                    and
                     (
-                        autovalutazioni["data"] == r["data"]
-                    )
-                    &
-                    (
-                        autovalutazioni["tipo_evento"] == r["tipo_evento"]
-                    )
-                ).any(),
+                        (
+                            autovalutazioni["data"] == r["data"]
+                        )
+                        &
+                        (
+                            autovalutazioni["tipo_evento"] == r["tipo_evento"]
+                        )
+                    ).any()
+                ),
                 axis=1
             )
-        
-        storico_visibile["Autovalutazione"] = storico_visibile[
-            "sbloccato"
-        ].map(
-            {
-                True: "✅",
-                False: "❌"
-            }
-        )
-        
-        storico_visibile["voto_visibile"] = (
-            storico_visibile["voto"]
-            .fillna("")
-            .astype(str)
-        )
-        
-        storico_visibile["commento_visibile"] = (
-            storico_visibile["commento"]
-            .fillna("")
-            .astype(str)
-        )
-        
-        storico_visibile.loc[
-            ~storico_visibile["sbloccato"],
-            "voto_visibile"
-        ] = "🔒"
-        
-        storico_visibile.loc[
-            ~storico_visibile["sbloccato"],
-            "commento_visibile"
-        ] = "Compila prima la tua autovalutazione"
-        
-        st.dataframe(
-            storico_visibile[
-                [
-                    "data",
-                    "tipo_evento",
-                    "presenza",
-                    "Autovalutazione",
-                    "voto_visibile",
-                    "commento_visibile"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
 
-        st.markdown("---")
-        st.subheader("📝 Autovalutazione")
+            # Colonna stato autovalutazione
+            # Assente -> trattino
+            # Presente compilato -> spunta
+            # Presente non compilato -> croce
+            storico_visibile["Autovalutazione"] = "—"
 
-        evento = st.selectbox(
-            "Seleziona attività",
-            [
-                f"{r['data']} - {r['tipo_evento']}"
-                for _, r in storico_atleta.iterrows()
-            ]
-        )
-        
-        stanchezza = st.slider(
-            "😴 Livello di stanchezza",
-            1,
-            10,
-            5
-        )
-        
-        benessere = st.slider(
-            "😊 Come ti sei sentito",
-            1,
-            10,
-            5
-        )
-        
-        autovalutazione = st.slider(
-            "🏊 Come valuti la tua prestazione",
-            1,
-            10,
-            5
-        )
-        
-        commento_atleta = st.text_area(
-            "📝 Commento personale"
-        )
+            storico_visibile.loc[
+                storico_visibile["presente"]
+                &
+                storico_visibile["sbloccato"],
+                "Autovalutazione"
+            ] = "✅"
 
-        if st.button(
-            "💾 Salva autovalutazione"
-        ):
-        
-            data_evento = evento.split(" - ")[0]
-        
-            tipo_evento = evento.split(" - ")[1]
-        
-            salva_autovalutazione(
-                int(st.session_state.utente_loggato),
-                data_evento,
-                tipo_evento,
-                stanchezza,
-                benessere,
-                autovalutazione,
-                commento_atleta
+            storico_visibile.loc[
+                storico_visibile["presente"]
+                &
+                ~storico_visibile["sbloccato"],
+                "Autovalutazione"
+            ] = "❌"
+
+            # Colonne visibili, separate da quelle numeriche originali
+            storico_visibile["voto_visibile"] = (
+                storico_visibile["voto"]
+                .fillna("")
+                .astype(str)
             )
-        
-            st.success(
-                "✅ Autovalutazione salvata."
-            )
-        
-            st.rerun()
 
-        # -----------------------------------------------------
-        # GRAFICO CONFRONTO VALUTAZIONI
-        # -----------------------------------------------------
-        
-        st.markdown("---")
-        
-        tutte_compilate = (
-            not storico_visibile.empty
-            and
-            storico_visibile["sbloccato"].all()
-        )
-        
-        if tutte_compilate:
-        
-            st.subheader("📈 Confronto valutazioni")
-        
-            storico_grafico = storico_atleta.merge(
-                autovalutazioni,
-                on=[
-                    "data",
-                    "tipo_evento"
+            storico_visibile["commento_visibile"] = (
+                storico_visibile["commento"]
+                .fillna("")
+                .astype(str)
+            )
+
+            # Se assente: niente croce, niente voto, niente commento
+            storico_visibile.loc[
+                ~storico_visibile["presente"],
+                "voto_visibile"
+            ] = "—"
+
+            storico_visibile.loc[
+                ~storico_visibile["presente"],
+                "commento_visibile"
+            ] = "—"
+
+            # Se presente ma non ha compilato: voto/commento admin bloccati
+            storico_visibile.loc[
+                storico_visibile["presente"]
+                &
+                ~storico_visibile["sbloccato"],
+                "voto_visibile"
+            ] = "🔒"
+
+            storico_visibile.loc[
+                storico_visibile["presente"]
+                &
+                ~storico_visibile["sbloccato"],
+                "commento_visibile"
+            ] = "Compila prima la tua autovalutazione"
+
+            st.dataframe(
+                storico_visibile[
+                    [
+                        "data",
+                        "tipo_evento",
+                        "presenza",
+                        "Autovalutazione",
+                        "voto_visibile",
+                        "commento_visibile"
+                    ]
                 ],
-                how="inner"
+                use_container_width=True,
+                hide_index=True
             )
-        
-            storico_grafico["data"] = pd.to_datetime(
-                storico_grafico["data"]
-            )
-        
-            storico_grafico = storico_grafico.sort_values(
-                "data"
-            )
-        
-            tipo_grafico = st.selectbox(
-                "Periodo grafico",
-                [
-                    "Stagionale",
-                    "Mensile",
-                    "Settimanale"
-                ],
-                key="periodo_grafico_area_atleta"
-            )
-        
-            dati_grafico = storico_grafico.copy()
-        
-            if tipo_grafico == "Mensile":
-        
-                mesi = sorted(
-                    dati_grafico["data"]
-                    .dt.strftime("%Y-%m")
-                    .unique()
+
+            # -----------------------------------------------------
+            # AUTOVALUTAZIONE
+            # -----------------------------------------------------
+
+            st.markdown("---")
+
+            st.subheader("📝 Autovalutazione")
+
+            attivita_da_compilare = storico_visibile[
+                storico_visibile["presente"]
+                &
+                ~storico_visibile["sbloccato"]
+            ].copy()
+
+            if attivita_da_compilare.empty:
+
+                st.success(
+                    "✅ Hai compilato tutte le autovalutazioni richieste."
                 )
-        
-                mese_scelto = st.selectbox(
-                    "Seleziona mese",
-                    mesi,
-                    key="mese_grafico_area_atleta"
-                )
-        
-                dati_grafico = dati_grafico[
-                    dati_grafico["data"].dt.strftime("%Y-%m")
-                    == mese_scelto
-                ]
-        
-            elif tipo_grafico == "Settimanale":
-        
-                dati_grafico["settimana"] = (
-                    dati_grafico["data"]
-                    .dt.strftime("%Y-W%U")
-                )
-        
-                settimane = sorted(
-                    dati_grafico["settimana"].unique()
-                )
-        
-                settimana_scelta = st.selectbox(
-                    "Seleziona settimana",
-                    settimane,
-                    key="settimana_grafico_area_atleta"
-                )
-        
-                dati_grafico = dati_grafico[
-                    dati_grafico["settimana"] == settimana_scelta
-                ]
-        
-            if dati_grafico.empty:
-        
-                st.info(
-                    "Nessun dato disponibile per il periodo selezionato."
-                )
-        
+
             else:
-        
-                fig, ax = plt.subplots()
-        
-                ax.plot(
-                    dati_grafico["data"],
-                    dati_grafico["voto"],
-                    color="red",
-                    marker="o",
-                    label="Voto admin"
+
+                opzioni_eventi = [
+                    f"{r['data']} - {r['tipo_evento']}"
+                    for _, r in attivita_da_compilare.iterrows()
+                ]
+
+                evento = st.selectbox(
+                    "Seleziona attività da compilare",
+                    opzioni_eventi,
+                    key="evento_autovalutazione_area_atleta"
                 )
-        
-                ax.plot(
-                    dati_grafico["data"],
-                    dati_grafico["autovalutazione"],
-                    color="blue",
-                    marker="o",
-                    label="Autovalutazione prestazione"
+
+                stanchezza = st.slider(
+                    "😴 Livello di stanchezza",
+                    1,
+                    10,
+                    5,
+                    key="stanchezza_area_atleta"
                 )
-        
-                ax.plot(
-                    dati_grafico["data"],
-                    dati_grafico["benessere"],
-                    color="green",
-                    marker="o",
-                    label="Come ti sei sentito"
+
+                benessere = st.slider(
+                    "😊 Come ti sei sentito",
+                    1,
+                    10,
+                    5,
+                    key="benessere_area_atleta"
                 )
-        
-                ax.plot(
-                    dati_grafico["data"],
-                    dati_grafico["stanchezza"],
-                    color="gold",
-                    marker="o",
-                    label="Stanchezza"
+
+                autovalutazione = st.slider(
+                    "🏊 Come valuti la tua prestazione",
+                    1,
+                    10,
+                    5,
+                    key="autovalutazione_area_atleta"
                 )
-        
-                ax.set_xlabel("Tempo")
-                ax.set_ylabel("Voto")
-                ax.set_ylim(0, 10)
-        
-                ax.legend(
-                    loc="lower right"
+
+                commento_atleta = st.text_area(
+                    "📝 Commento personale",
+                    key="commento_autovalutazione_area_atleta"
                 )
-        
-                fig.autofmt_xdate()
-        
-                st.pyplot(fig)
-        
-        else:
-        
-            st.info(
-                "📌 Il grafico sarà disponibile quando avrai compilato tutte le autovalutazioni."
+
+                if st.button(
+                    "💾 Salva autovalutazione",
+                    key="salva_autovalutazione_area_atleta"
+                ):
+
+                    parti_evento = evento.split(
+                        " - ",
+                        1
+                    )
+
+                    data_evento = parti_evento[0]
+
+                    tipo_evento = parti_evento[1]
+
+                    salva_autovalutazione(
+                        int(st.session_state.utente_loggato),
+                        data_evento,
+                        tipo_evento,
+                        stanchezza,
+                        benessere,
+                        autovalutazione,
+                        commento_atleta
+                    )
+
+                    st.success(
+                        "✅ Autovalutazione salvata."
+                    )
+
+                    st.rerun()
+
+            # -----------------------------------------------------
+            # GRAFICO CONFRONTO VALUTAZIONI
+            # -----------------------------------------------------
+
+            st.markdown("---")
+
+            storico_presenti = storico_visibile[
+                storico_visibile["presente"]
+            ].copy()
+
+            tutte_compilate = (
+                not storico_presenti.empty
+                and
+                storico_presenti["sbloccato"].all()
             )
 
+            if tutte_compilate:
+
+                st.subheader("📈 Confronto valutazioni")
+
+                storico_grafico = storico_atleta[
+                    storico_atleta["presenza"] != 0
+                ].merge(
+                    autovalutazioni,
+                    on=[
+                        "data",
+                        "tipo_evento"
+                    ],
+                    how="inner"
+                )
+
+                storico_grafico["data"] = pd.to_datetime(
+                    storico_grafico["data"]
+                )
+
+                storico_grafico = storico_grafico.sort_values(
+                    "data"
+                )
+
+                tipo_grafico = st.selectbox(
+                    "Periodo grafico",
+                    [
+                        "Stagionale",
+                        "Mensile",
+                        "Settimanale"
+                    ],
+                    key="periodo_grafico_area_atleta"
+                )
+
+                dati_grafico = storico_grafico.copy()
+
+                if tipo_grafico == "Mensile":
+
+                    mesi = sorted(
+                        dati_grafico["data"]
+                        .dt.strftime("%Y-%m")
+                        .unique()
+                    )
+
+                    mese_scelto = st.selectbox(
+                        "Seleziona mese",
+                        mesi,
+                        key="mese_grafico_area_atleta"
+                    )
+
+                    dati_grafico = dati_grafico[
+                        dati_grafico["data"]
+                        .dt.strftime("%Y-%m")
+                        == mese_scelto
+                    ]
+
+                elif tipo_grafico == "Settimanale":
+
+                    dati_grafico["settimana"] = (
+                        dati_grafico["data"]
+                        .dt.strftime("%Y-W%U")
+                    )
+
+                    settimane = sorted(
+                        dati_grafico["settimana"]
+                        .unique()
+                    )
+
+                    settimana_scelta = st.selectbox(
+                        "Seleziona settimana",
+                        settimane,
+                        key="settimana_grafico_area_atleta"
+                    )
+
+                    dati_grafico = dati_grafico[
+                        dati_grafico["settimana"]
+                        == settimana_scelta
+                    ]
+
+                if dati_grafico.empty:
+
+                    st.info(
+                        "Nessun dato disponibile per il periodo selezionato."
+                    )
+
+                else:
+
+                    dati_plot = dati_grafico[
+                        [
+                            "data",
+                            "voto",
+                            "autovalutazione",
+                            "benessere",
+                            "stanchezza"
+                        ]
+                    ].copy()
+
+                    dati_plot = dati_plot.rename(
+                        columns={
+                            "voto": "Voto admin",
+                            "autovalutazione": "Autovalutazione prestazione",
+                            "benessere": "Come ti sei sentito",
+                            "stanchezza": "Stanchezza"
+                        }
+                    )
+
+                    dati_lunghi = dati_plot.melt(
+                        id_vars="data",
+                        var_name="Parametro",
+                        value_name="Valore"
+                    )
+
+                    grafico = (
+                        alt.Chart(dati_lunghi)
+                        .mark_line(point=True)
+                        .encode(
+                            x=alt.X(
+                                "data:T",
+                                title="Tempo"
+                            ),
+                            y=alt.Y(
+                                "Valore:Q",
+                                title="Voto",
+                                scale=alt.Scale(
+                                    domain=[
+                                        0,
+                                        10
+                                    ]
+                                )
+                            ),
+                            color=alt.Color(
+                                "Parametro:N",
+                                scale=alt.Scale(
+                                    domain=[
+                                        "Voto admin",
+                                        "Autovalutazione prestazione",
+                                        "Come ti sei sentito",
+                                        "Stanchezza"
+                                    ],
+                                    range=[
+                                        "red",
+                                        "blue",
+                                        "green",
+                                        "gold"
+                                    ]
+                                ),
+                                legend=alt.Legend(
+                                    orient="bottom-right"
+                                )
+                            )
+                        )
+                        .properties(
+                            height=400
+                        )
+                    )
+
+                    st.altair_chart(
+                        grafico,
+                        use_container_width=True
+                    )
+
+            else:
+
+                st.info(
+                    "📌 Il grafico sarà disponibile quando avrai compilato tutte le autovalutazioni dei giorni in cui eri presente."
+                )
+                
 # ============================================================
 # TAB 6 STORICO
 # ============================================================
