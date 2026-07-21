@@ -4146,12 +4146,8 @@ with tab10:
             """
             SELECT
                 a.nome,
-                a.categoria,
-                p.tipo_evento,
-                p.presenza,
-                p.entrata_ritardo,
-                p.uscita_anticipata,
-                p.voto
+                p.data,
+                p.presenza
             FROM presenze p
             JOIN atleti a
                 ON a.id = p.atleta_id
