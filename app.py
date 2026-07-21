@@ -4852,71 +4852,23 @@ with tab12:
             params=(stagione_selezionata,)
         )
 
-        analisi_allenamenti = analisi[
-            analisi["tipo_evento"].isin(
-                [
-                    "Allenamento in vasca",
-                    "Allenamento a secco"
-                ]
-            )
-        ].copy()
-
-        analisi_allenamenti["peso_presenza"] = 0.0
-
-        analisi_allenamenti.loc[
-            analisi_allenamenti["presenza"] == 1,
-            "peso_presenza"
-        ] = 1.0
-        
-        analisi_allenamenti.loc[
-            (
-                (
-                    analisi_allenamenti["entrata_ritardo"] == 1
-                )
-                ^
-                (
-                    analisi_allenamenti["uscita_anticipata"] == 1
-                )
-            )
-            &
-            (
-                analisi_allenamenti["presenza"] == 1
-            ),
-            "peso_presenza"
-        ] = 0.9
-        
-        analisi_allenamenti.loc[
-            (
-                analisi_allenamenti["entrata_ritardo"] == 1
-            )
-            &
-            (
-                analisi_allenamenti["uscita_anticipata"] == 1
-            )
-            &
-            (
-                analisi_allenamenti["presenza"] == 1
-            ),
-            "peso_presenza"
-        ] = 0.8
-    
         if analisi.empty:
-    
+
             st.info(
                 "Nessun dato disponibile."
             )
-    
+        
         else:
-    
+        
             analisi["data"] = pd.to_datetime(
                 analisi["data"]
             )
-    
+        
             analisi["mese"] = (
                 analisi["data"]
                 .dt.strftime("%Y-%m")
             )
-
+        
             analisi_allenamenti = analisi[
                 analisi["tipo_evento"].isin(
                     [
@@ -4925,11 +4877,50 @@ with tab12:
                     ]
                 )
             ].copy()
-    
+        
+            analisi_allenamenti["peso_presenza"] = 0.0
+        
+            analisi_allenamenti.loc[
+                analisi_allenamenti["presenza"] == 1,
+                "peso_presenza"
+            ] = 1.0
+        
+            analisi_allenamenti.loc[
+                (
+                    (
+                        analisi_allenamenti["entrata_ritardo"] == 1
+                    )
+                    ^
+                    (
+                        analisi_allenamenti["uscita_anticipata"] == 1
+                    )
+                )
+                &
+                (
+                    analisi_allenamenti["presenza"] == 1
+                ),
+                "peso_presenza"
+            ] = 0.9
+        
+            analisi_allenamenti.loc[
+                (
+                    analisi_allenamenti["entrata_ritardo"] == 1
+                )
+                &
+                (
+                    analisi_allenamenti["uscita_anticipata"] == 1
+                )
+                &
+                (
+                    analisi_allenamenti["presenza"] == 1
+                ),
+                "peso_presenza"
+            ] = 0.8
+        
             # ----------------------------------------------------
             # ANALISI MENSILE
             # ----------------------------------------------------
-    
+        
             mensile = analisi_allenamenti.groupby(
                 "mese"
             ).agg(
