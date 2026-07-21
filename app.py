@@ -861,15 +861,19 @@ def ripristina_backup_locale():
                 id,
                 nome,
                 categoria,
-                stagione
+                stagione,
+                email,
+                password
             )
-            VALUES(?,?,?,?)
+            VALUES(?,?,?,?,?,?)
             """,
             (
                 row["id"],
                 row["nome"],
                 row["categoria"],
-                row["stagione"]
+                row["stagione"],
+                row.get("email"),
+                row.get("password")
             )
         )
 
@@ -3755,16 +3759,22 @@ with tab7:
                         c.execute(
                             """
                             INSERT INTO atleti(
+                                id,
                                 nome,
                                 categoria,
-                                stagione
+                                stagione,
+                                email,
+                                password
                             )
-                            VALUES(?,?,?)
+                            VALUES(?,?,?,?,?,?)
                             """,
                             (
+                                row["id"],
                                 row["nome"],
                                 row["categoria"],
-                                stagione_destinazione
+                                row["stagione"],
+                                row.get("email"),
+                                row.get("password")
                             )
                         )
 
