@@ -532,36 +532,36 @@ def classifica_rendimento_evento(
         storico["tipo_evento"] == tipo_evento
     ]
 
-        dati = dati.copy()
+    dati = dati.copy()
 
-        dati["peso_presenza"] = 0.0
+    dati["peso_presenza"] = 0.0
     
-        dati.loc[
-            dati["presenza"] == 1,
-            "peso_presenza"
-        ] = 1.0
+    dati.loc[
+        dati["presenza"] == 1,
+    "peso_presenza"
+    ] = 1.0
     
-        dati.loc[
-            (
-                (dati["entrata_ritardo"] == 1)
-                ^
-                (dati["uscita_anticipata"] == 1)
-            )
+    dati.loc[
+        (
+            (dati["entrata_ritardo"] == 1)
+            ^
+            (dati["uscita_anticipata"] == 1)
+        )
+    &
+        (dati["presenza"] == 1),
+    "peso_presenza"
+    ] = 0.9
+    
+    dati.loc[
+        (
+            (dati["entrata_ritardo"] == 1)
             &
-            (dati["presenza"] == 1),
-            "peso_presenza"
-        ] = 0.9
-    
-        dati.loc[
-            (
-                (dati["entrata_ritardo"] == 1)
-                &
-                (dati["uscita_anticipata"] == 1)
-            )
-            &
-            (dati["presenza"] == 1),
-            "peso_presenza"
-        ] = 0.8
+            (dati["uscita_anticipata"] == 1)
+        )
+    &
+        (dati["presenza"] == 1),
+    "peso_presenza"
+    ] = 0.8
 
     if dati.empty:
 
