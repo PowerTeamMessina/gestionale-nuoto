@@ -3059,11 +3059,16 @@ with tab_area:
                     [
                         "data",
                         "tipo_evento",
-                        "presenza",
-                        "voto",
-                        "commento"
+                        "Autovalutazione",
+                        "voto_visibile",
+                        "commento_visibile"
                     ]
-                ],
+                ].rename(
+                    columns={
+                        "voto_visibile": "Voto",
+                        "commento_visibile": "Commento"
+                    }
+                ),
                 use_container_width=True,
                 hide_index=True
             )
