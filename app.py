@@ -542,7 +542,7 @@ def classifica_rendimento_evento(
         dropna=False
     ).agg(
         registrazioni=("presenza", "count"),
-        presenze=("presenza", "sum"),
+        presenze=("peso_presenza", "sum"),
         media_voti=("voto", "mean")
     ).reset_index()
 
@@ -2367,6 +2367,8 @@ with tab5:
             a.categoria,
             p.tipo_evento,
             p.presenza,
+            p.entrata_ritardo,
+            p.uscita_anticipata,
             p.voto
         FROM presenze p
         JOIN atleti a
@@ -2398,6 +2400,48 @@ with tab5:
                 ]
             )
         ].copy()
+
+        storico_allenamenti["peso_presenza"] = 0.0
+
+        # presenza piena
+        storico_allenamenti.loc[
+            storico_allenamenti["presenza"] == 1,
+            "peso_presenza"
+        ] = 1.0
+        
+        # solo ritardo O solo uscita anticipata
+        storico_allenamenti.loc[
+            (
+                (
+                    storico_allenamenti["entrata_ritardo"] == 1
+                )
+                ^
+                (
+                    storico_allenamenti["uscita_anticipata"] == 1
+                )
+            )
+            &
+            (
+                storico_allenamenti["presenza"] == 1
+            ),
+            "peso_presenza"
+        ] = 0.9
+        
+        # ritardo + uscita anticipata
+        storico_allenamenti.loc[
+            (
+                storico_allenamenti["entrata_ritardo"] == 1
+            )
+            &
+            (
+                storico_allenamenti["uscita_anticipata"] == 1
+            )
+            &
+            (
+                storico_allenamenti["presenza"] == 1
+            ),
+            "peso_presenza"
+        ] = 0.8
         
         stats_presenze = storico_allenamenti.groupby(
             ["nome", "categoria"],
@@ -2408,9 +2452,9 @@ with tab5:
                 "count"
             ),
             presenze=(
-                "presenza",
-                "sum"
-            )
+            "peso_presenza",
+            "sum"
+        )
         ).reset_index()
         
         stats_voti = storico.groupby(
@@ -3309,13 +3353,13 @@ with tab6:
         storico = pd.read_sql(
             """
             SELECT
-                p.data,
-                p.tipo_evento,
                 a.nome,
                 a.categoria,
+                p.tipo_evento,
                 p.presenza,
-                p.voto,
-                p.commento
+                p.entrata_ritardo,
+                p.uscita_anticipata,
+                p.voto
             FROM presenze p
             JOIN atleti a
                 ON a.id = p.atleta_id
@@ -3359,6 +3403,45 @@ with tab6:
                         ]
                     )
                 ].copy()
+                
+                storico_allenamenti["peso_presenza"] = 0.0
+                
+                storico_allenamenti.loc[
+                    storico_allenamenti["presenza"] == 1,
+                    "peso_presenza"
+                ] = 1.0
+                
+                storico_allenamenti.loc[
+                    (
+                        (
+                            storico_allenamenti["entrata_ritardo"] == 1
+                        )
+                        ^
+                        (
+                            storico_allenamenti["uscita_anticipata"] == 1
+                        )
+                    )
+                    &
+                    (
+                        storico_allenamenti["presenza"] == 1
+                    ),
+                    "peso_presenza"
+                ] = 0.9
+                
+                storico_allenamenti.loc[
+                    (
+                        storico_allenamenti["entrata_ritardo"] == 1
+                    )
+                    &
+                    (
+                        storico_allenamenti["uscita_anticipata"] == 1
+                    )
+                    &
+                    (
+                        storico_allenamenti["presenza"] == 1
+                    ),
+                    "peso_presenza"
+                ] = 0.8
 
             storico["presenza"] = storico["presenza"].map(
                 {
@@ -3937,13 +4020,13 @@ with tab8:
             storico = pd.read_sql(
                 """
                 SELECT
-                    p.data,
-                    p.tipo_evento,
                     a.nome,
                     a.categoria,
+                    p.tipo_evento,
                     p.presenza,
-                    p.voto,
-                    p.commento
+                    p.entrata_ritardo,
+                    p.uscita_anticipata,
+                    p.voto
                 FROM presenze p
                 JOIN atleti a
                     ON a.id = p.atleta_id
@@ -4030,8 +4113,12 @@ with tab10:
             """
             SELECT
                 a.nome,
-                p.data,
-                p.presenza
+                a.categoria,
+                p.tipo_evento,
+                p.presenza,
+                p.entrata_ritardo,
+                p.uscita_anticipata,
+                p.voto
             FROM presenze p
             JOIN atleti a
                 ON a.id = p.atleta_id
@@ -4173,6 +4260,8 @@ with tab12:
                 a.categoria,
                 p.tipo_evento,
                 p.presenza,
+                p.entrata_ritardo,
+                p.uscita_anticipata,
                 p.voto
             FROM presenze p
             JOIN atleti a
@@ -4217,7 +4306,7 @@ with tab12:
                     "count"
                 ),
                 presenze=(
-                    "presenza",
+                    "peso_presenza",
                     "sum"
                 )
             ).reset_index()
@@ -4779,7 +4868,7 @@ with tab12:
                     "count"
                 ),
                 presenze=(
-                    "presenza",
+                    "peso_presenza",
                     "sum"
                 ),
                 media_voti=(
@@ -4877,7 +4966,7 @@ with tab12:
                     "count"
                 ),
                 presenze=(
-                    "presenza",
+                    "peso_presenza",
                     "sum"
                 ),
                 media_voti=(
