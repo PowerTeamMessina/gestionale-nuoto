@@ -3384,13 +3384,15 @@ with tab6:
         storico = pd.read_sql(
             """
             SELECT
+                p.data,
                 a.nome,
                 a.categoria,
                 p.tipo_evento,
                 p.presenza,
                 p.entrata_ritardo,
                 p.uscita_anticipata,
-                p.voto
+                p.voto,
+                p.commento
             FROM presenze p
             JOIN atleti a
                 ON a.id = p.atleta_id
