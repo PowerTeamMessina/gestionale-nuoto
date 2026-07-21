@@ -4716,7 +4716,7 @@ with tab12:
     
         st.markdown("---")
     
-        st.header("📈 Analisi Stagione")
+        st.header("📈 Analisi Stagione Squadra")
     
         analisi = pd.read_sql(
             """
