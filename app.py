@@ -3350,6 +3350,15 @@ with tab6:
                 storico = storico[
                     storico["tipo_evento"] == filtro
                 ]
+                
+                storico_allenamenti = storico[
+                    storico["tipo_evento"].isin(
+                        [
+                            "Allenamento in vasca",
+                            "Allenamento a secco"
+                        ]
+                    )
+                ].copy()
 
             storico["presenza"] = storico["presenza"].map(
                 {
@@ -4403,12 +4412,9 @@ with tab12:
     
             if not storico_atleta.empty:
     
-                gare_disputate = len(
-                    storico_atleta[
-                        storico_atleta["tipo_evento"],
-                        atleta_scheda == "Gare"
-                    ]
-                )
+                gare_disputate = (
+                    storico_atleta["tipo_evento"] == "Gare"
+                ).sum()
     
                 st.metric(
                     "🏁 Gare disputate",
@@ -4444,7 +4450,7 @@ with tab12:
                     """,
                     conn,
                     params=(
-                        nome,
+                        atleta_scheda,
                         stagione_selezionata
                     )
                 )
