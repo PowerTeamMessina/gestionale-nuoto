@@ -2460,10 +2460,6 @@ if "👥 Atleti" in tab:
                     st.rerun()
                     pass
 
-    else:
-        st.warning("🔒 Accesso riservato agli amministratori.")
-
-
 # ============================================================
 # TAB 5
 # ============================================================
