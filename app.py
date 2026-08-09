@@ -4331,15 +4331,9 @@ if "📋 Registro settimanale" in tab:
 # TAB 12 - ANALISI STAGIONE
 # ============================================================
 
-with tab12:
+if "📈 Analisi" in tab:
 
-    if not is_staff():
-
-        st.warning(
-            "🔒 Accesso riservato agli amministratori."
-        )
-
-    else:
+    with tab["📈 Analisi"]:
 
         st.header("👤 Statistiche atleta")
     
