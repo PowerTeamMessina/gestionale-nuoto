@@ -1530,13 +1530,13 @@ if is_admin():
 
     nomi_tab = [
         "🏠 Dashboard",
-        "📊 Classifiche",
-        "📋 Registro settimanale",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
         "🏁 Gare",
+        "📋 Registro settimanale",
         "📈 Analisi",
         "👥 Atleti",
+        "📊 Classifiche",
         "🗂️ Storico",
         "⚙️ Stagioni",
         "💾 Backup"
@@ -1546,11 +1546,11 @@ elif is_tecnico():
 
     nomi_tab = [
         "🏠 Dashboard",
-        "📊 Classifiche",
         "📋 Registro settimanale",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
         "🏁 Gare",
+        "📊 Classifiche",
         "📈 Analisi",
         "👥 Atleti",
         "🗂️ Storico"
