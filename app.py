@@ -2096,11 +2096,34 @@ if "🏠 Dashboard" in tab:
             ).round(1)
         
             st.write("🏆 Percentuale presenze")
-        
-            st.bar_chart(
-                grafico_presenze.set_index("nome")[
-                    "percentuale"
-                ]
+
+            chart = (
+                alt.Chart(grafico_presenze)
+                .mark_bar()
+                .encode(
+                    x=alt.X(
+                        "nome:N",
+                        title="Atleta",
+                        sort="-y"
+                    ),
+                    y=alt.Y(
+                        "percentuale:Q",
+                        title="Percentuale presenze (%)",
+                        scale=alt.Scale(domain=[0, 100])
+                    ),
+                    tooltip=[
+                        "nome",
+                        "percentuale"
+                    ]
+                )
+                .properties(
+                    height=400
+                )
+            )
+            
+            st.altair_chart(
+                chart,
+                use_container_width=True
             )
     
         grafico_voti = pd.read_sql(
