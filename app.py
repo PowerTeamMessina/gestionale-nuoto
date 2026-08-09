@@ -2147,10 +2147,33 @@ if "🏠 Dashboard" in tab:
     
             st.write("🎯 Media voti")
     
-            st.bar_chart(
-                grafico_voti.set_index("nome")[
-                    "media_voti"
-                ]
+            chart_voti = (
+                alt.Chart(grafico_voti)
+                .mark_bar(color="#FF8C00")
+                .encode(
+                    x=alt.X(
+                        "nome:N",
+                        title="Atleta",
+                        sort="-y"
+                    ),
+                    y=alt.Y(
+                        "media_voti:Q",
+                        title="Media voti",
+                        scale=alt.Scale(domain=[0, 10])
+                    ),
+                    tooltip=[
+                        alt.Tooltip("nome:N", title="Atleta"),
+                        alt.Tooltip("media_voti:Q", title="Media", format=".2f")
+                    ]
+                )
+                .properties(
+                    height=400
+                )
+            )
+            
+            st.altair_chart(
+                chart_voti,
+                use_container_width=True
             )
         
         # --------------------------------------------------------
