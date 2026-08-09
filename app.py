@@ -685,6 +685,11 @@ def crea_backup_automatico():
         conn
     ).to_dict(orient="records")
 
+    dati["autovalutazioni"] = pd.read_sql(
+        "SELECT * FROM autovalutazioni",
+        conn
+    ).to_dict(orient="records")
+
     with open(
         "backup_automatico.json",
         "w",
@@ -832,6 +837,10 @@ def ripristina_backup_locale():
     )
 
     c.execute(
+        "DELETE FROM autovalutazioni"
+    )
+
+    c.execute(
         "DELETE FROM atleti"
     )
 
@@ -912,6 +921,37 @@ def ripristina_backup_locale():
                 row["tipo_evento"],
                 row["presenza"],
                 row["voto"],
+                row["commento"]
+            )
+        )
+
+    for row in dati.get(
+        "autovalutazioni",
+        []
+    ):
+    
+        c.execute(
+            """
+            INSERT INTO autovalutazioni(
+                id,
+                atleta_id,
+                data,
+                tipo_evento,
+                stanchezza,
+                benessere,
+                autovalutazione,
+                commento
+            )
+            VALUES(?,?,?,?,?,?,?,?)
+            """,
+            (
+                row["id"],
+                row["atleta_id"],
+                row["data"],
+                row["tipo_evento"],
+                row["stanchezza"],
+                row["benessere"],
+                row["autovalutazione"],
                 row["commento"]
             )
         )
@@ -3272,6 +3312,9 @@ if "👤 Area Atleta" in tab:
                     st.success(
                         "✅ Autovalutazione salvata."
                     )
+
+                    crea_backup_automatico()
+                    upload_backup_github()
 
                     st.rerun()
 
