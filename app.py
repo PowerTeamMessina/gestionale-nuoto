@@ -2542,11 +2542,6 @@ if "📊 Classifiche" in tab:
             )
     
         else:
-            
-            st.write(
-                storico["tipo_evento"]
-                .value_counts(dropna=False)
-            )
 
             storico_allenamenti = storico[
                 storico["tipo_evento"].isin(
