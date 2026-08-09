@@ -259,7 +259,9 @@ def salva_presenza(
     tipo_evento,
     presenza,
     voto,
-    commento
+    commento,
+    entrata_ritardo,
+    uscita_anticipata
 ):
 
     c.execute(
@@ -271,9 +273,11 @@ def salva_presenza(
             tipo_evento,
             presenza,
             voto,
-            commento
+            commento,
+            entrata_ritardo,
+            uscita_anticipata
         )
-        VALUES(?,?,?,?,?,?,?)
+        VALUES(?,?,?,?,?,?,?,?,?)
 
         ON CONFLICT(
             atleta_id,
@@ -285,7 +289,9 @@ def salva_presenza(
         DO UPDATE SET
             presenza = excluded.presenza,
             voto = excluded.voto,
-            commento = excluded.commento
+            commento = excluded.commento,
+            entrata_ritardo = excluded.entrata_ritardo,
+            uscita_anticipata = excluded.uscita_anticipata
         """,
         (
             atleta_id,
@@ -294,7 +300,9 @@ def salva_presenza(
             tipo_evento,
             int(presenza),
             voto,
-            commento
+            commento,
+            int(entrata_ritardo),
+            int(uscita_anticipata)
         )
     )
 
@@ -1106,14 +1114,14 @@ def mostra_registro(titolo, tipo_evento, stagione):
         
         entrata_ritardo = c_rit.toggle(
             "⏰ Entrata in ritardo",
-            value=False,
+            value=st.session_state.registro[atleta_id]["entrata_ritardo"],
             key=f"ritardo_{tipo_evento}_{data_evento}_{atleta_id}",
             disabled=not presenza
         )
         
         uscita_anticipata = c_usc.toggle(
             "🚪 Uscita anticipata",
-            value=False,
+            value=st.session_state.registro[atleta_id]["uscita_anticipata"],
             key=f"uscita_{tipo_evento}_{data_evento}_{atleta_id}",
             disabled=not presenza
         )
@@ -1177,6 +1185,8 @@ def mostra_registro(titolo, tipo_evento, stagione):
                 dati["presenza"],
                 dati["voto"] if dati["presenza"] else None,
                 dati["commento"],
+                dati["entrata_ritardo"],
+                dati["uscita_anticipata"]
             )
 
         crea_backup_automatico()
@@ -1288,8 +1298,9 @@ def login():
             st.success(
                 "Accesso amministratore effettuato."
             )
-
+            
             st.rerun()
+            return
 
         # -------------------------
         # TECNICO
@@ -1310,8 +1321,9 @@ def login():
             st.success(
                 "Accesso tecnico effettuato."
             )
-
+            
             st.rerun()
+            return
 
         # -------------------------
         # ATLETA
@@ -1344,8 +1356,9 @@ def login():
             st.success(
                 f"Benvenuto {atleta.iloc[0]['nome']}"
             )
-
+            
             st.rerun()
+            return
 
         # -------------------------
         # CREDENZIALI ERRATE
@@ -1368,10 +1381,13 @@ def is_atleta():
     )
 
 def is_loggato():
+
     return (
-        st.session_state.admin
+        st.session_state.get("admin", False)
         or
-        st.session_state.atleta
+        st.session_state.get("tecnico", False)
+        or
+        st.session_state.get("atleta", False)
     )
 
 def is_staff():
@@ -1388,68 +1404,68 @@ def is_tecnico():
         st.session_state.get("tecnico", False)
     )
 
+def ruolo_corrente():
+
+    if st.session_state.get("admin", False):
+        return "Amministratore"
+
+    if st.session_state.get("tecnico", False):
+        return "Tecnico"
+
+    if st.session_state.get("atleta", False):
+        return "Atleta"
+
+    return "Ospite"
+
+
+def nome_utente_corrente():
+
+    if st.session_state.get("admin", False):
+        return "Admin"
+
+    if st.session_state.get("tecnico", False):
+        return "Tecnico"
+
+    if st.session_state.get("atleta", False):
+
+        atleta = pd.read_sql(
+            """
+            SELECT nome
+            FROM atleti
+            WHERE id = ?
+            """,
+            conn,
+            params=(
+                int(st.session_state.utente_loggato),
+            )
+        )
+
+        if not atleta.empty:
+            return atleta.iloc[0]["nome"]
+
+        return "Atleta"
+
+    return "Ospite"
+
 # ============================================================
-# HEADER
+# HEADER E LOGIN
 # ============================================================
 
 st.title("🏊 Gestionale Nuoto Power Team 🏊")
 
 st.markdown(
     """
-    *created by @gabgrifo
+    *created by @gabgrifo*
     """
 )
 
 login()
 
-if st.session_state.utente_loggato is None:
-
-    st.info(
-        "🔓 Modalità ospite attiva. "
-        "La Dashboard e le classifiche sono visibili, le altre sezioni richiedono il login."
-    )
-
 aggiornamento_automatico_giornaliero()
 
-st.write("Admin:", st.session_state.admin)
-st.write(
-    "Tecnico:",
-    st.session_state.get(
-        "tecnico",
-        False
-    )
-)
-st.write(
-    "Atleta:",
-    st.session_state.get(
-        "atleta",
-        False
-    )
-)
-
-if (
-    st.session_state.get("admin", False)
-    or
-    st.session_state.get("tecnico", False)
-    or
-    st.session_state.get("atleta", False)
-):
-
-    if st.button(
-        "🚪 Logout",
-        key="logout"
-    ):
-
-        st.session_state.admin = False
-        st.session_state.tecnico = False
-        st.session_state.atleta = False
-
-        st.session_state.utente_loggato = None
-
-        if "password_temp" in st.session_state:
-            del st.session_state["password_temp"]
-
-        st.rerun()
+# ============================================================
+# STAGIONE
+# ============================================================
 
 stagioni = get_stagioni()
 
@@ -1463,7 +1479,8 @@ if st.session_state.stagione_corrente in stagioni:
 stagione_selezionata = st.selectbox(
     "Stagione sportiva",
     stagioni,
-    index=indice
+    index=indice,
+    key="select_stagione_principale"
 )
 
 st.session_state.stagione_corrente = (
@@ -1471,13 +1488,49 @@ st.session_state.stagione_corrente = (
 )
 
 # ============================================================
-# TAB PRINCIPALI
+# INFO UTENTE
 # ============================================================
 
-(tab0, tab5, tab_area, tab10, tab1, tab2, tab3, tab12, tab4, tab6, tab7, tab8) = st.tabs([
+st.markdown("---")
+
+col_user, col_logout = st.columns(
+    [
+        4,
+        1
+    ]
+)
+
+with col_logout:
+
+    if is_loggato():
+
+        if st.button(
+            "🚪 Logout",
+            key="logout_principale"
+        ):
+
+            st.session_state.admin = False
+            st.session_state.tecnico = False
+            st.session_state.atleta = False
+
+            st.session_state.utente_loggato = None
+
+            if "password_temp" in st.session_state:
+                del st.session_state["password_temp"]
+
+            st.rerun()
+
+# ============================================================
+# TAB IN BASE AL RUOLO
+# ============================================================
+
+tab = {}
+
+if is_admin():
+
+    nomi_tab = [
         "🏠 Dashboard",
         "📊 Classifiche",
-        "👤 Area Atleta",
         "📋 Registro settimanale",
         "📋 Allenamento vasca",
         "🏋️ Allenamento secco",
@@ -1487,634 +1540,670 @@ st.session_state.stagione_corrente = (
         "🗂️ Storico",
         "⚙️ Stagioni",
         "💾 Backup"
-])
+    ]
+
+elif is_tecnico():
+
+    nomi_tab = [
+        "🏠 Dashboard",
+        "📊 Classifiche",
+        "📋 Registro settimanale",
+        "📋 Allenamento vasca",
+        "🏋️ Allenamento secco",
+        "🏁 Gare",
+        "📈 Analisi",
+        "👥 Atleti",
+        "🗂️ Storico"
+    ]
+
+elif is_atleta():
+
+    nomi_tab = [
+        "🏠 Dashboard",
+        "📊 Classifiche",
+        "👤 Area Atleta"
+    ]
+
+else:
+
+    nomi_tab = [
+        "🏠 Dashboard",
+        "📊 Classifiche"
+    ]
+
+tabs_creati = st.tabs(nomi_tab)
+
+for nome, oggetto_tab in zip(
+    nomi_tab,
+    tabs_creati
+):
+    tab[nome] = oggetto_tab
 
 # ============================================================
 # TAB 0 - DASHBOARD
 # ============================================================
 
-with tab0:
+if "🏠 Dashboard" in tab:
 
-    st.header("🏠 Dashboard")
+    with tab["🏠 Dashboard"]:
 
-    # --------------------------------------------------------
-    # ATLETI
-    # --------------------------------------------------------
-
-    totale_atleti = len(
-        get_atleti(stagione_selezionata)
-    )
-
-    # --------------------------------------------------------
-    # REGISTRAZIONI
-    # --------------------------------------------------------
-
-    totale_eventi = pd.read_sql(
-        """
-        SELECT COUNT(DISTINCT data || tipo_evento)
-        AS totale
-        FROM presenze
-        WHERE stagione = ?
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    ).iloc[0]["totale"]
-
-    if pd.isna(totale_eventi):
-        totale_eventi = 0
-
-    # --------------------------------------------------------
-    # GARE
-    # --------------------------------------------------------
-
-    totale_gare = pd.read_sql(
-        """
-        SELECT COUNT(DISTINCT data)
-        AS totale
-        FROM presenze
-        WHERE stagione = ?
-        AND tipo_evento = 'Gare'
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    ).iloc[0]["totale"]
-
-    if pd.isna(totale_gare):
-        totale_gare = 0
-
-    # --------------------------------------------------------
-    # MEDIA voti
-    # --------------------------------------------------------
-
-    media_voti = pd.read_sql(
-        """
-        SELECT AVG(voto) AS media
-        FROM presenze
-        WHERE stagione = ?
-        AND voto IS NOT NULL
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    ).iloc[0]["media"]
-
-    if pd.isna(media_voti):
-        media_voti = 0
-
-    # --------------------------------------------------------
-    # ULTIMA ATTIVITA'
-    # --------------------------------------------------------
-
-    ultima_attivita = pd.read_sql(
-        """
-        SELECT MAX(data) AS data
-        FROM presenze
-        WHERE stagione = ?
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    ).iloc[0]["data"]
-
-    if ultima_attivita is None:
-        ultima_attivita = "-"
-
-    # --------------------------------------------------------
-    # CLASSIFICA PRESENZE
-    # --------------------------------------------------------
+        st.header("🏠 Dashboard")
     
-    query_dashboard = pd.read_sql(
-        """
-        SELECT
-            a.nome,
-            SUM(p.presenza) AS presenze,
-            COUNT(*) AS registrazioni
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE p.stagione = ?
-          AND p.tipo_evento IN (
-                'Allenamento in vasca',
-                'Allenamento a secco'
-          )
-        GROUP BY a.nome
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    miglior_presenza = "-"
-    miglior_percentuale = 0
-
-    if not query_dashboard.empty:
-
-        query_dashboard["percentuale"] = (
-            query_dashboard["presenze"]
-            /
-            query_dashboard["registrazioni"]
-            * 100
+        # --------------------------------------------------------
+        # ATLETI
+        # --------------------------------------------------------
+    
+        totale_atleti = len(
+            get_atleti(stagione_selezionata)
         )
-
+    
+        # --------------------------------------------------------
+        # REGISTRAZIONI
+        # --------------------------------------------------------
+    
+        totale_eventi = pd.read_sql(
+            """
+            SELECT COUNT(DISTINCT data || tipo_evento)
+            AS totale
+            FROM presenze
+            WHERE stagione = ?
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        ).iloc[0]["totale"]
+    
+        if pd.isna(totale_eventi):
+            totale_eventi = 0
+    
+        # --------------------------------------------------------
+        # GARE
+        # --------------------------------------------------------
+    
+        totale_gare = pd.read_sql(
+            """
+            SELECT COUNT(DISTINCT data)
+            AS totale
+            FROM presenze
+            WHERE stagione = ?
+            AND tipo_evento = 'Gare'
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        ).iloc[0]["totale"]
+    
+        if pd.isna(totale_gare):
+            totale_gare = 0
+    
+        # --------------------------------------------------------
+        # MEDIA voti
+        # --------------------------------------------------------
+    
+        media_voti = pd.read_sql(
+            """
+            SELECT AVG(voto) AS media
+            FROM presenze
+            WHERE stagione = ?
+            AND voto IS NOT NULL
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        ).iloc[0]["media"]
+    
+        if pd.isna(media_voti):
+            media_voti = 0
+    
+        # --------------------------------------------------------
+        # ULTIMA ATTIVITA'
+        # --------------------------------------------------------
+    
+        ultima_attivita = pd.read_sql(
+            """
+            SELECT MAX(data) AS data
+            FROM presenze
+            WHERE stagione = ?
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        ).iloc[0]["data"]
+    
+        if ultima_attivita is None:
+            ultima_attivita = "-"
+    
+        # --------------------------------------------------------
+        # CLASSIFICA PRESENZE
+        # --------------------------------------------------------
+        
+        query_dashboard = pd.read_sql(
+            """
+            SELECT
+                a.nome,
+                SUM(p.presenza) AS presenze,
+                COUNT(*) AS registrazioni
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE p.stagione = ?
+              AND p.tipo_evento IN (
+                    'Allenamento in vasca',
+                    'Allenamento a secco'
+              )
+            GROUP BY a.nome
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        )
+    
         miglior_presenza = "-"
         miglior_percentuale = 0
-
+    
         if not query_dashboard.empty:
-
+    
             query_dashboard["percentuale"] = (
                 query_dashboard["presenze"]
                 /
                 query_dashboard["registrazioni"]
-            * 100
+                * 100
             )
-
-            miglior_percentuale = round(
-                query_dashboard["percentuale"].max(),
-                1 
-            )
-
-            ex_aequo = query_dashboard[
-                query_dashboard["percentuale"]
-                == query_dashboard["percentuale"].max()
-            ]
-
-            miglior_presenza = ", ".join(
-                ex_aequo["nome"].tolist()
-            )
-
-    # --------------------------------------------------------
-    # CLASSIFICA VOTI
-    # --------------------------------------------------------
-
-    query_voti = pd.read_sql(
-        """
-        SELECT
-            a.nome,
-            AVG(p.voto) AS media
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE
-            p.stagione = ?
-            AND p.voto IS NOT NULL
-        GROUP BY a.nome
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    miglior_rendimento = "-"
-    miglior_media = 0
-
-    if not query_voti.empty:
-
+    
+            miglior_presenza = "-"
+            miglior_percentuale = 0
+    
+            if not query_dashboard.empty:
+    
+                query_dashboard["percentuale"] = (
+                    query_dashboard["presenze"]
+                    /
+                    query_dashboard["registrazioni"]
+                * 100
+                )
+    
+                miglior_percentuale = round(
+                    query_dashboard["percentuale"].max(),
+                    1 
+                )
+    
+                ex_aequo = query_dashboard[
+                    query_dashboard["percentuale"]
+                    == query_dashboard["percentuale"].max()
+                ]
+    
+                miglior_presenza = ", ".join(
+                    ex_aequo["nome"].tolist()
+                )
+    
+        # --------------------------------------------------------
+        # CLASSIFICA VOTI
+        # --------------------------------------------------------
+    
+        query_voti = pd.read_sql(
+            """
+            SELECT
+                a.nome,
+                AVG(p.voto) AS media
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE
+                p.stagione = ?
+                AND p.voto IS NOT NULL
+            GROUP BY a.nome
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        )
+    
         miglior_rendimento = "-"
         miglior_media = 0
-
+    
         if not query_voti.empty:
-
-            miglior_media = round(
-                query_voti["media"].max(),
-                2
-            )
-
-            ex_aequo = query_voti[
-                query_voti["media"]
-                == query_voti["media"].max()
-            ]
-
-            miglior_rendimento = ", ".join(
-                ex_aequo["nome"].tolist()
-            )
-
-    # --------------------------------------------------------
-    # METRICHE
-    # --------------------------------------------------------
-
-    c1, c2, c3, c4, c5 = st.columns(5)
-
-    c1.metric(
-        "👥 Atleti",
-        totale_atleti
-    )
-
-    c2.metric(
-        "🏊 Registrazioni",
-        totale_eventi
-    )
-
-    c3.metric(
-        "🏁 Gare",
-        totale_gare
-    )
-
-    c4.metric(
-        "🎯 Media voti",
-        round(media_voti, 2)
-    )
-
-    c5.metric(
-        "📅 Ultima attività",
-        ultima_attivita
-    )
-
-    st.markdown("---")
-
-    st.subheader("🏆 Hall of FAME 🏆")
-
-    # --------------------------------------------------------
-    # HALL OF FAME GENERALE
-    # --------------------------------------------------------
-
-    st.subheader("🌟 Hall of Fame Generale")
-
-    classifica_generale = query_dashboard.copy()
-
-    classifica_generale["percentuale"] = (
-        classifica_generale["presenze"]
-        /
-        classifica_generale["registrazioni"]
-        * 100
-    ).round(1)
     
-    classifica_generale = classifica_generale.merge(
-        query_voti,
-        on="nome",
-        how="inner"
-    )
+            miglior_rendimento = "-"
+            miglior_media = 0
     
-    classifica_generale["punteggio"] = (
-        (
-            classifica_generale["media"]
-            +
-            classifica_generale["percentuale"] / 10
+            if not query_voti.empty:
+    
+                miglior_media = round(
+                    query_voti["media"].max(),
+                    2
+                )
+    
+                ex_aequo = query_voti[
+                    query_voti["media"]
+                    == query_voti["media"].max()
+                ]
+    
+                miglior_rendimento = ", ".join(
+                    ex_aequo["nome"].tolist()
+                )
+    
+        # --------------------------------------------------------
+        # METRICHE
+        # --------------------------------------------------------
+    
+        c1, c2, c3, c4, c5 = st.columns(5)
+    
+        c1.metric(
+            "👥 Atleti",
+            totale_atleti
         )
-        / 2
-    ).round(2)
-
-    classifica_generale = classifica_generale.sort_values(
-        by="punteggio",
-        ascending=False
-    ).reset_index(drop=True)
-
-    valori = (
-        classifica_generale["punteggio"]
-        .drop_duplicates()
-        .head(3)
-        .tolist()
-    )
-
-    c1, c2, c3 = st.columns(3)
-
-    colonne = [c1, c2, c3]
     
-    medaglie = ["🥇", "🥈", "🥉"]
-    
-    for i, valore in enumerate(valori[:3]):
-    
-        gruppo = classifica_generale[
-            classifica_generale["punteggio"] == valore
-        ]
-    
-        nomi = ", ".join(
-            gruppo["nome"].tolist()
+        c2.metric(
+            "🏊 Registrazioni",
+            totale_eventi
         )
-
-        colonne[i].markdown(
-            f"<h1 style='text-align:center'>{medaglie[i]}</h1>",
-            unsafe_allow_html=True
+    
+        c3.metric(
+            "🏁 Gare",
+            totale_gare
+        )
+    
+        c4.metric(
+            "🎯 Media voti",
+            round(media_voti, 2)
+        )
+    
+        c5.metric(
+            "📅 Ultima attività",
+            ultima_attivita
+        )
+    
+        st.markdown("---")
+    
+        st.subheader("🏆 Hall of FAME 🏆")
+    
+        # --------------------------------------------------------
+        # HALL OF FAME GENERALE
+        # --------------------------------------------------------
+    
+        st.subheader("🌟 Hall of Fame Generale")
+    
+        classifica_generale = query_dashboard.copy()
+    
+        classifica_generale["percentuale"] = (
+            classifica_generale["presenze"]
+            /
+            classifica_generale["registrazioni"]
+            * 100
+        ).round(1)
+        
+        classifica_generale = classifica_generale.merge(
+            query_voti,
+            on="nome",
+            how="inner"
         )
         
-        colonne[i].markdown(
-            f"<h2 style='text-align:center'>{nomi}</h2>",
-            unsafe_allow_html=True
+        classifica_generale["punteggio"] = (
+            (
+                classifica_generale["media"]
+                +
+                classifica_generale["percentuale"] / 10
+            )
+            / 2
+        ).round(2)
+    
+        classifica_generale = classifica_generale.sort_values(
+            by="punteggio",
+            ascending=False
+        ).reset_index(drop=True)
+    
+        valori = (
+            classifica_generale["punteggio"]
+            .drop_duplicates()
+            .head(3)
+            .tolist()
         )
     
-        colonne[i].markdown(
-            f"<h3 style='text-align:center'>Punteggio {valore}</h3>",
-            unsafe_allow_html=True
-        )
-
-    st.markdown("---")
+        c1, c2, c3 = st.columns(3)
     
-    st.subheader("🏆 Hall of Fame - Presenze")
-
-    if not query_dashboard.empty:
-
+        colonne = [c1, c2, c3]
+        
+        medaglie = ["🥇", "🥈", "🥉"]
+        
+        for i, valore in enumerate(valori[:3]):
+        
+            gruppo = classifica_generale[
+                classifica_generale["punteggio"] == valore
+            ]
+        
+            nomi = ", ".join(
+                gruppo["nome"].tolist()
+            )
+    
+            colonne[i].markdown(
+                f"<h1 style='text-align:center'>{medaglie[i]}</h1>",
+                unsafe_allow_html=True
+            )
+            
+            colonne[i].markdown(
+                f"<h2 style='text-align:center'>{nomi}</h2>",
+                unsafe_allow_html=True
+            )
+        
+            colonne[i].markdown(
+                f"<h3 style='text-align:center'>Punteggio {valore}</h3>",
+                unsafe_allow_html=True
+            )
+    
+        st.markdown("---")
+        
+        st.subheader("🏆 Hall of Fame - Presenze")
+    
+        if not query_dashboard.empty:
+    
+            podio = query_dashboard.copy()
+    
+            podio["percentuale"] = (
+                podio["presenze"]
+                /
+                podio["registrazioni"]
+                * 100
+            ).round(1)
+    
+            podio = podio.sort_values(
+                by="percentuale",
+                ascending=False
+            )
+    
+            valori = (
+                podio["percentuale"]
+                .drop_duplicates()
+                .head(3)
+                .tolist()
+            )
+    
+            medaglie = ["🥇", "🥈", "🥉"]
+    
+            for i, valore in enumerate(valori):
+    
+                gruppo = podio[
+                    podio["percentuale"] == valore
+                ]
+    
+                nomi = ", ".join(
+                    gruppo["nome"].tolist()
+                )
+    
+                st.markdown(
+                    f"#### {medaglie[i]} {nomi}"
+                )
+    
+                st.caption(
+                    f"{valore}% presenza"
+                )
+                    
+        # --------------------------------------------------------
+        # HALL OF SHAME
+        # --------------------------------------------------------
+    
+        st.markdown("---")
+    
+        st.subheader("☠️ Hall of SHAME Generale ☠️")
+        
+        classifica_shame = query_dashboard.copy()
+        
+        classifica_shame["percentuale"] = (
+            classifica_shame["presenze"]
+            /
+            classifica_shame["registrazioni"]
+            * 100
+        ).round(1)
+        
+        classifica_shame = classifica_shame.merge(
+            query_voti,
+            on="nome",
+            how="inner"
+        )
+        
+        # stesso punteggio della Hall of Fame
+        classifica_shame["punteggio"] = (
+            (
+                classifica_shame["media"]
+                +
+                classifica_shame["percentuale"] / 10
+            )
+            / 2
+        ).round(2)
+        
+        # qui però prendiamo i peggiori
+        classifica_shame = classifica_shame.sort_values(
+            by="punteggio",
+            ascending=True
+        ).reset_index(drop=True)
+        
+        valori = (
+            classifica_shame["punteggio"]
+            .drop_duplicates()
+            .head(3)
+            .tolist()
+        )
+        
+        c1, c2, c3 = st.columns(3)
+        
+        colonne = [c1, c2, c3]
+        
+        medaglie = ["💀", "💩", "🪦"]
+        
+        for i, valore in enumerate(valori[:3]):
+        
+            gruppo = classifica_shame[
+                classifica_shame["punteggio"] == valore
+            ]
+        
+            nomi = ", ".join(
+                gruppo["nome"].tolist()
+            )
+        
+            colonne[i].markdown(
+                f"<h1 style='text-align:center'>{medaglie[i]}</h1>",
+                unsafe_allow_html=True
+            )
+        
+            colonne[i].markdown(
+                f"<h2 style='text-align:center'>{nomi}</h2>",
+                unsafe_allow_html=True
+            )
+        
+            colonne[i].markdown(
+                f"<h3 style='text-align:center'>Punteggio {valore}</h3>",
+                unsafe_allow_html=True
+            )
+    
+        st.markdown("---")
+    
+        st.subheader("📌 Presenze da monitorare")
+    
         podio = query_dashboard.copy()
-
+        
         podio["percentuale"] = (
             podio["presenze"]
             /
             podio["registrazioni"]
             * 100
         ).round(1)
-
+        
         podio = podio.sort_values(
             by="percentuale",
-            ascending=False
+            ascending=True
         )
-
+        
         valori = (
             podio["percentuale"]
             .drop_duplicates()
             .head(3)
             .tolist()
         )
-
-        medaglie = ["🥇", "🥈", "🥉"]
-
+        
+        medaglie = ["🤡", "🥴", "🫠"]
+        
         for i, valore in enumerate(valori):
-
+        
             gruppo = podio[
                 podio["percentuale"] == valore
             ]
-
+        
             nomi = ", ".join(
                 gruppo["nome"].tolist()
             )
-
+        
+            assenze_medie = round(
+                100 - valore,
+                1
+            )
+        
             st.markdown(
-                f"#### {medaglie[i]} {nomi}"
+                f"### {medaglie[i]} {nomi}"
             )
-
+        
             st.caption(
-                f"{valore}% presenza"
+                f"{assenze_medie}% assenze"
             )
-                
-    # --------------------------------------------------------
-    # HALL OF SHAME
-    # --------------------------------------------------------
-
-    st.markdown("---")
-
-    st.subheader("☠️ Hall of SHAME Generale ☠️")
+            
+        # --------------------------------------------------------
+        # GRAFICI
+        # --------------------------------------------------------
     
-    classifica_shame = query_dashboard.copy()
-    
-    classifica_shame["percentuale"] = (
-        classifica_shame["presenze"]
-        /
-        classifica_shame["registrazioni"]
-        * 100
-    ).round(1)
-    
-    classifica_shame = classifica_shame.merge(
-        query_voti,
-        on="nome",
-        how="inner"
-    )
-    
-    # stesso punteggio della Hall of Fame
-    classifica_shame["punteggio"] = (
-        (
-            classifica_shame["media"]
-            +
-            classifica_shame["percentuale"] / 10
-        )
-        / 2
-    ).round(2)
-    
-    # qui però prendiamo i peggiori
-    classifica_shame = classifica_shame.sort_values(
-        by="punteggio",
-        ascending=True
-    ).reset_index(drop=True)
-    
-    valori = (
-        classifica_shame["punteggio"]
-        .drop_duplicates()
-        .head(3)
-        .tolist()
-    )
-    
-    c1, c2, c3 = st.columns(3)
-    
-    colonne = [c1, c2, c3]
-    
-    medaglie = ["💀", "💩", "🪦"]
-    
-    for i, valore in enumerate(valori[:3]):
-    
-        gruppo = classifica_shame[
-            classifica_shame["punteggio"] == valore
-        ]
-    
-        nomi = ", ".join(
-            gruppo["nome"].tolist()
-        )
-    
-        colonne[i].markdown(
-            f"<h1 style='text-align:center'>{medaglie[i]}</h1>",
-            unsafe_allow_html=True
-        )
-    
-        colonne[i].markdown(
-            f"<h2 style='text-align:center'>{nomi}</h2>",
-            unsafe_allow_html=True
-        )
-    
-        colonne[i].markdown(
-            f"<h3 style='text-align:center'>Punteggio {valore}</h3>",
-            unsafe_allow_html=True
-        )
-
-    st.markdown("---")
-
-    st.subheader("🚨 Assenti cronici")
-
-    podio = query_dashboard.copy()
-    
-    podio["percentuale"] = (
-        podio["presenze"]
-        /
-        podio["registrazioni"]
-        * 100
-    ).round(1)
-    
-    podio = podio.sort_values(
-        by="percentuale",
-        ascending=True
-    )
-    
-    valori = (
-        podio["percentuale"]
-        .drop_duplicates()
-        .head(3)
-        .tolist()
-    )
-    
-    medaglie = ["🤡", "🥴", "🫠"]
-    
-    for i, valore in enumerate(valori):
-    
-        gruppo = podio[
-            podio["percentuale"] == valore
-        ]
-    
-        nomi = ", ".join(
-            gruppo["nome"].tolist()
-        )
-    
-        assenze_medie = round(
-            100 - valore,
-            1
-        )
-    
-        st.markdown(
-            f"### {medaglie[i]} {nomi}"
-        )
-    
-        st.caption(
-            f"{assenze_medie}% assenze"
-        )
-        
-    # --------------------------------------------------------
-    # GRAFICI
-    # --------------------------------------------------------
-
-    st.markdown("---")
-
-    st.subheader("📊 Analisi visiva")
-
-    grafico_presenze = pd.read_sql(
-        """
-        SELECT
-            a.nome,
-            SUM(p.presenza) AS presenze,
-            COUNT(*) AS registrazioni
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE p.stagione = ?
-          AND p.tipo_evento IN (
-                'Allenamento in vasca',
-                'Allenamento a secco'
-          )
-        GROUP BY a.nome
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    if not grafico_presenze.empty:
-    
-        grafico_presenze["percentuale"] = (
-            grafico_presenze["presenze"]
-            /
-            grafico_presenze["registrazioni"]
-            * 100
-        ).round(1)
-    
-        st.write("🏆 Percentuale presenze")
-    
-        st.bar_chart(
-            grafico_presenze.set_index("nome")[
-                "percentuale"
-            ]
-        )
-
-    grafico_voti = pd.read_sql(
-        """
-        SELECT
-            a.nome,
-            AVG(p.voto) AS media_voti
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE
-            p.stagione = ?
-            AND p.voto IS NOT NULL
-        GROUP BY a.nome
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    if not grafico_voti.empty:
-
-        st.write("🎯 Media voti")
-
-        st.bar_chart(
-            grafico_voti.set_index("nome")[
-                "media_voti"
-            ]
-        )
-    
-    # --------------------------------------------------------
-    # BACKUP AUTOMATICO
-    # --------------------------------------------------------
-    if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
-        
-        st.warning(
-            "🔒 Backup disponibile solo agli amministratori."
-        )
-        pass
-        
-    else:
-
         st.markdown("---")
-
-        st.subheader("💾 Stato backup")
-
-        if os.path.exists(
-            "backup_automatico.json"
-        ):
-
-            ultima_modifica = datetime.fromtimestamp(
-                os.path.getmtime(
-                    "backup_automatico.json"
-                )
+    
+        st.subheader("📊 Analisi visiva")
+    
+        grafico_presenze = pd.read_sql(
+            """
+            SELECT
+                a.nome,
+                SUM(p.presenza) AS presenze,
+                COUNT(*) AS registrazioni
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE p.stagione = ?
+              AND p.tipo_evento IN (
+                    'Allenamento in vasca',
+                    'Allenamento a secco'
+              )
+            GROUP BY a.nome
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        )
+    
+        if not grafico_presenze.empty:
+        
+            grafico_presenze["percentuale"] = (
+                grafico_presenze["presenze"]
+                /
+                grafico_presenze["registrazioni"]
+                * 100
+            ).round(1)
+        
+            st.write("🏆 Percentuale presenze")
+        
+            st.bar_chart(
+                grafico_presenze.set_index("nome")[
+                    "percentuale"
+                ]
             )
-
-            dimensione = round(
-                os.path.getsize(
-                    "backup_automatico.json"
-                ) / 1024,
-                2
+    
+        grafico_voti = pd.read_sql(
+            """
+            SELECT
+                a.nome,
+                AVG(p.voto) AS media_voti
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE
+                p.stagione = ?
+                AND p.voto IS NOT NULL
+            GROUP BY a.nome
+            """,
+            conn,
+            params=(stagione_selezionata,)
+        )
+    
+        if not grafico_voti.empty:
+    
+            st.write("🎯 Media voti")
+    
+            st.bar_chart(
+                grafico_voti.set_index("nome")[
+                    "media_voti"
+                ]
             )
-
-            c1, c2 = st.columns(2)
-
-            c1.metric(
-                "📅 Ultimo backup",
-                ultima_modifica.strftime(
-                    "%d/%m/%Y %H:%M"
-                )
-            )
-
-            c2.metric(
-                "📦 Dimensione",
-                f"{dimensione} KB"
-            )
-
-            with open(
-                "backup_automatico.json",
-                "r",
-                encoding="utf-8"
-                
-            ) as f:
-
-                st.download_button(
-                    "📥 Scarica backup automatico",
-                    f.read(),
-                    "backup_automatico.json",
-                    "application/json"
-                )
-
-        else:
-
+        
+        # --------------------------------------------------------
+        # BACKUP AUTOMATICO
+        # --------------------------------------------------------
+        if not (     st.session_state.get("admin", False)     or     st.session_state.get("tecnico", False) ):
+            
             st.warning(
-                "Nessun backup automatico disponibile."
+                "🔒 Backup disponibile solo agli amministratori."
             )
+            pass
+            
+        else:
+    
+            st.markdown("---")
+    
+            st.subheader("💾 Stato backup")
+    
+            if os.path.exists(
+                "backup_automatico.json"
+            ):
+    
+                ultima_modifica = datetime.fromtimestamp(
+                    os.path.getmtime(
+                        "backup_automatico.json"
+                    )
+                )
+    
+                dimensione = round(
+                    os.path.getsize(
+                        "backup_automatico.json"
+                    ) / 1024,
+                    2
+                )
+    
+                c1, c2 = st.columns(2)
+    
+                c1.metric(
+                    "📅 Ultimo backup",
+                    ultima_modifica.strftime(
+                        "%d/%m/%Y %H:%M"
+                    )
+                )
+    
+                c2.metric(
+                    "📦 Dimensione",
+                    f"{dimensione} KB"
+                )
+    
+                with open(
+                    "backup_automatico.json",
+                    "r",
+                    encoding="utf-8"
+                    
+                ) as f:
+    
+                    st.download_button(
+                        "📥 Scarica backup automatico",
+                        f.read(),
+                        "backup_automatico.json",
+                        "application/json"
+                    )
+    
+            else:
+    
+                st.warning(
+                    "Nessun backup automatico disponibile."
+                )
 
 # ============================================================
 # TAB 1
 # ============================================================
 
-with tab1:
-    if not is_staff():
-        st.warning(
-            "🔒 Accesso riservato a tecnici e amministratori."
-        )
-    else:
+if "📋 Allenamento vasca" in tab:
+
+    with tab["📋 Allenamento vasca"]:
     
         mostra_registro("📋 Allenamento in vasca", "Allenamento in vasca", stagione_selezionata)
 
@@ -2123,15 +2212,9 @@ with tab1:
 # TAB 2
 # ============================================================
 
-with tab2:
+if "🏋️ Allenamento secco" in tab:
 
-    if not is_staff():
-
-        st.warning(
-            "🔒 Accesso riservato agli amministratori."
-        )
-        
-    else:
+    with tab["🏋️ Allenamento secco"]:
         
         mostra_registro("📋 Allenamento a secco", "Allenamento a secco", stagione_selezionata)
 
@@ -2139,15 +2222,9 @@ with tab2:
 # TAB 3
 # ============================================================
 
-with tab3:
+if "🏁 Gare" in tab:
 
-    if not is_staff():
-
-        st.warning(
-              "🔒 Accesso riservato agli amministratori."
-        )
-        
-    else:
+    with tab["🏁 Gare"]:
         
         mostra_registro("🏁 Gare", "Gare", stagione_selezionata)
 
@@ -2155,9 +2232,9 @@ with tab3:
 # TAB 4 ATLETI
 # ============================================================
 
-with tab4:
+if "👥 Atleti" in tab:
 
-    if is_staff():
+    with tab["👥 Atleti"]:
 
         st.header("👥 Gestione Atleti")
 
@@ -2391,442 +2468,438 @@ with tab4:
 # TAB 5
 # ============================================================
 
-with tab5:
+if "📊 Classifiche" in tab:
 
-    st.header("📊 Classifiche")
+    with tab["📊 Classifiche"]:
 
-    storico = pd.read_sql(
-        """
-        SELECT
-            a.nome,
-            a.categoria,
-            p.tipo_evento,
-            p.presenza,
-            p.entrata_ritardo,
-            p.uscita_anticipata,
-            p.voto
-        FROM presenze p
-        JOIN atleti a
-            ON a.id = p.atleta_id
-        WHERE p.stagione = ?
-        """,
-        conn,
-        params=(stagione_selezionata,)
-    )
-
-    if storico.empty:
-
-        st.info(
-            "Nessun dato disponibile."
+        st.header("📊 Classifiche")
+    
+        storico = pd.read_sql(
+            """
+            SELECT
+                a.nome,
+                a.categoria,
+                p.tipo_evento,
+                p.presenza,
+                p.entrata_ritardo,
+                p.uscita_anticipata,
+                p.voto
+            FROM presenze p
+            JOIN atleti a
+                ON a.id = p.atleta_id
+            WHERE p.stagione = ?
+            """,
+            conn,
+            params=(stagione_selezionata,)
         )
-
-    else:
-        
-        st.write(
-            storico["tipo_evento"]
-            .value_counts(dropna=False)
-        )
-
-        storico_allenamenti = storico[
-            storico["tipo_evento"].isin(
-                [
-                    "Allenamento in vasca",
-                    "Allenamento a secco"
-                ]
+    
+        if storico.empty:
+    
+            st.info(
+                "Nessun dato disponibile."
             )
-        ].copy()
-
-        storico_allenamenti["peso_presenza"] = 0.0
-
-        # presenza piena
-        storico_allenamenti.loc[
-            storico_allenamenti["presenza"] == 1,
-            "peso_presenza"
-        ] = 1.0
-        
-        # solo ritardo O solo uscita anticipata
-        storico_allenamenti.loc[
-            (
+    
+        else:
+            
+            st.write(
+                storico["tipo_evento"]
+                .value_counts(dropna=False)
+            )
+    
+            storico_allenamenti = storico[
+                storico["tipo_evento"].isin(
+                    [
+                        "Allenamento in vasca",
+                        "Allenamento a secco"
+                    ]
+                )
+            ].copy()
+    
+            storico_allenamenti["peso_presenza"] = 0.0
+    
+            # presenza piena
+            storico_allenamenti.loc[
+                storico_allenamenti["presenza"] == 1,
+                "peso_presenza"
+            ] = 1.0
+            
+            # solo ritardo O solo uscita anticipata
+            storico_allenamenti.loc[
+                (
+                    (
+                        storico_allenamenti["entrata_ritardo"] == 1
+                    )
+                    ^
+                    (
+                        storico_allenamenti["uscita_anticipata"] == 1
+                    )
+                )
+                &
+                (
+                    storico_allenamenti["presenza"] == 1
+                ),
+                "peso_presenza"
+            ] = 0.9
+            
+            # ritardo + uscita anticipata
+            storico_allenamenti.loc[
                 (
                     storico_allenamenti["entrata_ritardo"] == 1
                 )
-                ^
+                &
                 (
                     storico_allenamenti["uscita_anticipata"] == 1
                 )
+                &
+                (
+                    storico_allenamenti["presenza"] == 1
+                ),
+                "peso_presenza"
+            ] = 0.8
+            
+            stats_presenze = storico_allenamenti.groupby(
+                ["nome", "categoria"],
+                dropna=False
+            ).agg(
+                registrazioni=(
+                    "presenza",
+                    "count"
+                ),
+                presenze=(
+                "peso_presenza",
+                "sum"
             )
-            &
-            (
-                storico_allenamenti["presenza"] == 1
-            ),
-            "peso_presenza"
-        ] = 0.9
-        
-        # ritardo + uscita anticipata
-        storico_allenamenti.loc[
-            (
-                storico_allenamenti["entrata_ritardo"] == 1
+            ).reset_index()
+            
+            stats_voti = storico.groupby(
+                ["nome", "categoria"],
+                dropna=False
+            ).agg(
+                media_voti=(
+                    "voto",
+                    "mean"
+                )
+            ).reset_index()
+            
+            stats = stats_presenze.merge(
+                stats_voti,
+                on=[
+                    "nome",
+                    "categoria"
+                ],
+                how="left"
             )
-            &
-            (
-                storico_allenamenti["uscita_anticipata"] == 1
-            )
-            &
-            (
-                storico_allenamenti["presenza"] == 1
-            ),
-            "peso_presenza"
-        ] = 0.8
-        
-        stats_presenze = storico_allenamenti.groupby(
-            ["nome", "categoria"],
-            dropna=False
-        ).agg(
-            registrazioni=(
-                "presenza",
-                "count"
-            ),
-            presenze=(
-            "peso_presenza",
-            "sum"
-        )
-        ).reset_index()
-        
-        stats_voti = storico.groupby(
-            ["nome", "categoria"],
-            dropna=False
-        ).agg(
-            media_voti=(
-                "voto",
-                "mean"
-            )
-        ).reset_index()
-        
-        stats = stats_presenze.merge(
-            stats_voti,
-            on=[
-                "nome",
-                "categoria"
-            ],
-            how="left"
-        )
-
-        stats["assenze"] = (
-            stats["registrazioni"]
-            - stats["presenze"]
-        )
-
-        stats["percentuale"] = (
-            stats["presenze"]
-            / stats["registrazioni"]
-            * 100
-        ).round(1)
-
-        stats["media_voti"] = (
-            stats["media_voti"]
-            .fillna(0)
-            .round(2)
-        )
-
-        totale_reg = int(
-            stats["registrazioni"].sum()
-        )
-
-        totale_pres = int(
-            stats["presenze"].sum()
-        )
-
-        totale_ass = int(
-            stats["assenze"].sum()
-        )
-
-        media_globale = round(
-            stats["media_voti"].mean(),
-            2
-        )
-
-        c1, c2, c3, c4 = st.columns(4)
-
-        c1.metric(
-            "Registrazioni",
-            totale_reg
-        )
-
-        c2.metric(
-            "Presenze",
-            totale_pres
-        )
-
-        c3.metric(
-            "Assenze",
-            totale_ass
-        )
-
-        c4.metric(
-            "Media voti",
-            media_globale
-        )
-        # =====================================================
-        # CLASSIFICA GENERALE
-        # =====================================================
-        
-    st.subheader("🌟 Classifica generale")
-    st.caption("La classifica è il risultato della media aritmetica tra i voti di prestazione (attività in acqua, a secco e gare) e la percentuale di presenze")
-        
-    classifica_generale = stats.copy()
-        
-    classifica_generale["punteggio"] = (
-        (
-            classifica_generale["media_voti"]
-            +
-            classifica_generale["percentuale"] / 10
-        )
-        / 2
-    ).round(2)
-        
-    classifica_generale = classifica_generale.sort_values(
-        by="punteggio",
-        ascending=False
-    ).reset_index(drop=True)
     
-    posizioni = []
-        
-    for i in range(len(classifica_generale)):
-        
-        if i == 0:
-        
-            posizioni.append(1)
-        
-        else:
-        
-            stesso_punteggio = (
-                classifica_generale.iloc[i]["punteggio"]
-                ==
-                classifica_generale.iloc[i - 1]["punteggio"]
+            stats["assenze"] = (
+                stats["registrazioni"]
+                - stats["presenze"]
             )
+    
+            stats["percentuale"] = (
+                stats["presenze"]
+                / stats["registrazioni"]
+                * 100
+            ).round(1)
+    
+            stats["media_voti"] = (
+                stats["media_voti"]
+                .fillna(0)
+                .round(2)
+            )
+    
+            totale_reg = int(
+                stats["registrazioni"].sum()
+            )
+    
+            totale_pres = int(
+                stats["presenze"].sum()
+            )
+    
+            totale_ass = int(
+                stats["assenze"].sum()
+            )
+    
+            media_globale = round(
+                stats["media_voti"].mean(),
+                2
+            )
+    
+            c1, c2, c3, c4 = st.columns(4)
+    
+            c1.metric(
+                "Registrazioni",
+                totale_reg
+            )
+    
+            c2.metric(
+                "Presenze",
+                totale_pres
+            )
+    
+            c3.metric(
+                "Assenze",
+                totale_ass
+            )
+    
+            c4.metric(
+                "Media voti",
+                media_globale
+            )
+            # =====================================================
+            # CLASSIFICA GENERALE
+            # =====================================================
+            
+        st.subheader("🌟 Classifica generale")
+        st.caption("La classifica è il risultato della media aritmetica tra i voti di prestazione (attività in acqua, a secco e gare) e la percentuale di presenze")
+            
+        classifica_generale = stats.copy()
+            
+        classifica_generale["punteggio"] = (
+            (
+                classifica_generale["media_voti"]
+                +
+                classifica_generale["percentuale"] / 10
+            )
+            / 2
+        ).round(2)
+            
+        classifica_generale = classifica_generale.sort_values(
+            by="punteggio",
+            ascending=False
+        ).reset_index(drop=True)
         
-            if stesso_punteggio:
-        
-                posizioni.append(
+        posizioni = []
+            
+        for i in range(len(classifica_generale)):
+            
+            if i == 0:
+            
+                posizioni.append(1)
+            
+            else:
+            
+                stesso_punteggio = (
+                    classifica_generale.iloc[i]["punteggio"]
+                    ==
+                    classifica_generale.iloc[i - 1]["punteggio"]
+                )
+            
+                if stesso_punteggio:
+            
+                    posizioni.append(
+                        posizioni[-1]
+                    )
+            
+                else:
+            
+                     posizioni.append(i + 1)
+            
+        classifica_generale.insert(
+            0,
+            "Posizione",
+            posizioni
+        )
+            
+        st.dataframe(
+            classifica_generale[
+                [
+                    "Posizione",
+                    "nome",
+                    "categoria",
+                    "punteggio",
+                    "media_voti",
+                    "percentuale",
+                    "presenze",
+                    "assenze"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+            # =====================================================
+            # CLASSIFICA PRESENZE
+            # =====================================================
+    
+        st.markdown("---")
+    
+        st.subheader("🏆 Classifica presenze")
+    
+        classifica = stats.copy()
+    
+        # Ordina prima per percentuale presenza decrescente
+        classifica = classifica.sort_values(
+            by="percentuale",
+            ascending=False
+        ).reset_index(drop=True)
+    
+        # Calcolo posizioni con ex aequo
+        posizioni = []
+    
+        for i in range(len(classifica)):
+    
+            if i == 0:
+    
+                posizioni.append(1)
+    
+            else:
+    
+                if (
+                    classifica.iloc[i]["percentuale"]
+                    ==
+                    classifica.iloc[i - 1]["percentuale"]
+                ):
+    
+                    posizioni.append(
                     posizioni[-1]
                 )
-        
-            else:
-        
-                 posizioni.append(i + 1)
-        
-    classifica_generale.insert(
-        0,
-        "Posizione",
-        posizioni
-    )
-        
-    st.dataframe(
-        classifica_generale[
-            [
-                "Posizione",
-                "nome",
-                "categoria",
-                "punteggio",
-                "media_voti",
-                "percentuale",
-                "presenze",
-                "assenze"
-            ]
-        ],
-        use_container_width=True,
-        hide_index=True
-    )
-        # =====================================================
-        # CLASSIFICA PRESENZE
-        # =====================================================
-
-    st.markdown("---")
-
-    st.subheader("🏆 Classifica presenze")
-
-    classifica = stats.copy()
-
-    # Ordina prima per percentuale presenza decrescente
-    classifica = classifica.sort_values(
-        by="percentuale",
-        ascending=False
-    ).reset_index(drop=True)
-
-    # Calcolo posizioni con ex aequo
-    posizioni = []
-
-    for i in range(len(classifica)):
-
-        if i == 0:
-
-            posizioni.append(1)
-
-        else:
-
-            if (
-                classifica.iloc[i]["percentuale"]
-                ==
-                classifica.iloc[i - 1]["percentuale"]
-            ):
-
-                posizioni.append(
-                posizioni[-1]
-            )
-
-            else:
-
-                posizioni.append(i + 1)
-
-    classifica.insert(
-        0,
-        "Posizione",
-        posizioni
-    )
-
-    st.dataframe(
-        classifica[
-            [
-                "Posizione",
-                "nome",
-                "categoria",
-                "presenze",
-                "assenze",
-                "percentuale"
-            ]
-        ],
-        use_container_width=True,
-        hide_index=True
-    )
-
-    csv = (
-        stats
-        .to_csv(index=False)
-        .encode("utf-8")
-    )
-
-    st.download_button(
-            "📥 Scarica statistiche CSV",
-            csv,
-            "statistiche.csv",
-            "text/csv"
-    )
-        
-    # =====================================================
-    # CLASSIFICA RENDIMENTO
-    # =====================================================
-
-    st.markdown("---")
-
-    st.subheader("🎯 Classifica rendimento complessivo")
-    st.caption("La classifica è il risultato della media aritmetica tra i voti di prestazione (attività in acqua, a secco e gare)")
     
-    rendimento = stats.copy()
-
-    rendimento = rendimento.sort_values(
-        by=[
-            "media_voti",
-            "percentuale"
-        ],
-        ascending=[
-            False,
-            False
-        ]
-    ).reset_index(drop=True)
-
-    medaglie_rendimento = []
-
-    rank = []
-
-    posizione = 1
-
-    for i in range(len(rendimento)):
-
-        if i == 0:
-
-            rank.append(1)
-
-        else:
-
-            stesso_voto = (
-                rendimento.iloc[i]["media_voti"]
-                ==
-                rendimento.iloc[i - 1]["media_voti"]
-            )
-
-            stessa_presenza = (
-                rendimento.iloc[i]["percentuale"]
-                ==
-                rendimento.iloc[i - 1]["percentuale"]
-            )
-
-            if stesso_voto and stessa_presenza:
-
-                rank.append(rank[-1])
-
-            else:
-
-                posizione = i + 1
-                rank.append(posizione)
-
-    rendimento.insert(
-        0,
-        "Rank",
-        rank
-    )
-
-    st.dataframe(
-        rendimento[
-            [
-                "Rank",
-                "nome",
-                "categoria",
+                else:
+    
+                    posizioni.append(i + 1)
+    
+        classifica.insert(
+            0,
+            "Posizione",
+            posizioni
+        )
+    
+        st.dataframe(
+            classifica[
+                [
+                    "Posizione",
+                    "nome",
+                    "categoria",
+                    "presenze",
+                    "assenze",
+                    "percentuale"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+    
+        csv = (
+            stats
+            .to_csv(index=False)
+            .encode("utf-8")
+        )
+    
+        st.download_button(
+                "📥 Scarica statistiche CSV",
+                csv,
+                "statistiche.csv",
+                "text/csv"
+        )
+            
+        # =====================================================
+        # CLASSIFICA RENDIMENTO
+        # =====================================================
+    
+        st.markdown("---")
+    
+        st.subheader("🎯 Classifica rendimento complessivo")
+        st.caption("La classifica è il risultato della media aritmetica tra i voti di prestazione (attività in acqua, a secco e gare)")
+        
+        rendimento = stats.copy()
+    
+        rendimento = rendimento.sort_values(
+            by=[
                 "media_voti",
-                "presenze",
                 "percentuale"
+            ],
+            ascending=[
+                False,
+                False
             ]
-        ],
-        use_container_width=True,
-        hide_index=True
-    )
-
-    st.markdown("---")
-    st.subheader("🏊 Classifica rendimento - Allenamento in vasca")
-
-    classifica_rendimento_evento(
-        storico,
-        "Allenamento in vasca"
-    )
-
-    st.markdown("---")
-    st.subheader("🏋️ Classifica rendimento - Allenamento a secco")
-
-    classifica_rendimento_evento(
-        storico,
-        "Allenamento a secco"
-    )
-
-    st.markdown("---")
-    st.subheader("🏁 Classifica rendimento - Gare")
-
-    classifica_rendimento_evento(
-        storico,
-        "Gare"
-    )
+        ).reset_index(drop=True)
+    
+        medaglie_rendimento = []
+    
+        rank = []
+    
+        posizione = 1
+    
+        for i in range(len(rendimento)):
+    
+            if i == 0:
+    
+                rank.append(1)
+    
+            else:
+    
+                stesso_voto = (
+                    rendimento.iloc[i]["media_voti"]
+                    ==
+                    rendimento.iloc[i - 1]["media_voti"]
+                )
+    
+                stessa_presenza = (
+                    rendimento.iloc[i]["percentuale"]
+                    ==
+                    rendimento.iloc[i - 1]["percentuale"]
+                )
+    
+                if stesso_voto and stessa_presenza:
+    
+                    rank.append(rank[-1])
+    
+                else:
+    
+                    posizione = i + 1
+                    rank.append(posizione)
+    
+        rendimento.insert(
+            0,
+            "Rank",
+            rank
+        )
+    
+        st.dataframe(
+            rendimento[
+                [
+                    "Rank",
+                    "nome",
+                    "categoria",
+                    "media_voti",
+                    "presenze",
+                    "percentuale"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+    
+        st.markdown("---")
+        st.subheader("🏊 Classifica rendimento - Allenamento in vasca")
+    
+        classifica_rendimento_evento(
+            storico,
+            "Allenamento in vasca"
+        )
+    
+        st.markdown("---")
+        st.subheader("🏋️ Classifica rendimento - Allenamento a secco")
+    
+        classifica_rendimento_evento(
+            storico,
+            "Allenamento a secco"
+        )
+    
+        st.markdown("---")
+        st.subheader("🏁 Classifica rendimento - Gare")
+    
+        classifica_rendimento_evento(
+            storico,
+            "Gare"
+        )
 
 # ============================================================
 # AREA ATLETA
 # ============================================================
 
-with tab_area:
+if "👤 Area Atleta" in tab:
 
-    if not st.session_state.get("atleta", False):
-
-        st.warning(
-            "🔒 Accesso riservato agli atleti."
-        )
-
-    else:
+    with tab["👤 Area Atleta"]:
 
         st.header("👤 Area Atleta")
 
@@ -3379,15 +3452,9 @@ with tab_area:
 # TAB 6 STORICO
 # ============================================================
 
-with tab6:
-    if not is_staff():
-        
-        st.warning(
-            "🔒 Accesso riservato agli amministratori."
-        )
-        pass
+if "🗂️ Storico" in tab:
 
-    else:
+    with tab["🗂️ Storico"]:
         st.header("🗂️ Storico")
 
         storico = pd.read_sql(
@@ -3527,15 +3594,11 @@ with tab6:
 # TAB 7
 # ============================================================
 
-with tab7:
+if "⚙️ Stagioni" in tab:
 
-    if not is_staff():
-        
-        st.warning(
-            "🔒 Accesso riservato agli amministratori."
-        )
+    with tab["⚙️ Stagioni"]:
 
-    else:
+        st.header("⚙️ Gestione stagioni")
 
         st.header("⚙️ Limiti del sistema")
 
@@ -3846,16 +3909,9 @@ with tab7:
 # ============================================================
 
 
-with tab8:
+if "💾 Backup" in tab:
 
-    if not is_staff():
-
-        st.warning(
-            "🔒 Backup disponibile solo agli amministratori."
-        )
-        pass
-
-    else:
+    with tab["💾 Backup"]:
 
         st.header("💾 Backup & Export")
 
@@ -4124,15 +4180,9 @@ with tab8:
 # TAB 10 - REGISTRO SETTIMANALE
 # ============================================================
 
-with tab10:
+if "📋 Registro settimanale" in tab:
 
-    if not is_staff():
-
-        st.warning(
-            "🔒 Effettua il login per accedere al Registro Settimanale."
-        )
-
-    else:
+    with tab["📋 Registro settimanale"]:
 
         st.header("📋 Registro Settimanale")
 
