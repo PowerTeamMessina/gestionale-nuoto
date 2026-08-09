@@ -2548,15 +2548,6 @@ if "📊 Classifiche" in tab:
                 .value_counts(dropna=False)
             )
     
-            storico_allenamenti = storico[
-                storico["tipo_evento"].isin(
-                    [
-                        "Allenamento in vasca",
-                        "Allenamento a secco"
-                    ]
-                )
-            ].copy()
-    
             storico_allenamenti["peso_presenza"] = 0.0
     
             # presenza piena
